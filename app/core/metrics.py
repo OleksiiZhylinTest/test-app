@@ -69,19 +69,34 @@ def deduplicate_sprint_issues(
     sprints: list[dict[str, Any]],
     sprint_issues: dict[int | str, list[dict[str, Any]]],
 ) -> dict[int | str, list[dict[str, Any]]]:
-    """Return sprint_issues with each issue key kept only in its most recent sprint.
+    """Return sprint_issues with each issue assigned to exactly one sprint.
 
-    When the Jira API returns the same issue for multiple sprints, it should count
-    only toward the most recent sprint. Internally sorts oldest-first so the result
-    is independent of the caller's ordering.
+    Attribution rules, applied in order:
+
+    1. If the issue has ``resolutiondate`` whose date falls within some sprint's
+       ``[startDate, endDate]`` window, attribute the issue to that sprint —
+       even if Jira's sprint field for the issue does not include that sprint.
+       This corrects the common SCRUM workflow case where a ticket carries
+       over from a closed sprint into the active sprint without the user
+       updating its sprint field, and is then closed during the active
+       sprint. Without this rule, the closed sprint's velocity would inflate
+       retroactively with work that actually happened later.
+    2. Otherwise, attribute the issue to the most recent sprint (by
+       ``startDate``) where it appears in the input. Handles Jira's habit
+       of returning the same ticket for multiple sprints when its sprint
+       field contains more than one sprint id.
+
+    Issues without a ``key`` are untrackable and remain in their original
+    placement.
     """
-    # Sort oldest-first so last write always wins with the most recent sprint.
-    # This makes the function independent of whether the caller passes newest-first
-    # or oldest-first (jira_client returns newest-first after sorting with reverse=True).
+    # Sort oldest-first so last-write-wins in step 1 produces the most-recent
+    # sprint as the default attribution. Stable on equal keys, so the function
+    # is independent of whether the caller passes newest-first or oldest-first.
     oldest_first = sorted(sprints, key=lambda s: s.get("startDate") or "")
 
-    # Map each issue key to the last sprint ID it appears in (last write wins)
-    issue_last_sprint: dict[str, int | str] = {}
+    # Step 1 — default attribution: most recent sprint where the issue appears.
+    issue_target: dict[str, int | str] = {}
+    issue_by_key: dict[str, dict[str, Any]] = {}
     for sprint in oldest_first:
         sid = sprint.get("id")
         if sid is None:
@@ -89,21 +104,61 @@ def deduplicate_sprint_issues(
         for iss in sprint_issues.get(sid) or []:
             key = iss.get("key") or ""
             if key:
-                issue_last_sprint[key] = sid
+                issue_target[key] = sid
+                issue_by_key[key] = iss
 
-    # Rebuild: keep each issue only in its mapped (last) sprint.
-    # Issues without a key are untrackable and stay wherever they appear.
+    # Step 2 — build sprint windows for the resolutiondate override. Sprints
+    # without both startDate and endDate (e.g. test fixtures, kanban week
+    # entries) cannot match a date, so they are skipped here and only
+    # participate in the step-1 fallback.
+    sprint_windows: list[tuple[int | str, str, str]] = []
+    for sprint in oldest_first:
+        sid = sprint.get("id")
+        start = (sprint.get("startDate") or "")[:10]
+        end = (sprint.get("endDate") or "")[:10]
+        if sid is not None and start and end:
+            sprint_windows.append((sid, start, end))
+
+    # Step 3 — override by resolutiondate when it falls within a sprint window.
+    for key, iss in issue_by_key.items():
+        fields = iss.get("fields") or {}
+        resolved = (fields.get("resolutiondate") or "")[:10]
+        if not resolved:
+            continue
+        for sid, start, end in sprint_windows:
+            if start <= resolved <= end:
+                issue_target[key] = sid
+                break
+
+    # Step 4 — rebuild sprint_issues, preserving the caller's sprint ordering.
     result: dict[int | str, list[dict[str, Any]]] = {}
+    placed: set[str] = set()
     for sprint in sprints:
         sid = sprint.get("id")
         if sid is None:
             continue
-        kept = []
+        kept: list[dict[str, Any]] = []
         for iss in sprint_issues.get(sid) or []:
             key = iss.get("key") or ""
-            if not key or issue_last_sprint.get(key) == sid:
+            if not key:
                 kept.append(iss)
+                continue
+            if issue_target.get(key) == sid and key not in placed:
+                kept.append(iss)
+                placed.add(key)
         result[sid] = kept
+
+    # Step 5 — insert issues whose resolutiondate moved them to a sprint that
+    # didn't originally contain them.
+    for key, sid in issue_target.items():
+        if key in placed:
+            continue
+        moved = issue_by_key.get(key)
+        if moved is None or sid not in result:
+            continue
+        result[sid].append(moved)
+        placed.add(key)
+
     return result
 
 
