@@ -608,3 +608,67 @@ def test_dedup_newest_first_input_still_keeps_issue_in_most_recent():
     result = metrics.deduplicate_sprint_issues([s_new, s_old], {1: [issue], 2: [issue]})
     assert result[1] == [], "Older sprint should be emptied"
     assert result[2] == [issue], "Newer sprint should keep the issue"
+
+
+def test_dedup_moves_issue_by_resolutiondate_when_only_in_old_sprint():
+    """Bug fix: ticket left in closed sprint A but resolved during active sprint B
+    must count toward B, not A. Otherwise A's velocity inflates retroactively."""
+    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
+    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
+    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2026-04-25T10:00:00.000+0000")
+    # Issue only in A's list (sprint field never updated to include B).
+    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: []})
+    assert result[1] == [], "Closed sprint A must lose the issue when resolved during B"
+    assert result[2] == [issue], "Active sprint B must gain the issue by resolutiondate"
+
+
+def test_dedup_keeps_issue_in_sprint_where_actually_resolved():
+    """When an issue's resolutiondate falls within the sprint it appears in,
+    that sprint is the correct attribution and no override happens."""
+    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
+    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
+    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2026-04-15T10:00:00.000+0000")
+    # Issue resolved during A's window and is only in A's list — must stay in A.
+    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: []})
+    assert result[1] == [issue]
+    assert result[2] == []
+
+
+def test_dedup_resolutiondate_overrides_sprint_membership_for_carryover():
+    """Issue carried over (in both sprints' lists) but actually resolved
+    during the active sprint stays attributed to the active sprint."""
+    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
+    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
+    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2026-04-25T10:00:00.000+0000")
+    # Jira returns the issue under both sprints (its sprint field = [A, B]).
+    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: [issue]})
+    assert result[1] == []
+    assert result[2] == [issue]
+
+
+def test_dedup_resolutiondate_outside_all_windows_falls_back_to_membership():
+    """If resolutiondate doesn't fall in any tracked sprint window, fall back
+    to most-recent-membership attribution (no behavior change for that case)."""
+    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
+    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
+    # Resolved long before either tracked sprint.
+    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2025-01-15T10:00:00.000+0000")
+    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: [issue]})
+    assert result[1] == []
+    assert result[2] == [issue], "Falls back to most-recent membership when no window matches"
+
+
+def test_velocity_attributes_late_resolved_issue_to_active_sprint():
+    """End-to-end: verify the attribution fix shows up in compute_velocity output.
+
+    Regression for: 'tickets closed in current Active Sprint were included in
+    previous Sprint report'.
+    """
+    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
+    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
+    issue = make_issue("X-1", "Done", 8.0, resolutiondate="2026-04-25T10:00:00.000+0000")
+    sprint_issues = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: []})
+    velocity = metrics.compute_velocity([s_a, s_b], sprint_issues)
+    by_sid = {row["sprint_id"]: row for row in velocity}
+    assert by_sid[1]["velocity"] == 0.0, "Closed sprint must not retain late-resolved work"
+    assert by_sid[2]["velocity"] == 8.0, "Active sprint must claim work by resolutiondate"

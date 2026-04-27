@@ -38,12 +38,15 @@ def make_issue(
     status: str = "Done",
     points: float | None = 5.0,
     story_points_field: str = "customfield_10016",
+    resolutiondate: str | None = None,
 ) -> dict:
     fields: dict = {
         "status": {"name": status},
     }
     if points is not None:
         fields[story_points_field] = points
+    if resolutiondate is not None:
+        fields["resolutiondate"] = resolutiondate
     return {"key": key, "fields": fields}
 
 

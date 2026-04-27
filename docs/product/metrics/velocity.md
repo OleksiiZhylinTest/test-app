@@ -58,11 +58,23 @@ Story points and other field IDs always come from the active schema (file or bui
 
 1. **Fetch sprints** — retrieve the last `JIRA_SPRINT_COUNT` sprints for the board.
 2. **Fetch issues** — for each sprint, retrieve all issues assigned to it.
-3. **Deduplicate across sprints** — a ticket returned by multiple sprint API calls is counted
-   only in the **last (most recent) sprint** it appears in. This prevents double-counting when
-   Jira carries a ticket forward from one sprint to the next.
-4. **Filter to done issues** — keep only issues whose `status.name` (lowercased) is in the
-   configured `done_statuses` set.
+3. **Attribute each ticket to a single sprint** — applied in this priority order:
+   1. **By `resolutiondate`** — if the ticket's resolution date falls within some sprint's
+      `[startDate, endDate]` window, it is attributed to that sprint, even if Jira's sprint
+      field for the ticket does not include it. This ensures that work which closed during
+      the active sprint counts toward the active sprint, not toward a closed sprint the
+      ticket was carried over from.
+   2. **By most-recent membership** — otherwise, the ticket is attributed to the most recent
+      sprint (by `startDate`) where Jira's API returned it. This handles tickets without a
+      resolution date and tickets resolved outside any tracked sprint window.
+
+   Both rules work together to (a) prevent double-counting when Jira returns the same ticket
+   for multiple sprints, and (b) prevent retroactive inflation of a closed sprint's velocity
+   by tickets that actually completed later.
+4. **Filter to done issues** — keep an issue if either (a) its `status.name` (lowercased) is
+   in the configured `done_statuses` set, or (b) it has a non-empty `resolutiondate` field.
+   The fallback (b) supports kanban boards with custom terminal status names (e.g. `Released`,
+   `Deployed`) that are not enumerated in `done_statuses`.
 5. **Sum story points** — add up the `story_points` field value for each done issue.
    Issues with a missing or non-numeric value contribute 0.
 6. **Record per sprint** — store `velocity` (rounded to 1 decimal place) and `issue_count`
@@ -73,6 +85,9 @@ Story points and other field IDs always come from the active schema (file or bui
 ```
 velocity(sprint) = Σ story_points(issue)  for all issues where status ∈ done_statuses
 ```
+
+Where "issue is done" follows the rule from step 4 above (status match or `resolutiondate`
+fallback).
 
 No weighting, averaging, or normalisation is applied within a single sprint. The HTML report
 overlays a running average line for visual trend interpretation.
@@ -143,12 +158,13 @@ def compute_velocity(
 
 **Helper functions used:**
 - `_get_story_points(issue, story_points_field)` — extracts the numeric field value, returns `0.0` on missing/invalid.
-- `_is_done(issue, done_statuses)` — checks `fields.status.name` (lowercased) against `done_statuses`.
+- `_is_done(issue, done_statuses)` — returns True if `fields.status.name` (lowercased) is in `done_statuses`, or if `fields.resolutiondate` is set (kanban fallback for custom terminal status names).
 - `_resolve_schema_params(schema)` — pulls `story_points_field` and `done_statuses` from the active schema dict.
 
 **Extending velocity:**
-- To change the aggregation (e.g. count issues instead of points), modify `_get_story_points` or
-  add a parallel `compute_velocity_by_count` function following the same signature.
+- To count issues instead of summing points, set `ESTIMATION_TYPE=JiraTickets` (env var or UI
+  radio). `build_metrics_dict()` already overwrites each row's `velocity` with its `issue_count`
+  in that mode — see the **Estimation Type** section above. No code change required.
 - To add a new "done" status, update `status_mapping.done_statuses` in the schema JSON — no code
   change required.
 - To add velocity to a new report format, consume `metrics["velocity"]` from the dict returned by
