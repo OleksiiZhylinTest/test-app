@@ -25,10 +25,6 @@ export async function restoreValues(activateTab) {
   document.getElementById('jira-issue-types').value          = store.get(STORE_KEYS.JIRA_ISSUE_TYPES);
   document.getElementById('jira-closed-sprints-only').value  = store.get(STORE_KEYS.JIRA_CLOSED_SPRINTS_ONLY);
   document.getElementById('jira-filter-page-size').value     = store.get(STORE_KEYS.JIRA_FILTER_PAGE_SIZE);
-  document.getElementById('ai-assisted-label').value         = store.get(STORE_KEYS.AI_ASSISTED_LABEL);
-  document.getElementById('ai-exclude-labels').value         = store.get(STORE_KEYS.AI_EXCLUDE_LABELS);
-  document.getElementById('ai-tool-labels').value            = store.get(STORE_KEYS.AI_TOOL_LABELS);
-  document.getElementById('ai-action-labels').value          = store.get(STORE_KEYS.AI_ACTION_LABELS);
   updateBadgeFromSaved();
 
   // 2. Overlay with server-side config read from .env on disk
@@ -56,11 +52,6 @@ export async function restoreValues(activateTab) {
     if (cfg.JIRA_CLOSED_SPRINTS_ONLY) { document.getElementById('jira-closed-sprints-only').value  = cfg.JIRA_CLOSED_SPRINTS_ONLY; store.set(STORE_KEYS.JIRA_CLOSED_SPRINTS_ONLY, cfg.JIRA_CLOSED_SPRINTS_ONLY); }
     if (cfg.JIRA_FILTER_PAGE_SIZE)    { document.getElementById('jira-filter-page-size').value     = cfg.JIRA_FILTER_PAGE_SIZE;    store.set(STORE_KEYS.JIRA_FILTER_PAGE_SIZE,    cfg.JIRA_FILTER_PAGE_SIZE); }
 
-    if (cfg.AI_ASSISTED_LABEL) { document.getElementById('ai-assisted-label').value = cfg.AI_ASSISTED_LABEL; store.set(STORE_KEYS.AI_ASSISTED_LABEL, cfg.AI_ASSISTED_LABEL); }
-    if (cfg.AI_EXCLUDE_LABELS) { document.getElementById('ai-exclude-labels').value = cfg.AI_EXCLUDE_LABELS; store.set(STORE_KEYS.AI_EXCLUDE_LABELS, cfg.AI_EXCLUDE_LABELS); }
-    if (cfg.AI_TOOL_LABELS)    { document.getElementById('ai-tool-labels').value    = cfg.AI_TOOL_LABELS;    store.set(STORE_KEYS.AI_TOOL_LABELS,    cfg.AI_TOOL_LABELS); }
-    if (cfg.AI_ACTION_LABELS)  { document.getElementById('ai-action-labels').value  = cfg.AI_ACTION_LABELS;  store.set(STORE_KEYS.AI_ACTION_LABELS,  cfg.AI_ACTION_LABELS); }
-
     updateBadgeFromSaved();
 
     if (!data.configured && !store.get(STORE_KEYS.JIRA_URL)) {
@@ -76,9 +67,6 @@ export async function restoreValues(activateTab) {
     JIRA_SPRINT_COUNT:        'sprint-count',
     JIRA_CLOSED_SPRINTS_ONLY: 'jira-closed-sprints-only',
     JIRA_FILTER_PAGE_SIZE:    'jira-filter-page-size',
-    AI_ASSISTED_LABEL:        'ai-assisted-label',
-    AI_TOOL_LABELS:           'ai-tool-labels',
-    AI_ACTION_LABELS:         'ai-action-labels',
   };
   for (const [key, elId] of Object.entries(fieldIds)) {
     const el = document.getElementById(elId);

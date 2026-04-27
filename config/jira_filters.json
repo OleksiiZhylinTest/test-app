@@ -12,7 +12,17 @@
       "JIRA_TEAM_ID": "",
       "JIRA_ISSUE_TYPES": "",
       "JIRA_CLOSED_SPRINTS_ONLY": "true",
-      "schema_name": "Default_Jira_Cloud"
+      "JIRA_BOARD_ID": "",
+      "JIRA_SPRINT_COUNT": "10",
+      "JIRA_FILTER_ID": "",
+      "JIRA_FILTER_PAGE_SIZE": "50",
+      "PROJECT_TYPE": "SCRUM",
+      "ESTIMATION_TYPE": "StoryPoints",
+      "schema_name": "Default_Jira_Cloud",
+      "AI_ASSISTED_LABEL": "ai_assisted",
+      "AI_EXCLUDE_LABELS": "ai_not_applicable",
+      "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
     }
   },
   {
@@ -34,7 +44,11 @@
       "JIRA_BOARD_ID": "1",
       "JIRA_SPRINT_COUNT": "10",
       "JIRA_FILTER_ID": "",
-      "JIRA_FILTER_PAGE_SIZE": ""
+      "JIRA_FILTER_PAGE_SIZE": "",
+      "AI_ASSISTED_LABEL": "ai_assisted",
+      "AI_EXCLUDE_LABELS": "",
+      "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
     }
   },
   {
@@ -56,7 +70,11 @@
       "JIRA_BOARD_ID": "1",
       "JIRA_SPRINT_COUNT": "10",
       "JIRA_FILTER_ID": "",
-      "JIRA_FILTER_PAGE_SIZE": ""
+      "JIRA_FILTER_PAGE_SIZE": "",
+      "AI_ASSISTED_LABEL": "ai_assisted",
+      "AI_EXCLUDE_LABELS": "",
+      "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
     }
   },
   {
@@ -78,7 +96,11 @@
       "JIRA_BOARD_ID": "1",
       "JIRA_SPRINT_COUNT": "10",
       "JIRA_FILTER_ID": "10032",
-      "JIRA_FILTER_PAGE_SIZE": "100"
+      "JIRA_FILTER_PAGE_SIZE": "100",
+      "AI_ASSISTED_LABEL": "ai_assisted",
+      "AI_EXCLUDE_LABELS": "ai_not_applicable",
+      "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
     }
   }
 ]

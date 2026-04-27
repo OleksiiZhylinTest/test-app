@@ -56,6 +56,10 @@ class GenerateHandlerMixin:
                     "JIRA_FILTER_ID",
                     "PROJECT_TYPE",
                     "ESTIMATION_TYPE",
+                    "AI_ASSISTED_LABEL",
+                    "AI_EXCLUDE_LABELS",
+                    "AI_TOOL_LABELS",
+                    "AI_ACTION_LABELS",
                 ]
                 filters = self._load_filters()
                 for _idx, _entry in enumerate(filters):

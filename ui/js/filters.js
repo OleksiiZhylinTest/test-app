@@ -186,6 +186,7 @@ function clearFormFields() {
   const textIds = [
     'jira-project', 'jira-team-id', 'jira-issue-types',
     'jira-board-id', 'sprint-count', 'filter-id', 'jira-filter-page-size',
+    'ai-assisted-label', 'ai-exclude-labels', 'ai-tool-labels', 'ai-action-labels',
   ];
   textIds.forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; });
   const closed = document.getElementById('jira-closed-sprints-only');
@@ -207,6 +208,11 @@ function loadFilterIntoForm(entry) {
   setVal('sprint-count',           params.JIRA_SPRINT_COUNT);
   setVal('filter-id',              params.JIRA_FILTER_ID);
   setVal('jira-filter-page-size',  params.JIRA_FILTER_PAGE_SIZE);
+
+  setVal('ai-assisted-label', params.AI_ASSISTED_LABEL);
+  setVal('ai-exclude-labels', params.AI_EXCLUDE_LABELS);
+  setVal('ai-tool-labels',    params.AI_TOOL_LABELS);
+  setVal('ai-action-labels',  params.AI_ACTION_LABELS);
 
   setRadio('filter-project-type',    params.PROJECT_TYPE    || 'SCRUM');
   setRadio('filter-estimation-type', params.ESTIMATION_TYPE || 'StoryPoints');
@@ -406,6 +412,10 @@ export function initFilters(filterLog) {
       JIRA_SPRINT_COUNT:        document.getElementById('sprint-count').value.trim(),
       JIRA_FILTER_ID:           filterId,
       JIRA_FILTER_PAGE_SIZE:    document.getElementById('jira-filter-page-size').value.trim(),
+      AI_ASSISTED_LABEL:        document.getElementById('ai-assisted-label').value.trim(),
+      AI_EXCLUDE_LABELS:        document.getElementById('ai-exclude-labels').value.trim(),
+      AI_TOOL_LABELS:           document.getElementById('ai-tool-labels').value.trim(),
+      AI_ACTION_LABELS:         document.getElementById('ai-action-labels').value.trim(),
     };
 
     const reportName = document.getElementById('report-name')?.value.trim() || filterName;

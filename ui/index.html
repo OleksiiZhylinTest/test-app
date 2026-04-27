@@ -166,93 +166,6 @@
         </div>
       </div>
 
-      <!-- AI Adoption Labels (extracted as sibling card) -->
-      <div class="card">
-        <div class="card-title">AI Adoption Labels</div>
-        <div class="card-subtitle">
-          Labels added in Jira to track AI-assisted work. Labels are case-sensitive and must match exactly.
-          Click <strong>Save AI Labels</strong> to persist these to <code>.env</code>.
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="ai-assisted-label">AI Assisted Label</label>
-          <input
-            class="form-input"
-            type="text"
-            id="ai-assisted-label"
-            name="AI_ASSISTED_LABEL"
-            placeholder="AI_assistance"
-            autocomplete="off"
-            spellcheck="false"
-            maxlength="200"
-          />
-          <p class="form-helper">Label that marks an issue as AI-assisted. Default: <strong>AI_assistance</strong>.</p>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="ai-exclude-labels">
-            Exclude Labels <span class="optional">optional — comma-separated</span>
-          </label>
-          <input
-            class="form-input"
-            type="text"
-            id="ai-exclude-labels"
-            name="AI_EXCLUDE_LABELS"
-            placeholder="e.g. spike,admin,tech-debt"
-            autocomplete="off"
-            spellcheck="false"
-            maxlength="1000"
-          />
-          <p class="form-helper">Issues carrying these labels are excluded from the AI % denominator. Use for non-delivery work such as spikes or admin tickets.</p>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="ai-tool-labels">
-            Tool Labels <span class="optional">optional — comma-separated</span>
-          </label>
-          <input
-            class="form-input"
-            type="text"
-            id="ai-tool-labels"
-            name="AI_TOOL_LABELS"
-            placeholder="AI_Tool_Copilot,AI_Tool_ChatGPT,AI_Tool_Gemini"
-            autocomplete="off"
-            spellcheck="false"
-            maxlength="1000"
-          />
-          <p class="form-helper">Labels identifying AI tools used. One label per tool; an issue can carry multiple tool labels. Default: <strong>AI_Tool_Copilot,AI_Tool_ChatGPT,AI_Tool_Gemini</strong>.</p>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="ai-action-labels">
-            Action Labels <span class="optional">optional — comma-separated</span>
-          </label>
-          <input
-            class="form-input"
-            type="text"
-            id="ai-action-labels"
-            name="AI_ACTION_LABELS"
-            placeholder="AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing"
-            autocomplete="off"
-            spellcheck="false"
-            maxlength="1000"
-          />
-          <p class="form-helper">Labels identifying AI use-cases. Default: <strong>AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing</strong>.</p>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-save-ai-labels" type="button">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-              <polyline points="17 21 17 13 7 13 7 21"/>
-              <polyline points="7 3 7 8 15 8"/>
-            </svg>
-            Save AI Labels
-          </button>
-          <span class="save-confirm" id="save-confirm-ai" aria-live="polite">Settings saved</span>
-        </div>
-      </div>
-
       <!-- Last generated reports -->
       <div class="card">
         <div class="card-title">Last Generated Reports</div>
@@ -473,6 +386,84 @@
 
             </div>
           </details>
+        </div>
+      </details>
+
+      <!-- AI Adoption Labels (collapsible; semantically grouped with Data Source) -->
+      <details class="filter-details" id="filter-ai-labels">
+        <summary>AI Adoption Labels</summary>
+        <div class="filter-details-body">
+          <p class="form-helper" style="margin-bottom:16px;">
+            Labels added in Jira to track AI-assisted work. Labels are case-sensitive and must match exactly.
+            These values are saved per filter when you click <strong>Save Filter</strong> below.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="ai-assisted-label">AI Assisted Label</label>
+            <input
+              class="form-input"
+              type="text"
+              id="ai-assisted-label"
+              name="AI_ASSISTED_LABEL"
+              placeholder="AI_assistance"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="200"
+            />
+            <p class="form-helper">Label that marks an issue as AI-assisted. Default: <strong>AI_assistance</strong>.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ai-exclude-labels">
+              Exclude Labels <span class="optional">optional — comma-separated</span>
+            </label>
+            <input
+              class="form-input"
+              type="text"
+              id="ai-exclude-labels"
+              name="AI_EXCLUDE_LABELS"
+              placeholder="e.g. spike,admin,tech-debt"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="1000"
+            />
+            <p class="form-helper">Issues carrying these labels are excluded from the AI % denominator. Use for non-delivery work such as spikes or admin tickets.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ai-tool-labels">
+              Tool Labels <span class="optional">optional — comma-separated</span>
+            </label>
+            <input
+              class="form-input"
+              type="text"
+              id="ai-tool-labels"
+              name="AI_TOOL_LABELS"
+              placeholder="AI_Tool_Copilot,AI_Tool_ChatGPT,AI_Tool_Gemini"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="1000"
+            />
+            <p class="form-helper">Labels identifying AI tools used. One label per tool; an issue can carry multiple tool labels. Default: <strong>AI_Tool_Copilot,AI_Tool_ChatGPT,AI_Tool_Gemini</strong>.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ai-action-labels">
+              Action Labels <span class="optional">optional — comma-separated</span>
+            </label>
+            <input
+              class="form-input"
+              type="text"
+              id="ai-action-labels"
+              name="AI_ACTION_LABELS"
+              placeholder="AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="1000"
+            />
+            <p class="form-helper">Labels identifying AI use-cases. Default: <strong>AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing</strong>.</p>
+          </div>
+
         </div>
       </details>
 
