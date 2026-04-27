@@ -610,65 +610,83 @@ def test_dedup_newest_first_input_still_keeps_issue_in_most_recent():
     assert result[2] == [issue], "Newer sprint should keep the issue"
 
 
-def test_dedup_moves_issue_by_resolutiondate_when_only_in_old_sprint():
-    """Bug fix: ticket left in closed sprint A but resolved during active sprint B
-    must count toward B, not A. Otherwise A's velocity inflates retroactively."""
-    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
-    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
-    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2026-04-25T10:00:00.000+0000")
-    # Issue only in A's list (sprint field never updated to include B).
-    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: []})
-    assert result[1] == [], "Closed sprint A must lose the issue when resolved during B"
-    assert result[2] == [issue], "Active sprint B must gain the issue by resolutiondate"
+def test_dedup_drops_issue_owned_by_active_sprint_outside_fetch():
+    """Bug fix: when JIRA_CLOSED_SPRINTS_ONLY=True, the active sprint is not
+    fetched. A ticket carried into the active sprint must NOT be attributed
+    to the most-recent closed sprint — it should be dropped until the active
+    sprint enters the fetch window. Reproduces the user-reported case where
+    a ticket in [Sprint 5, Sprint 6, Sprint 7] (Sprint 7 active, not fetched)
+    was incorrectly counted in Sprint 6's velocity.
+    """
+    s5 = make_sprint(5, start="2026-03-23", end="2026-04-05")
+    s6 = make_sprint(6, start="2026-04-06", end="2026-04-19")
+    issue = make_issue("X-1", "Done", 5.0, sprint_ids=[5, 6, 7])
+    # Jira returns the issue under both fetched sprints (its sprint field
+    # contains 5 and 6); Sprint 7 is active, not in our sprints list.
+    result = metrics.deduplicate_sprint_issues([s5, s6], {5: [issue], 6: [issue]})
+    assert result[5] == [], "Sprint 5 must not own a ticket also in a later sprint"
+    assert result[6] == [], "Sprint 6 must not own a ticket carried into the active Sprint 7"
 
 
-def test_dedup_keeps_issue_in_sprint_where_actually_resolved():
-    """When an issue's resolutiondate falls within the sprint it appears in,
-    that sprint is the correct attribution and no override happens."""
-    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
-    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
-    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2026-04-15T10:00:00.000+0000")
-    # Issue resolved during A's window and is only in A's list — must stay in A.
-    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: []})
-    assert result[1] == [issue]
-    assert result[2] == []
+def test_dedup_keeps_issue_in_active_sprint_when_fetched():
+    """Mirror of the bug fix: when the active sprint IS in the fetch
+    (JIRA_CLOSED_SPRINTS_ONLY=False), the ticket lands in the active sprint."""
+    s5 = make_sprint(5, start="2026-03-23", end="2026-04-05")
+    s6 = make_sprint(6, start="2026-04-06", end="2026-04-19")
+    s7 = make_sprint(7, start="2026-04-20", end="2026-05-03")
+    issue = make_issue("X-1", "Done", 5.0, sprint_ids=[5, 6, 7])
+    result = metrics.deduplicate_sprint_issues(
+        [s5, s6, s7],
+        {5: [issue], 6: [issue], 7: [issue]},
+    )
+    assert result[5] == []
+    assert result[6] == []
+    assert result[7] == [issue]
 
 
-def test_dedup_resolutiondate_overrides_sprint_membership_for_carryover():
-    """Issue carried over (in both sprints' lists) but actually resolved
-    during the active sprint stays attributed to the active sprint."""
-    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
-    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
-    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2026-04-25T10:00:00.000+0000")
-    # Jira returns the issue under both sprints (its sprint field = [A, B]).
-    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: [issue]})
+def test_dedup_attributes_to_latest_sprint_field_id_not_jira_membership():
+    """Even if Jira's API returns an issue only under sprint 5, the sprint
+    field's max ID is the source of truth. If max ID == 6 and 6 is fetched,
+    the issue is attributed to 6."""
+    s5 = make_sprint(5, start="2026-03-23", end="2026-04-05")
+    s6 = make_sprint(6, start="2026-04-06", end="2026-04-19")
+    issue = make_issue("X-1", "Done", 5.0, sprint_ids=[5, 6])
+    # Jira returns under sprint 5 only — but the sprint field shows it's also in 6.
+    result = metrics.deduplicate_sprint_issues([s5, s6], {5: [issue], 6: []})
+    assert result[5] == []
+    assert result[6] == [issue]
+
+
+def test_dedup_falls_back_when_sprint_field_missing():
+    """Issues without a sprint field (legacy / unusual data) fall back to
+    most-recent-membership attribution."""
+    s_old = make_sprint(1, start="2026-03-01")
+    s_new = make_sprint(2, start="2026-03-15")
+    issue = make_issue("X-1", "Done", 5.0)  # no sprint_ids
+    result = metrics.deduplicate_sprint_issues([s_old, s_new], {1: [issue], 2: [issue]})
     assert result[1] == []
     assert result[2] == [issue]
 
 
-def test_dedup_resolutiondate_outside_all_windows_falls_back_to_membership():
-    """If resolutiondate doesn't fall in any tracked sprint window, fall back
-    to most-recent-membership attribution (no behavior change for that case)."""
-    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
-    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
-    # Resolved long before either tracked sprint.
-    issue = make_issue("X-1", "Done", 5.0, resolutiondate="2025-01-15T10:00:00.000+0000")
-    result = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: [issue]})
-    assert result[1] == []
-    assert result[2] == [issue], "Falls back to most-recent membership when no window matches"
+def test_velocity_excludes_ticket_carried_to_unfetched_active_sprint():
+    """End-to-end regression for the user-reported bug:
 
-
-def test_velocity_attributes_late_resolved_issue_to_active_sprint():
-    """End-to-end: verify the attribution fix shows up in compute_velocity output.
-
-    Regression for: 'tickets closed in current Active Sprint were included in
-    previous Sprint report'.
+    Sprint 6's velocity should be 18, not 23. The 5-point ticket whose sprint
+    field includes Sprint 7 (active, not fetched) must not inflate Sprint 6.
     """
-    s_a = make_sprint(1, start="2026-04-06", end="2026-04-19")
-    s_b = make_sprint(2, start="2026-04-20", end="2026-05-03")
-    issue = make_issue("X-1", "Done", 8.0, resolutiondate="2026-04-25T10:00:00.000+0000")
-    sprint_issues = metrics.deduplicate_sprint_issues([s_a, s_b], {1: [issue], 2: []})
-    velocity = metrics.compute_velocity([s_a, s_b], sprint_issues)
+    s5 = make_sprint(5, start="2026-03-23", end="2026-04-05")
+    s6 = make_sprint(6, start="2026-04-06", end="2026-04-19")
+    # 18 points of work done in Sprint 6 (3 tickets fully owned by sprint 6):
+    s6_native = [
+        make_issue("S6-1", "Done", 8.0, sprint_ids=[6]),
+        make_issue("S6-2", "Done", 5.0, sprint_ids=[6]),
+        make_issue("S6-3", "Done", 5.0, sprint_ids=[6]),
+    ]
+    # The carry-over ticket: 5 points, sprint field = [5, 6, 7]. Belongs to 7.
+    carry = make_issue("CARRY-1", "Done", 5.0, sprint_ids=[5, 6, 7])
+    sprint_issues_in = {5: [carry], 6: s6_native + [carry]}
+    sprint_issues = metrics.deduplicate_sprint_issues([s5, s6], sprint_issues_in)
+    velocity = metrics.compute_velocity([s5, s6], sprint_issues)
     by_sid = {row["sprint_id"]: row for row in velocity}
-    assert by_sid[1]["velocity"] == 0.0, "Closed sprint must not retain late-resolved work"
-    assert by_sid[2]["velocity"] == 8.0, "Active sprint must claim work by resolutiondate"
+    assert by_sid[6]["velocity"] == 18.0, "Sprint 6 velocity must exclude the carry-over to Sprint 7"
+    assert by_sid[5]["velocity"] == 0.0, "Sprint 5 must not retain the carry-over either"
