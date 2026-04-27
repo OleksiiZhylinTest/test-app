@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Adoption Metrics Report — User Guide</title>
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #172b4d;
+    background: #f4f5f7;
+  }
+  a { color: #0052cc; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h2 { font-size: 20px; font-weight: 600; color: #172b4d; margin-bottom: 12px; }
+  h3 { font-size: 16px; font-weight: 600; color: #172b4d; margin-bottom: 8px; }
+  p  { margin-bottom: 10px; }
+  ul, ol { padding-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12px;
+    background: #f4f5f7;
+    border: 1px solid #dfe1e6;
+    border-radius: 3px;
+    padding: 1px 4px;
+  }
+
+  /* ── Layout ── */
+  .page-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0052cc 0%, #0747a6 100%);
+    color: #fff;
+    padding: 36px 40px 28px;
+  }
+  .hero h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+  .hero p {
+    font-size: 15px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    max-width: 640px;
+  }
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .hero-links a {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 3px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .hero-links a:hover { background: rgba(255,255,255,0.3); text-decoration: none; }
+
+  /* ── Content sections ── */
+  .section {
+    padding: 32px 40px;
+    border-bottom: 1px solid #ebecf0;
+  }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5e6c84;
+    margin-bottom: 8px;
+    border-left: 3px solid #0052cc;
+    padding-left: 8px;
+  }
+
+  /* ── Role cards ── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .role-card {
+    border: 1px solid #dfe1e6;
+    border-radius: 6px;
+    padding: 16px 18px;
+    background: #fafbfc;
+  }
+  .role-card .role-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .role-card h3 {
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #0052cc;
+  }
+  .role-card p {
+    font-size: 13px;
+    color: #5e6c84;
+    margin: 0;
+  }
+
+  /* ── Steps (Quick Start) ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #f4f5f7;
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .step-num {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    background: #0052cc;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .step-body h3 { margin-bottom: 4px; font-size: 14px; }
+  .step-body p  { font-size: 13px; color: #5e6c84; margin: 0; }
+
+  /* ── Video cards ── */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 8px;
+  }
+  @media (max-width: 700px) {
+    .video-grid { grid-template-columns: 1fr; }
+  }
+  .video-card {
+    border: 1px solid #dfe1e6;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fafbfc;
+  }
+  .video-thumb {
+    position: relative;
+    background: #172b4d;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .video-thumb .play-btn {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s;
+  }
+  .video-thumb:hover .play-btn { transform: scale(1.1); }
+  .play-btn svg { margin-left: 3px; }
+  .video-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    position: absolute;
+    top: 8px;
+    left: 10px;
+  }
+  .video-info {
+    padding: 12px 14px;
+  }
+  .video-info h3 {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .video-info p {
+    font-size: 12px;
+    color: #7a869a;
+    margin-bottom: 8px;
+  }
+  .video-info a {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .coming-soon {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #7a869a;
+    background: #f4f5f7;
+    border: 1px solid #dfe1e6;
+    border-radius: 3px;
+    padding: 2px 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .video-thumb.pending { cursor: default; }
+  .video-thumb.pending .play-btn { opacity: 0.35; }
+  .video-pending-label {
+    position: absolute;
+    bottom: 8px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+  .callout-icon { font-size: 16px; min-width: 18px; }
+  .callout.info    { background: #deebff; border-left: 4px solid #0052cc; }
+  .callout.tip     { background: #e3fcef; border-left: 4px solid #00875a; }
+  .callout.warning { background: #fffae6; border-left: 4px solid #ff8b00; }
+  .callout p { margin: 0; }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  th {
+    background: #f4f5f7;
+    text-align: left;
+    font-weight: 600;
+    padding: 8px 12px;
+    border: 1px solid #dfe1e6;
+    color: #5e6c84;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 8px 12px;
+    border: 1px solid #dfe1e6;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #fafbfc; }
+
+  /* ── Tabs (CSS-only via radio) ── */
+  .tabs-wrap { margin-top: 8px; }
+  .tab-inputs { display: none; }
+  .tab-labels {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #dfe1e6;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+  }
+  .tab-label {
+    padding: 8px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #5e6c84;
+    border: 1px solid transparent;
+    border-bottom: none;
+    margin-bottom: -2px;
+    border-radius: 4px 4px 0 0;
+    user-select: none;
+    transition: color 0.1s;
+  }
+  .tab-label:hover { color: #0052cc; background: #f4f5f7; }
+  .tab-content { display: none; padding: 20px 0 0; }
+
+  #tab1:checked ~ .tab-labels .lbl1,
+  #tab2:checked ~ .tab-labels .lbl2,
+  #tab3:checked ~ .tab-labels .lbl3,
+  #tab4:checked ~ .tab-labels .lbl4 {
+    color: #0052cc;
+    border-color: #dfe1e6;
+    border-bottom-color: #fff;
+    background: #fff;
+  }
+  #tab1:checked ~ .tab-contents .tc1,
+  #tab2:checked ~ .tab-contents .tc2,
+  #tab3:checked ~ .tab-contents .tc3,
+  #tab4:checked ~ .tab-contents .tc4 { display: block; }
+
+  /* ── Accordion (details/summary) ── */
+  details {
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background: #fafbfc;
+  }
+  details[open] { background: #fff; }
+  summary {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "▸";
+    color: #7a869a;
+    font-size: 11px;
+    transition: transform 0.2s;
+  }
+  details[open] summary::after { transform: rotate(90deg); }
+  .accordion-body {
+    padding: 0 14px 14px;
+    font-size: 13px;
+  }
+  .accordion-body p:last-child { margin-bottom: 0; }
+
+  /* ── Inline code paths ── */
+  .mono { font-family: monospace; font-size: 12px; }
+
+  /* ── Download banner ── */
+  .download-banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #f4f5f7;
+    border-top: 3px solid #00875a;
+    padding: 16px 40px;
+    flex-wrap: wrap;
+  }
+  .download-icon {
+    font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .download-meta {
+    flex: 1;
+    min-width: 200px;
+  }
+  .download-meta strong {
+    font-size: 14px;
+    color: #172b4d;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .download-meta span {
+    font-size: 12px;
+    color: #7a869a;
+  }
+  .download-meta .version-badge {
+    display: inline-block;
+    background: #e3fcef;
+    color: #006644;
+    border: 1px solid #abf5d1;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #00875a;
+    color: #fff !important;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 4px;
+    text-decoration: none !important;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .download-btn:hover { background: #006644; }
+  .download-note {
+    width: 100%;
+    font-size: 11px;
+    color: #97a0af;
+    padding-top: 4px;
+  }
+
+  /* ── Screenshots ── */
+  .screenshot-wrap {
+    margin: 16px 0;
+  }
+  .screenshot-wrap figcaption {
+    font-size: 12px;
+    color: #7a869a;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .screenshot-wrap img {
+    width: 100%;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: block;
+  }
+  .screenshot-pair {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin: 16px 0;
+  }
+  .screenshot-pair figure {
+    margin: 0;
+  }
+  .screenshot-pair figcaption {
+    font-size: 12px;
+    color: #7a869a;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .screenshot-pair img {
+    width: 100%;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: block;
+  }
+  /* ── Role card jump link ── */
+  .role-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0052cc;
+  }
+
+  /* ── Report screenshot accordion ── */
+  .report-screenshot details {
+    border: none;
+    background: transparent;
+    margin-bottom: 12px;
+  }
+  .report-screenshot details summary {
+    background: #f4f5f7;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #172b4d;
+    padding: 8px 14px;
+  }
+  .report-screenshot details[open] summary {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .report-screenshot .accordion-body {
+    border: 1px solid #dfe1e6;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 12px;
+    background: #fff;
+  }
+
+  /* ── Back to top button ── */
+  #back-to-top {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #0052cc;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    transition: background 0.15s;
+  }
+  #back-to-top:hover { background: #0747a6; }
+  #back-to-top.visible { display: flex; }
+
+  /* ── Page footer bar ── */
+  .page-footer {
+    padding: 16px 40px;
+    border-top: 1px solid #ebecf0;
+    font-size: 12px;
+    color: #7a869a;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════════════════════ -->
+  <header class="hero">
+    <p>Automated sprint-level reporting for team velocity and AI adoption, powered by Jira Cloud data.</p>
+    <nav class="hero-links" aria-label="Page navigation">
+      <a href="#quick-start">⚡ Quick Start</a>
+      <a href="#videos">▶ Video Guides</a>
+      <a href="#app-reference">🖥 App Reference</a>
+      <a href="#reports">📊 Reports</a>
+    </nav>
+    <nav class="hero-links" aria-label="Support navigation" style="margin-top:6px; opacity:0.8;">
+      <a href="#labeling">🏷 Jira Labels</a>
+      <a href="#troubleshooting">🔧 Troubleshooting</a>
+      <a href="#faq">❓ FAQ</a>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       DOWNLOAD BANNER
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="download-banner">
+    <div class="download-icon">📦</div>
+    <div class="download-meta">
+      <strong>
+        <span class="version-badge">v1.0.0</span>
+        AI Adoption Metrics Report — Latest Release
+      </strong>
+      <span>Released: 2026-04-20 &nbsp;·&nbsp; Windows · Python 3.12 &nbsp;·&nbsp; ~5 MB</span>
+    </div>
+    <a class="download-btn" href="#" title="Replace # with the Confluence attachment URL">
+      ⬇ Download .zip
+    </a>
+    <p class="download-note">
+      Attach the <code>.zip</code> file to this Confluence page, then replace the button link with the attachment URL
+      (Insert → Files → copy link). Update the version badge and release date with each new release.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       WHO IS THIS FOR?
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="audience">
+    <div class="section-label">Who is this for?</div>
+    <div class="role-grid">
+      <div class="role-card">
+        <div class="role-icon">👨‍💻</div>
+        <h3>Engineering Teams</h3>
+        <p>Tag Jira issues with AI labels before closing them and view per-sprint adoption metrics in generated reports.</p>
+        <a class="role-link" href="#labeling">→ Jira Labeling Guide</a>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">👔</div>
+        <h3>Engineering Managers</h3>
+        <p>Track AI adoption trends and velocity changes across sprints to measure the impact of AI tooling on delivery.</p>
+        <a class="role-link" href="#reports">→ Understanding Reports</a>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">📈</div>
+        <h3>Product &amp; Stakeholders</h3>
+        <p>Receive the self-contained HTML report — no tool installation needed. Open in any browser.</p>
+        <a class="role-link" href="#quick-start">→ Quick Start</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       QUICK START
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="quick-start">
+    <div class="section-label">Getting Started</div>
+    <h2>Quick Start</h2>
+
+    <div class="callout info">
+      <span class="callout-icon">📋</span>
+      <p><strong>Prerequisites:</strong> Windows machine · Python 3.12 (auto-installed by setup script) · Jira Cloud access · <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank">Atlassian API token</a> (not your account password)</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Install</h3>
+          <p>Double-click <code>project_setup.bat</code>. It detects or installs Python 3.12, creates a <code>.venv</code>, installs dependencies, and generates <code>.env</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Configure Jira Credentials</h3>
+          <p>Open <code>.env</code> and fill in <code>JIRA_URL</code>, <code>JIRA_EMAIL</code>, and <code>JIRA_API_TOKEN</code>. Or use the <strong>Jira Connection</strong> tab in the UI.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Launch &amp; Generate</h3>
+          <p>Double-click <code>start_app.bat</code>. The app opens at <a href="http://localhost:8080">localhost:8080</a>. Select a filter, click <strong>Generate Report</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <figure class="screenshot-wrap" style="margin-top:16px;">
+      <img src="../../../generated/tmp/screenshots/01_app_overview.png" alt="AI Adoption Manager app — Generate Report tab after launch">
+      <figcaption>The app after launch at localhost:8080 — four tabs across the top, Generate Report active by default.</figcaption>
+    </figure>
+
+    <div class="callout tip" style="margin-top:16px;">
+      <span class="callout-icon">💡</span>
+      <p><strong>Port conflict?</strong> Edit <code>config/defaults.env</code>, set <code>PORT=9000</code> (or any free port), and restart <code>start_app.bat</code>.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       VIDEO GUIDES
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="videos">
+    <div class="section-label">Video Guides</div>
+    <h2>Watch &amp; Learn</h2>
+    <p>Step-by-step recordings covering installation, initial setup, and the full product workflow.</p>
+
+    <div class="video-grid">
+
+      <div class="video-card">
+        <div class="video-thumb pending">
+          <span class="video-label">Installation</span>
+          <div class="play-btn">
+            <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+              <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="#0052cc"/>
+            </svg>
+          </div>
+          <span class="video-pending-label">Coming soon</span>
+        </div>
+        <div class="video-info">
+          <h3>Installation Walkthrough</h3>
+          <p>Running <code>project_setup.bat</code> from scratch, resolving Python version issues, and verifying the virtual environment.</p>
+          <span class="coming-soon">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-thumb pending">
+          <span class="video-label">Setup</span>
+          <div class="play-btn">
+            <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+              <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="#0052cc"/>
+            </svg>
+          </div>
+          <span class="video-pending-label">Coming soon</span>
+        </div>
+        <div class="video-info">
+          <h3>First Report Setup</h3>
+          <p>Configuring Jira credentials, creating your first schema, building a filter, and generating your initial sprint report.</p>
+          <span class="coming-soon">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-thumb pending">
+          <span class="video-label">E2E Flow</span>
+          <div class="play-btn">
+            <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+              <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="#0052cc"/>
+            </svg>
+          </div>
+          <span class="video-pending-label">Coming soon</span>
+        </div>
+        <div class="video-info">
+          <h3>End-to-End Product Usage</h3>
+          <p>Full workflow: labeling Jira issues, running multi-sprint reports, interpreting AI adoption metrics, and sharing results.</p>
+          <span class="coming-soon">Coming soon</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       KEY CONCEPTS
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="concepts">
+    <div class="section-label">Reference</div>
+    <h2>Key Concepts</h2>
+    <details>
+      <summary>Glossary — expand to see all terms</summary>
+      <div class="accordion-body" style="padding-top:12px;">
+        <table>
+          <thead><tr><th>Concept</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Filter</strong></td><td>A named JQL query that scopes which Jira issues are included in a report. Stored in <code>config/jira_filters.json</code>.</td></tr>
+            <tr><td><strong>Schema</strong></td><td>A mapping of Jira custom-field IDs to pipeline-readable names (story points, sprint, team, status). Stored in <code>config/jira_schema.json</code>.</td></tr>
+            <tr><td><strong>AI Labels</strong></td><td>Jira issue labels that mark AI-assisted work. Configured in the Generate Report tab.</td></tr>
+            <tr><td><strong>Sprint Count</strong></td><td>How many sprints (or Kanban periods) to look back when generating a report.</td></tr>
+            <tr><td><strong>Scrum</strong></td><td>Project type that uses sprint boundaries to group issues. Report section: <em>Velocity Trend</em>.</td></tr>
+            <tr><td><strong>Kanban</strong></td><td>Project type that uses fixed time windows. Report section: <em>Throughput Trend</em>.</td></tr>
+            <tr><td><strong>DAU</strong></td><td>Daily Active Usage — team AI tool usage from self-reported Jira survey issues.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       APP REFERENCE — CSS TABS
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="app-reference">
+    <div class="section-label">App Reference</div>
+    <h2>Using the App</h2>
+    <p>The UI has four tabs. Follow the order below when setting up for the first time.</p>
+
+    <div class="tabs-wrap">
+      <input class="tab-inputs" type="radio" name="tabs" id="tab1" checked>
+      <input class="tab-inputs" type="radio" name="tabs" id="tab2">
+      <input class="tab-inputs" type="radio" name="tabs" id="tab3">
+      <input class="tab-inputs" type="radio" name="tabs" id="tab4">
+
+      <div class="tab-labels">
+        <label class="tab-label lbl1" for="tab1">1 · Jira Connection</label>
+        <label class="tab-label lbl2" for="tab2">2 · Schema Setup</label>
+        <label class="tab-label lbl3" for="tab3">3 · Filter Builder</label>
+        <label class="tab-label lbl4" for="tab4">4 · Generate Report</label>
+      </div>
+
+      <div class="tab-contents">
+
+        <!-- Tab 1 -->
+        <div class="tab-content tc1">
+          <p>Configure and verify your Jira connection before using any other tab.</p>
+          <table>
+            <thead><tr><th>Section</th><th>What to do</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Credentials</strong></td><td>Enter Jira URL, email, and API token; click <strong>Save</strong>, then <strong>Test Connection</strong>.</td></tr>
+              <tr><td><strong>Sprint Settings</strong></td><td>Optionally set a default Board ID and Sprint Count.</td></tr>
+              <tr><td><strong>SSL Certificate</strong></td><td>If your Jira uses a custom CA, click <strong>Fetch Certificate</strong> to cache the TLS cert.</td></tr>
+            </tbody>
+          </table>
+          <div class="screenshot-pair">
+            <figure>
+              <img src="../../../generated/tmp/screenshots/05a_jira_connection_empty.png" alt="Jira Connection tab with credentials filled and saved">
+              <figcaption>Credentials saved — click <strong>Test Connection</strong> to verify.</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../generated/tmp/screenshots/05b_jira_connection_tested.png" alt="Jira Connection tab showing Connected status">
+              <figcaption>After a successful test — badge shows <strong>Connected</strong> with the Atlassian account name.</figcaption>
+            </figure>
+          </div>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <p>The <strong>Test Connection</strong> button checks <code>JIRA_URL/rest/api/3/myself</code> with a 12-second timeout. The certificate badge shows <code>Valid</code>, <code>Expired</code>, or <code>No certificate</code>.</p>
+          </div>
+        </div>
+
+        <!-- Tab 2 -->
+        <div class="tab-content tc2">
+          <p>Schemas map Jira custom-field IDs to story points, sprint, team, and status fields. The default schema (<code>Default_Jira_Cloud</code>) works for most standard Jira Cloud instances.</p>
+          <table>
+            <thead><tr><th>When to create a custom schema</th><th>How</th></tr></thead>
+            <tbody>
+              <tr><td>Your Jira uses non-standard custom field IDs for story points or sprint</td><td>Click <strong>New Schema</strong>, edit the JSON to match your field IDs, click <strong>Save</strong>.</td></tr>
+              <tr><td>Multiple Jira instances with different field setups</td><td>Create one schema per instance.</td></tr>
+            </tbody>
+          </table>
+          <figure class="screenshot-wrap">
+            <img src="../../../generated/tmp/screenshots/06_schema_setup.png" alt="Schema Setup tab showing the Default_Jira_Cloud JSON editor">
+            <figcaption>Schema Setup tab — the JSON editor shows <code>Default_Jira_Cloud</code> field mappings. Use <strong>New Schema</strong> to add a custom one.</figcaption>
+          </figure>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <p>The Schema Setup tab is an editor only. The schema used for a specific report run is selected per-filter in the <strong>Filter Builder</strong> tab.</p>
+          </div>
+        </div>
+
+        <!-- Tab 3 -->
+        <div class="tab-content tc3">
+          <p>Create a named filter that scopes your report to a specific team or project. The filter appears in the Generate Report dropdown once saved.</p>
+          <table>
+            <thead><tr><th>Field</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Filter Name</strong></td><td>A unique name, e.g. <code>My Team Q2 2026</code></td></tr>
+              <tr><td><strong>Active Schema</strong></td><td>Select the schema for this filter's Jira instance</td></tr>
+              <tr><td><strong>Project Key(s)</strong></td><td>Jira project key(s) to include, e.g. <code>MYPROJ</code></td></tr>
+              <tr><td><strong>Issue Types</strong></td><td>e.g. <code>Story,Bug,Task</code></td></tr>
+              <tr><td><strong>Project Type</strong></td><td>Scrum (sprint-based) or Kanban (continuous flow)</td></tr>
+              <tr><td><strong>Estimation Type</strong></td><td>Story Points or Jira Tickets (issue count)</td></tr>
+              <tr><td><strong>Board ID</strong></td><td>Required — find it in your Jira agile board URL</td></tr>
+              <tr><td><strong>Sprint Count</strong></td><td>How many sprints to look back, e.g. <code>8</code></td></tr>
+            </tbody>
+          </table>
+          <div class="screenshot-pair">
+            <figure>
+              <img src="../../../generated/tmp/screenshots/07a_filter_builder_empty.png" alt="Filter Builder with Jira Filter ID entered">
+              <figcaption>Using a saved <strong>Jira Filter ID</strong> — simplest approach if your team already has a Jira filter.</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../generated/tmp/screenshots/07b_filter_builder_filled.png" alt="Filter Builder with JQL Builder expanded and fields filled">
+              <figcaption>JQL Builder expanded — configure Project Type, Estimation Type, Board ID, and Sprint Count manually.</figcaption>
+            </figure>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <p>You can also enter a Jira Filter ID directly instead of building a JQL query.</p>
+          </div>
+        </div>
+
+        <!-- Tab 4 -->
+        <div class="tab-content tc4">
+          <p>This is your main working tab for generating reports.</p>
+          <ol>
+            <li>Select a filter from the <strong>Saved Filter</strong> dropdown.</li>
+            <li>Optionally set a <strong>Report Name</strong> (defaults to the filter name).</li>
+            <li>Expand <strong>Report Options</strong> to adjust Project Type, Estimation Type, and which metric sections to include.</li>
+            <li>Review the <strong>AI Adoption Labels</strong> card — ensure labels match what your team uses in Jira.</li>
+            <li>Click <strong>Generate Report</strong>.</li>
+          </ol>
+          <div class="screenshot-pair">
+            <figure>
+              <img src="../../../generated/tmp/screenshots/09b_generate_report_options.png" alt="Report Options panel expanded showing Metric Sections checkboxes">
+              <figcaption><strong>Report Options</strong> expanded — toggle individual metric sections on or off before generating.</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../generated/tmp/screenshots/09_generate_report_ai_labels.png" alt="AI Adoption Labels card showing label configuration fields">
+              <figcaption><strong>AI Adoption Labels</strong> card — configure tool and action labels once; values persist to <code>.env</code>.</figcaption>
+            </figure>
+          </div>
+          <p style="margin-top:10px;">Live output streams in the output panel. When complete, the report appears in <strong>Last Generated Reports</strong> — click the link to open it.</p>
+          <div class="screenshot-pair">
+            <figure>
+              <img src="../../../generated/tmp/screenshots/10_output_streaming.png" alt="Live output panel streaming log lines during report generation">
+              <figcaption>Output panel streaming live — log lines appear as the pipeline runs.</figcaption>
+            </figure>
+            <figure>
+              <img src="../../../generated/tmp/screenshots/11_last_generated_reports.png" alt="Last Generated Reports list with timestamped links">
+              <figcaption><strong>Last Generated Reports</strong> — each run produces a timestamped link to its <code>report.html</code>.</figcaption>
+            </figure>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <p>Configure AI label values once in the <strong>AI Adoption Labels</strong> card — they are saved to <code>.env</code> automatically.</p>
+          </div>
+        </div>
+
+      </div><!-- /tab-contents -->
+    </div><!-- /tabs-wrap -->
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       UNDERSTANDING YOUR REPORTS
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="reports">
+    <div class="section-label">Output</div>
+    <h2>Understanding Your Reports</h2>
+    <p>Each section can be toggled independently in <strong>Report Options</strong>. Reports are saved to <code>generated/reports/&lt;YYYY-MM-DDTHH-MM-SS&gt;/</code>.</p>
+
+    <table>
+      <thead><tr><th>Section</th><th>Toggle</th><th>What It Shows</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Velocity Trend</strong> (Scrum) / <strong>Throughput Trend</strong> (Kanban)</td><td>Velocity</td><td>Story points (or issue count) of done issues per sprint, with a running average line.</td></tr>
+        <tr><td><strong>AI Assistance Trend</strong></td><td>AI Trend</td><td>Per-sprint percentage of done story points marked AI-assisted.</td></tr>
+        <tr><td><strong>AI Usage Details</strong></td><td>AI Usage</td><td>Breakdown of AI tool labels and use-case labels across AI-assisted issues.</td></tr>
+        <tr><td><strong>DAU Survey</strong></td><td>DAU</td><td>Team Daily Active Usage from self-reported survey; by-role breakdown and usage-frequency chart.</td></tr>
+        <tr><td><strong>DAU Trend</strong></td><td>DAU Trend</td><td>Week-over-week DAU average and adoption percentage.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="report-screenshot">
+      <details open>
+        <summary>📊 Velocity Trend — sprint-by-sprint story points completed</summary>
+        <div class="accordion-body">
+          <figure class="screenshot-wrap" style="margin:0;">
+            <img src="../../../generated/tmp/screenshots/12a_report_overview.png" alt="Velocity Trend chart with per-sprint bars and running average line">
+            <figcaption>Report header and Velocity Trend — story points per sprint with running average line and sprint summary table.</figcaption>
+          </figure>
+        </div>
+      </details>
+
+      <details>
+        <summary>🤖 AI Assistance Trend — % of work that was AI-assisted per sprint</summary>
+        <div class="accordion-body">
+          <figure class="screenshot-wrap" style="margin:0;">
+            <img src="../../../generated/tmp/screenshots/12d_ai_assistance_trend.png" alt="AI Assistance Trend area chart with per-sprint percentage and summary table">
+            <figcaption>AI Assistance Trend — per-sprint AI % with total SP, AI-labeled SP, and rolling totals.</figcaption>
+          </figure>
+        </div>
+      </details>
+
+      <details>
+        <summary>🔧 AI Usage Details — tools used and use-case breakdown</summary>
+        <div class="accordion-body">
+          <figure class="screenshot-wrap" style="margin:0;">
+            <img src="../../../generated/tmp/screenshots/12e_ai_usage_details.png" alt="AI Usage Details pie charts for tool distribution and use-case distribution">
+            <figcaption>AI Usage Details — two pie charts: AI tool distribution (Copilot, Gemini, etc.) and use-case distribution (CodeGen, Review, Testing, etc.).</figcaption>
+          </figure>
+        </div>
+      </details>
+
+      <details>
+        <summary>👥 DAU Survey — daily active usage by role</summary>
+        <div class="accordion-body">
+          <figure class="screenshot-wrap" style="margin:0;">
+            <img src="../../../generated/tmp/screenshots/12f_dau_section.png" alt="DAU section bar chart by role and usage frequency table">
+            <figcaption>DAU Survey — team AI tool usage by role (avg days/week), response count, and usage-frequency breakdown.</figcaption>
+          </figure>
+        </div>
+      </details>
+    </div>
+
+    <h3 style="margin-top:16px;">Output Files</h3>
+    <table>
+      <thead><tr><th>File</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>report.html</code></td><td>Self-contained HTML with interactive Chart.js charts — opens in any modern browser, no server needed.</td></tr>
+        <tr><td><code>report.md</code></td><td>Plain-text summary with ASCII bar charts and tables.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <p>The HTML report is fully self-contained — CSS, JavaScript, and data are all inlined. Send it as an attachment; recipients open it in any browser without installing the tool.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       JIRA LABELING GUIDE
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="labeling">
+    <div class="section-label">For Teams</div>
+    <h2>Jira Labeling Guide</h2>
+    <p>For AI metrics to work, team members must label their Jira issues <strong>before closing them</strong>.</p>
+
+    <div class="callout warning">
+      <span class="callout-icon">⚠️</span>
+      <p>The <code>AI_assistance</code> label (or your configured label) is required on every AI-assisted issue. Without it, the issue is not counted in any AI metric.</p>
+    </div>
+
+    <h3>Required Label</h3>
+    <table>
+      <thead><tr><th>Label type</th><th>Env var</th><th>Default value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>AI Assisted</td><td><code>AI_ASSISTED_LABEL</code></td><td><code>AI_assistance</code></td><td>Marks an issue as AI-assisted — required for any AI metric.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Optional Labels</h3>
+    <table>
+      <thead><tr><th>Label type</th><th>Env var</th><th>Example values</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>AI Tool</td><td><code>AI_TOOL_LABELS</code></td><td><code>AI_Tool_Copilot</code>, <code>AI_Tool_ChatGPT</code></td><td>Which AI tool was used.</td></tr>
+        <tr><td>AI Action / Use Case</td><td><code>AI_ACTION_LABELS</code></td><td><code>AI_Case_CodeGen</code>, <code>AI_Case_Review</code></td><td>How AI was used.</td></tr>
+        <tr><td>Exclude</td><td><code>AI_EXCLUDE_LABELS</code></td><td><code>spike</code>, <code>ops</code></td><td>Issues excluded from the AI % denominator (non-delivery work).</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How to Apply Labels in Jira</h3>
+    <ol>
+      <li>Open the Jira issue.</li>
+      <li>Find the <strong>Labels</strong> field in the issue detail panel.</li>
+      <li>Add the appropriate labels <strong>before</strong> moving the issue to Done.</li>
+    </ol>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TROUBLESHOOTING
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="troubleshooting">
+    <div class="section-label">Support</div>
+    <h2>Troubleshooting</h2>
+
+    <details>
+      <summary>Can't connect to Jira</summary>
+      <div class="accordion-body">
+        <table>
+          <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>"Connection failed" on Test Connection</td><td>Verify <code>JIRA_URL</code> has no trailing slash; confirm email and API token are correct.</td></tr>
+            <tr><td>HTTP 401 Unauthorized</td><td>API token may be expired — generate a new one at <a href="https://id.atlassian.com" target="_blank">id.atlassian.com</a>.</td></tr>
+            <tr><td>HTTP 403 Forbidden</td><td>Your account may lack API access — contact your Jira admin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary>SSL certificate errors</summary>
+      <div class="accordion-body">
+        <p>If your company uses a custom Certificate Authority:</p>
+        <ol>
+          <li>Go to the <strong>Jira Connection</strong> tab.</li>
+          <li>Click <strong>Fetch Certificate</strong> — this caches the TLS cert at <code>certs/jira_ca_bundle.pem</code>.</li>
+          <li>Retry the connection.</li>
+        </ol>
+        <p>Alternatively, run from the terminal: <code>python tools/fetch_ssl_cert.py</code></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Port 8080 in use</summary>
+      <div class="accordion-body">
+        <p>Edit <code>config/defaults.env</code>, change <code>PORT=9000</code> (or any available port), and restart <code>start_app.bat</code>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Report sections missing or empty</summary>
+      <div class="accordion-body">
+        <table>
+          <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>Velocity section missing</td><td>Ensure at least one metric section is checked in Report Options.</td></tr>
+            <tr><td>AI metrics show 0%</td><td>Confirm issues have the <code>AI_assistance</code> label (or your configured label) in Jira.</td></tr>
+            <tr><td>DAU section empty</td><td>DAU data requires self-reported survey issues in Jira; check your team's workflow.</td></tr>
+            <tr><td>Charts render blank</td><td>Ensure you're opening the HTML file in a modern browser (Chrome, Edge, Firefox).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FAQ
+  ═══════════════════════════════════════════════════════════ -->
+  <section class="section" id="faq">
+    <div class="section-label">FAQ</div>
+    <h2>Frequently Asked Questions</h2>
+
+    <details>
+      <summary>What's the difference between Scrum and Kanban project types?</summary>
+      <div class="accordion-body">
+        <p>Scrum uses sprint boundaries to group issues into periods — the report section is labeled <strong>Velocity Trend</strong>. Kanban uses fixed time windows (rolling periods) — the report section is labeled <strong>Throughput Trend</strong>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Story Points vs. Jira Tickets — which should I use?</summary>
+      <div class="accordion-body">
+        <p>Use <strong>Story Points</strong> if your team consistently estimates issues. Use <strong>Jira Tickets</strong> (issue count) if story point coverage is inconsistent or your team doesn't estimate.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Can I have multiple schemas for different Jira instances?</summary>
+      <div class="accordion-body">
+        <p>Yes. Create one schema per instance in the <strong>Schema Setup</strong> tab, then select the appropriate schema when building each filter in the <strong>Filter Builder</strong> tab.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Where are reports saved?</summary>
+      <div class="accordion-body">
+        <p>All reports are saved under <code>generated/reports/&lt;timestamp&gt;/</code> in the project folder. The <strong>Last Generated Reports</strong> list in the UI links directly to each <code>report.html</code>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Can I share the HTML report with someone who doesn't have the tool?</summary>
+      <div class="accordion-body">
+        <p>Yes. The <code>report.html</code> file is fully self-contained — all CSS, JavaScript, and data are inlined. Send it as an attachment; it opens in any modern browser without any server or installation.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>How do I update Jira credentials without editing <code>.env</code> manually?</summary>
+      <div class="accordion-body">
+        <p>Use the <strong>Jira Connection</strong> tab — enter the values and click <strong>Save</strong>. Changes are written to <code>.env</code> automatically.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>The default filter can't be deleted — is that intentional?</summary>
+      <div class="accordion-body">
+        <p>Yes. <code>Default_Jira_Filter</code> is a read-only reference filter that ships with the tool. Create a new named filter for your team's use.</p>
+      </div>
+    </details>
+
+  </section>
+
+  <footer class="page-footer">
+    <span>AI Adoption Metrics Report — User Guide</span>
+    <span>Last reviewed: 2026-04-20 &nbsp;·&nbsp; <a href="#quick-start">Back to top ↑</a></span>
+  </footer>
+</div><!-- /page-wrap -->
+
+<button id="back-to-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  /* Back-to-top visibility */
+  window.addEventListener('scroll', function() {
+    var btn = document.getElementById('back-to-top');
+    if (window.scrollY > 600) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  });
+
+  /* Keyboard arrow-key navigation for tabs */
+  (function() {
+    var labels = document.querySelectorAll('.tab-label');
+    var inputs = [
+      document.getElementById('tab1'),
+      document.getElementById('tab2'),
+      document.getElementById('tab3'),
+      document.getElementById('tab4')
+    ];
+    labels.forEach(function(lbl, idx) {
+      lbl.setAttribute('tabindex', '0');
+      lbl.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight') { inputs[Math.min(idx+1, inputs.length-1)].checked = true; labels[Math.min(idx+1, labels.length-1)].focus(); }
+        if (e.key === 'ArrowLeft')  { inputs[Math.max(idx-1, 0)].checked = true; labels[Math.max(idx-1, 0)].focus(); }
+      });
+    });
+  })();
+</script>
+</body>
+</html>
