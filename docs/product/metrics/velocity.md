@@ -59,18 +59,21 @@ Story points and other field IDs always come from the active schema (file or bui
 1. **Fetch sprints** — retrieve the last `JIRA_SPRINT_COUNT` sprints for the board.
 2. **Fetch issues** — for each sprint, retrieve all issues assigned to it.
 3. **Attribute each ticket to a single sprint** — applied in this priority order:
-   1. **By `resolutiondate`** — if the ticket's resolution date falls within some sprint's
-      `[startDate, endDate]` window, it is attributed to that sprint, even if Jira's sprint
-      field for the ticket does not include it. This ensures that work which closed during
-      the active sprint counts toward the active sprint, not toward a closed sprint the
-      ticket was carried over from.
-   2. **By most-recent membership** — otherwise, the ticket is attributed to the most recent
-      sprint (by `startDate`) where Jira's API returned it. This handles tickets without a
-      resolution date and tickets resolved outside any tracked sprint window.
+   1. **By the issue's sprint field** — read the ticket's sprint custom field
+      (`customfield_10020` by default) and pick the highest sprint ID in the list. This is
+      the "owner" sprint — the most recent sprint the ticket has been part of in Jira.
+      - If the owner is among the fetched sprints, place the ticket there.
+      - If the owner is **not** among the fetched sprints (typical case: the active sprint
+        is excluded by `JIRA_CLOSED_SPRINTS_ONLY=True` while the ticket is still returned
+        under a closed sprint's API response), drop the ticket from velocity. It will
+        surface in the owner sprint's velocity once that sprint enters the fetch window.
+   2. **Fallback (sprint field absent / unparseable)** — attribute the ticket to the most
+      recent sprint (by `startDate`) where Jira's API returned it. Same as the original
+      deduplication semantics; retained for kanban string-id periods and legacy tickets
+      without a sprint field.
 
-   Both rules work together to (a) prevent double-counting when Jira returns the same ticket
-   for multiple sprints, and (b) prevent retroactive inflation of a closed sprint's velocity
-   by tickets that actually completed later.
+   This ensures that a ticket carried over into the active sprint (sprint field `[5, 6, 7]`
+   with Sprint 7 active) is never wrongly counted in Sprint 6's velocity — Sprint 7 owns it.
 4. **Filter to done issues** — keep an issue if either (a) its `status.name` (lowercased) is
    in the configured `done_statuses` set, or (b) it has a non-empty `resolutiondate` field.
    The fallback (b) supports kanban boards with custom terminal status names (e.g. `Released`,

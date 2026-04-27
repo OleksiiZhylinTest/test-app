@@ -75,6 +75,8 @@ _DEFAULT_SCHEMA: dict[str, Any] = {
 
 # Built-in story points field when no schema dict supplies one (matches _DEFAULT_SCHEMA)
 DEFAULT_STORY_POINTS_FIELD_ID: str = _DEFAULT_SCHEMA["fields"]["story_points"]["id"]
+# Built-in sprint field when no schema dict supplies one (matches _DEFAULT_SCHEMA)
+DEFAULT_SPRINT_FIELD_ID: str = _DEFAULT_SCHEMA["fields"]["sprint"]["id"]
 
 
 def _read_file(path: Path | None = None) -> dict[str, Any]:

@@ -38,15 +38,16 @@ def make_issue(
     status: str = "Done",
     points: float | None = 5.0,
     story_points_field: str = "customfield_10016",
-    resolutiondate: str | None = None,
+    sprint_ids: list[int] | None = None,
+    sprint_field: str = "customfield_10020",
 ) -> dict:
     fields: dict = {
         "status": {"name": status},
     }
     if points is not None:
         fields[story_points_field] = points
-    if resolutiondate is not None:
-        fields["resolutiondate"] = resolutiondate
+    if sprint_ids is not None:
+        fields[sprint_field] = [{"id": sid, "name": f"Sprint {sid}"} for sid in sprint_ids]
     return {"key": key, "fields": fields}
 
 

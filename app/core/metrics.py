@@ -65,37 +65,86 @@ def _is_done(
     return bool(fields.get("resolutiondate"))
 
 
+def _latest_sprint_id_from_issue(
+    issue: dict[str, Any],
+    sprint_field_id: str,
+) -> int | None:
+    """Return the highest-numbered sprint ID from the issue's sprint custom field.
+
+    The Jira sprint custom field holds a list. Each entry is either a dict
+    (newer Cloud API: ``{"id": N, "name": "Sprint N", "state": ...}``) or a
+    legacy string (``"com.atlassian.greenhopper.service.sprint.Sprint@xxx[id=N,...]"``).
+    Sprint IDs are auto-incrementing in Jira, so the highest ID is the most
+    recently created sprint — which under normal Scrum cadence is also the
+    most recent in time. Returns ``None`` if no IDs can be parsed.
+    """
+    import re
+
+    fields = issue.get("fields") or {}
+    raw = fields.get(sprint_field_id)
+    if not isinstance(raw, list) or not raw:
+        return None
+    ids: list[int] = []
+    for entry in raw:
+        if isinstance(entry, dict):
+            sid = entry.get("id")
+            if sid is None:
+                continue
+            try:
+                ids.append(int(sid))
+            except (TypeError, ValueError):
+                continue
+        elif isinstance(entry, str):
+            match = re.search(r"id=(\d+)", entry)
+            if match:
+                ids.append(int(match.group(1)))
+    return max(ids) if ids else None
+
+
 def deduplicate_sprint_issues(
     sprints: list[dict[str, Any]],
     sprint_issues: dict[int | str, list[dict[str, Any]]],
+    sprint_field_id: str | None = None,
 ) -> dict[int | str, list[dict[str, Any]]]:
-    """Return sprint_issues with each issue assigned to exactly one sprint.
+    """Return sprint_issues with each issue assigned to its true owner sprint.
 
     Attribution rules, applied in order:
 
-    1. If the issue has ``resolutiondate`` whose date falls within some sprint's
-       ``[startDate, endDate]`` window, attribute the issue to that sprint —
-       even if Jira's sprint field for the issue does not include that sprint.
-       This corrects the common SCRUM workflow case where a ticket carries
-       over from a closed sprint into the active sprint without the user
-       updating its sprint field, and is then closed during the active
-       sprint. Without this rule, the closed sprint's velocity would inflate
-       retroactively with work that actually happened later.
-    2. Otherwise, attribute the issue to the most recent sprint (by
-       ``startDate``) where it appears in the input. Handles Jira's habit
-       of returning the same ticket for multiple sprints when its sprint
-       field contains more than one sprint id.
+    1. **By sprint custom field** — read the issue's sprint field (a list of
+       sprints the ticket has been part of) and pick the highest sprint ID
+       in that list. This is the "owner" sprint.
+
+       - If the owner is among the input ``sprints``, place the issue there.
+       - If the owner is **not** among the input ``sprints`` (typical case:
+         the active sprint is excluded by ``JIRA_CLOSED_SPRINTS_ONLY=True``
+         while the issue is still carried in a closed sprint's API
+         response), drop the issue from velocity. It belongs to a sprint
+         not yet being reported on; it will surface there once that sprint
+         enters the fetched window.
+
+    2. **Fallback (sprint field absent / unparseable)** — attribute the issue
+       to the most recent sprint (by ``startDate``) where it appears in the
+       input. Same as the original deduplication semantics, retained for
+       kanban string-id periods and for issues that lack a sprint field.
 
     Issues without a ``key`` are untrackable and remain in their original
     placement.
     """
-    # Sort oldest-first so last-write-wins in step 1 produces the most-recent
-    # sprint as the default attribution. Stable on equal keys, so the function
-    # is independent of whether the caller passes newest-first or oldest-first.
+    sf_id = sprint_field_id or schema.DEFAULT_SPRINT_FIELD_ID
+
+    fetched_int_ids: set[int] = set()
+    for sprint in sprints:
+        sid = sprint.get("id")
+        if isinstance(sid, int):
+            fetched_int_ids.add(sid)
+
+    # Sort oldest-first so the fallback "last-write-wins" pass produces the
+    # most-recent sprint as the default attribution. Stable on equal keys.
     oldest_first = sorted(sprints, key=lambda s: s.get("startDate") or "")
 
-    # Step 1 — default attribution: most recent sprint where the issue appears.
-    issue_target: dict[str, int | str] = {}
+    # Step 1 — fallback attribution: most recent sprint where the issue appears.
+    # We keep this as a fallback for issues without a parseable sprint field.
+    fallback_target: dict[str, int | str] = {}
     issue_by_key: dict[str, dict[str, Any]] = {}
     for sprint in oldest_first:
         sid = sprint.get("id")
@@ -104,33 +153,26 @@ def deduplicate_sprint_issues(
         for iss in sprint_issues.get(sid) or []:
             key = iss.get("key") or ""
             if key:
-                issue_target[key] = sid
+                fallback_target[key] = sid
                 issue_by_key[key] = iss
 
-    # Step 2 — build sprint windows for the resolutiondate override. Sprints
-    # without both startDate and endDate (e.g. test fixtures, kanban week
-    # entries) cannot match a date, so they are skipped here and only
-    # participate in the step-1 fallback.
-    sprint_windows: list[tuple[int | str, str, str]] = []
-    for sprint in oldest_first:
-        sid = sprint.get("id")
-        start = (sprint.get("startDate") or "")[:10]
-        end = (sprint.get("endDate") or "")[:10]
-        if sid is not None and start and end:
-            sprint_windows.append((sid, start, end))
-
-    # Step 3 — override by resolutiondate when it falls within a sprint window.
+    # Step 2 — primary attribution by sprint field. ``None`` means "drop":
+    # the issue's owner sprint is outside our fetched window.
+    issue_target: dict[str, int | str | None] = {}
     for key, iss in issue_by_key.items():
-        fields = iss.get("fields") or {}
-        resolved = (fields.get("resolutiondate") or "")[:10]
-        if not resolved:
+        latest = _latest_sprint_id_from_issue(iss, sf_id)
+        if latest is None:
+            issue_target[key] = fallback_target.get(key)
             continue
-        for sid, start, end in sprint_windows:
-            if start <= resolved <= end:
-                issue_target[key] = sid
-                break
+        if latest in fetched_int_ids:
+            issue_target[key] = latest
+        else:
+            # Owner is a sprint we did not fetch (e.g. an active sprint
+            # excluded by JIRA_CLOSED_SPRINTS_ONLY). Drop the issue from
+            # velocity to avoid wrong attribution to an older closed sprint.
+            issue_target[key] = None
 
-    # Step 4 — rebuild sprint_issues, preserving the caller's sprint ordering.
+    # Step 3 — rebuild sprint_issues, preserving the caller's sprint ordering.
     result: dict[int | str, list[dict[str, Any]]] = {}
     placed: set[str] = set()
     for sprint in sprints:
@@ -148,15 +190,16 @@ def deduplicate_sprint_issues(
                 placed.add(key)
         result[sid] = kept
 
-    # Step 5 — insert issues whose resolutiondate moved them to a sprint that
-    # didn't originally contain them.
-    for key, sid in issue_target.items():
-        if key in placed:
+    # Step 4 — insert issues whose owner sprint didn't originally contain them
+    # (e.g. Jira returned the issue only under sprint 5, but its sprint field's
+    # max ID is 6 — the issue belongs to 6's velocity).
+    for key, target_sid in issue_target.items():
+        if target_sid is None or key in placed:
             continue
         moved = issue_by_key.get(key)
-        if moved is None or sid not in result:
+        if moved is None or target_sid not in result:
             continue
-        result[sid].append(moved)
+        result[target_sid].append(moved)
         placed.add(key)
 
     return result
@@ -586,19 +629,20 @@ def compute_cycle_time(
 
 def _resolve_schema_params(
     schema: dict[str, Any] | None,
-) -> tuple[str | None, frozenset[str] | None, frozenset[str] | None]:
-    """Extract story_points_field, done_statuses, in_progress_statuses from a schema dict."""
+) -> tuple[str | None, str | None, frozenset[str] | None, frozenset[str] | None]:
+    """Extract story_points_field, sprint_field, done_statuses, in_progress_statuses from a schema dict."""
     if schema is None:
-        return None, None, None
+        return None, None, None, None
 
     from app.core import schema as schema_mod
 
     sp_field = schema_mod.get_field_id(schema, "story_points")
+    sprint_field = schema_mod.get_field_id(schema, "sprint")
     done = schema_mod.get_done_statuses(schema)
     ip = schema_mod.get_in_progress_statuses(schema)
     done_fs = frozenset(s.lower() for s in done) if done else None
     ip_fs = frozenset(s.lower() for s in ip) if ip else None
-    return sp_field, done_fs, ip_fs
+    return sp_field, sprint_field, done_fs, ip_fs
 
 
 def build_metrics_dict(
@@ -608,8 +652,8 @@ def build_metrics_dict(
     issues_with_changelog: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build the single metrics dict used by both HTML and MD reporters."""
-    sp_field, done_fs, ip_fs = _resolve_schema_params(schema)
-    sprint_issues = deduplicate_sprint_issues(sprints, sprint_issues)
+    sp_field, sprint_field, done_fs, ip_fs = _resolve_schema_params(schema)
+    sprint_issues = deduplicate_sprint_issues(sprints, sprint_issues, sprint_field)
     logger.debug("Computing metrics: %s sprint(s)", len(sprints))
 
     velocity = compute_velocity(sprints, sprint_issues, sp_field, done_fs)
