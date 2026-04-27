@@ -30,7 +30,7 @@ AI Adoption Metrics Report connects to your Jira Cloud instance and automaticall
 |---------|-------------|
 | **Filter** | A named JQL query that scopes which Jira issues are included in a report. Stored in `config/jira_filters.json`. |
 | **Schema** | A mapping of Jira custom-field IDs to pipeline-readable names (story points, sprint, team, status). Stored in `config/jira_schema.json`. |
-| **AI Labels** | Jira issue labels that mark AI-assisted work. Configured in the Generate Report tab. |
+| **AI Labels** | Jira issue labels that mark AI-assisted work. Configured in the Filter Builder tab. |
 | **Sprint Count** | How many sprints (or Kanban periods) to look back when generating a report. |
 
 ---
@@ -125,6 +125,8 @@ Create a named filter that scopes your report to a specific team or project.
 
 Click **Save Filter** — the filter appears in the Generate Report dropdown.
 
+Below **Data Source** the **AI Adoption Labels** section is collapsible — expand it to set the labels (`AI_ASSISTED_LABEL`, `AI_EXCLUDE_LABELS`, `AI_TOOL_LABELS`, `AI_ACTION_LABELS`) that the AI metrics use. Click **Save AI Labels** to persist them to `.env`.
+
 > **Tip:** You can also enter a Jira Filter ID directly instead of building a JQL query.
 
 ### Step 4 — Generate Report Tab
@@ -137,8 +139,7 @@ This is your main working tab.
    - **Project Type**: Scrum or Kanban
    - **Estimation Type**: Story Points or Jira Tickets
    - **Metric Sections**: Toggle which charts/tables to include
-4. Review the **AI Adoption Labels** card — ensure the labels match what your team uses in Jira
-5. Click **Generate Report**
+4. Click **Generate Report**
 
 Live output streams in the output panel. When complete, the report appears in the **Last Generated Reports** list — click the link to open the HTML report.
 
@@ -189,7 +190,7 @@ For AI metrics to work, team members must label their Jira issues **before closi
 2. Find the **Labels** field in the issue detail panel
 3. Add the appropriate labels before moving the issue to Done
 
-> **Tip:** Configure all label values once in the **AI Adoption Labels** card on the Generate Report tab. They are saved to `.env` automatically.
+> **Tip:** Configure all label values once in the **AI Adoption Labels** section of the Filter Builder tab (collapsible, below Data Source). They are saved to `.env` automatically.
 
 ---
 

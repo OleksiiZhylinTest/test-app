@@ -17,10 +17,6 @@ _CONFIG_KEYS = [
     "JIRA_ISSUE_TYPES",
     "JIRA_CLOSED_SPRINTS_ONLY",
     "JIRA_FILTER_PAGE_SIZE",
-    "AI_ASSISTED_LABEL",
-    "AI_EXCLUDE_LABELS",
-    "AI_TOOL_LABELS",
-    "AI_ACTION_LABELS",
 ]
 
 # Keys that contain credentials — written to .env (gitignored).

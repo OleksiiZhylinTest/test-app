@@ -44,18 +44,6 @@ The main workflow tab. Triggers report generation and displays live output.
 
 At least one metric section must be enabled; the Generate button is disabled when all are unchecked.
 
-#### AI Adoption Labels card
-
-Inline configuration for the Jira labels used by AI metrics. Changes are saved to `.env` via
-`POST /api/config`.
-
-| Field | Env var | Description |
-|-------|---------|-------------|
-| AI Assisted Label | `AI_ASSISTED_LABEL` | Label that marks an issue as AI-assisted (default: `AI_assistance`) |
-| Exclude Labels | `AI_EXCLUDE_LABELS` | Comma-separated labels excluded from the AI % denominator |
-| Tool Labels | `AI_TOOL_LABELS` | Labels identifying AI tools (e.g. `AI_Tool_Copilot,AI_Tool_ChatGPT`) |
-| Action Labels | `AI_ACTION_LABELS` | Labels identifying AI use-cases (e.g. `AI_Case_CodeGen,AI_Case_Review`) |
-
 #### Output panel
 
 Live SSE output from the generation subprocess. Displays each stdout/stderr line as it is
@@ -80,10 +68,25 @@ report pipeline uses when that filter is run.
 | **Active Schema** dropdown | Populated from `/api/schemas`. Chosen value is saved on the filter as `params.schema_name` and is what the pipeline reads when generating a report. Independent of the Schema Setup tab. |
 | **Filter Name** dropdown | Lists `— New filter —` plus every saved filter (the default is tagged `(default)`). Picking a filter loads its params into the form for in-place editing; picking `— New filter —` clears the form and reveals a text input pre-populated with `Default_Jira_Filter_<YYYY-MM-DD>`. |
 | **Report Name** field | Optional text input for the report title/filename. Auto-fills from the filter name when a filter is selected or the filter name is typed. Saved alongside the filter as `report_name` in `config/jira_filters.json`. |
-| Filter form | Project Key, optional Team ID, Issue Types, Closed-sprints-only, Project Type, Estimation Type, Board ID, Sprint Count, optional Jira Filter ID & page size |
-| Save button | Upserts the filter by name via `POST /api/filters`; disabled while `Default_Jira_Filter` is selected (the default is read-only) |
+| Filter form | Project Key, optional Team ID, Issue Types, Closed-sprints-only, Project Type, Estimation Type, Board ID, Sprint Count, optional Jira Filter ID & page size, plus AI Adoption Labels (see below) |
+| Save button | Upserts the filter — including AI Adoption Labels — by name via `POST /api/filters`; disabled while `Default_Jira_Filter` is selected (the default is read-only) |
 | Filter list | All saved filters, default first; non-default entries show a Remove button |
 | Default filter protection | The default filter cannot be deleted or overwritten via the UI |
+
+#### AI Adoption Labels section (collapsible, below Data Source)
+
+Collapsible `<details>` section directly below **Data Source**. Inline configuration for the
+Jira labels used by AI metrics. Values are stored per filter in
+`config/jira_filters.json` (under `params.AI_*`) and persisted as part of the main
+**Save Filter** action — there is no separate save button. When generating a report
+from a filter, those values override `defaults.env` for the run.
+
+| Field | Param key | Description |
+|-------|-----------|-------------|
+| AI Assisted Label | `AI_ASSISTED_LABEL` | Label that marks an issue as AI-assisted (default in `Default_Jira_Filter`: `ai_assisted`) |
+| Exclude Labels | `AI_EXCLUDE_LABELS` | Comma-separated labels excluded from the AI % denominator |
+| Tool Labels | `AI_TOOL_LABELS` | Labels identifying AI tools (e.g. `AI_Tool_Copilot,AI_Tool_ChatGPT`) |
+| Action Labels | `AI_ACTION_LABELS` | Labels identifying AI use-cases (e.g. `AI_Case_CodeGen,AI_Case_Review`) |
 
 ---
 

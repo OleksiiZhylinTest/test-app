@@ -31,6 +31,10 @@ class FilterHandlerMixin:
             "PROJECT_TYPE": "SCRUM",
             "ESTIMATION_TYPE": "StoryPoints",
             "schema_name": "Default_Jira_Cloud",
+            "AI_ASSISTED_LABEL": "ai_assisted",
+            "AI_EXCLUDE_LABELS": "ai_not_applicable",
+            "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
+            "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
         },
     }
 

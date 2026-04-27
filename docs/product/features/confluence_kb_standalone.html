@@ -716,7 +716,7 @@
           <tbody>
             <tr><td><strong>Filter</strong></td><td>A named JQL query that scopes which Jira issues are included in a report. Stored in <code>config/jira_filters.json</code>.</td></tr>
             <tr><td><strong>Schema</strong></td><td>A mapping of Jira custom-field IDs to pipeline-readable names (story points, sprint, team, status). Stored in <code>config/jira_schema.json</code>.</td></tr>
-            <tr><td><strong>AI Labels</strong></td><td>Jira issue labels that mark AI-assisted work. Configured in the Generate Report tab.</td></tr>
+            <tr><td><strong>AI Labels</strong></td><td>Jira issue labels that mark AI-assisted work. Configured in the Filter Builder tab.</td></tr>
             <tr><td><strong>Sprint Count</strong></td><td>How many sprints (or Kanban periods) to look back when generating a report.</td></tr>
             <tr><td><strong>Scrum</strong></td><td>Project type that uses sprint boundaries to group issues. Report section: <em>Velocity Trend</em>.</td></tr>
             <tr><td><strong>Kanban</strong></td><td>Project type that uses fixed time windows. Report section: <em>Throughput Trend</em>.</td></tr>
@@ -823,6 +823,7 @@
               <figcaption>JQL Builder expanded — configure Project Type, Estimation Type, Board ID, and Sprint Count manually.</figcaption>
             </figure>
           </div>
+          <p style="margin-top:10px;">Below <strong>Data Source</strong> the <strong>AI Adoption Labels</strong> section is collapsible — expand it to set the labels (<code>AI_ASSISTED_LABEL</code>, <code>AI_EXCLUDE_LABELS</code>, <code>AI_TOOL_LABELS</code>, <code>AI_ACTION_LABELS</code>) that the AI metrics use. Click <strong>Save AI Labels</strong> to persist them to <code>.env</code>.</p>
           <div class="callout tip">
             <span class="callout-icon">💡</span>
             <p>You can also enter a Jira Filter ID directly instead of building a JQL query.</p>
@@ -836,7 +837,6 @@
             <li>Select a filter from the <strong>Saved Filter</strong> dropdown.</li>
             <li>Optionally set a <strong>Report Name</strong> (defaults to the filter name).</li>
             <li>Expand <strong>Report Options</strong> to adjust Project Type, Estimation Type, and which metric sections to include.</li>
-            <li>Review the <strong>AI Adoption Labels</strong> card — ensure labels match what your team uses in Jira.</li>
             <li>Click <strong>Generate Report</strong>.</li>
           </ol>
           <div class="screenshot-pair">
@@ -862,7 +862,7 @@
           </div>
           <div class="callout tip">
             <span class="callout-icon">💡</span>
-            <p>Configure AI label values once in the <strong>AI Adoption Labels</strong> card — they are saved to <code>.env</code> automatically.</p>
+            <p>Configure AI label values once in the <strong>AI Adoption Labels</strong> section of the <strong>Filter Builder</strong> tab (collapsible, below Data Source) — they are saved to <code>.env</code> automatically.</p>
           </div>
         </div>
 

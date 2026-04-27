@@ -7,7 +7,6 @@ import { initJqlBuilderVisibility } from './jql-builder.js';
 import { initSchema } from './schema.js';
 import { initGenerate } from './generate.js';
 import { initFilterOptions } from './filter-options.js';
-import { initSaveHandlers } from './save-handlers.js';
 import { showFileModeBannerIfNeeded } from './file-mode-banner.js';
 import { restoreValues } from './restore.js';
 
@@ -34,7 +33,6 @@ try {
   initSchema();
   initGenerate(mainLog);
   initFilterOptions();
-  initSaveHandlers();
   showFileModeBannerIfNeeded();
 
   window.restoreValuesReady = false;

@@ -562,7 +562,11 @@ class TestPostConfig:
         # Credential keys remain in .env
         assert "JIRA_URL=https://x.atlassian.net" in env.read_text()
 
-    def test_post_saves_ai_labels_to_env(self, server_url, temp_root):
+    def test_post_ignores_ai_labels(self, server_url, temp_root):
+        """AI labels are per-filter (in jira_filters.json), not global config —
+        POST /api/config must not write them to defaults.env."""
+        env = temp_root / ".env"
+        env.write_text("JIRA_URL=https://x.atlassian.net\n")
         _post(
             f"{server_url}/api/config",
             {
@@ -572,12 +576,12 @@ class TestPostConfig:
                 "AI_ACTION_LABELS": "CodeGen,Review",
             },
         )
-        # AI labels are non-credentials → written to config/defaults.env
-        defaults = (temp_root / "config" / "defaults.env").read_text()
-        assert "AI_ASSISTED_LABEL=AI_help" in defaults
-        assert "AI_EXCLUDE_LABELS=Infra,Ops" in defaults
-        assert "AI_TOOL_LABELS=Copilot,ChatGPT" in defaults
-        assert "AI_ACTION_LABELS=CodeGen,Review" in defaults
+        defaults_path = temp_root / "config" / "defaults.env"
+        defaults = defaults_path.read_text() if defaults_path.exists() else ""
+        assert "AI_ASSISTED_LABEL=AI_help" not in defaults
+        assert "AI_EXCLUDE_LABELS=Infra,Ops" not in defaults
+        assert "AI_TOOL_LABELS=Copilot,ChatGPT" not in defaults
+        assert "AI_ACTION_LABELS=CodeGen,Review" not in defaults
 
     def test_post_saves_board_id_to_env(self, server_url, temp_root):
         _post(f"{server_url}/api/config", {"JIRA_BOARD_ID": "42"})
@@ -586,7 +590,11 @@ class TestPostConfig:
         assert "JIRA_BOARD_ID=42" in defaults
 
     def test_round_trip_all_fields(self, server_url, temp_root):
-        """POST every supported field, then GET and verify each one."""
+        """POST every supported field, then GET and verify each one.
+
+        AI labels are intentionally excluded — they live per-filter in
+        config/jira_filters.json, not in the global config endpoint.
+        """
         (temp_root / ".env").write_text("")
         payload = {
             "JIRA_URL": "https://rt.atlassian.net",
@@ -601,10 +609,6 @@ class TestPostConfig:
             "JIRA_ISSUE_TYPES": "Bug,Story",
             "JIRA_CLOSED_SPRINTS_ONLY": "false",
             "JIRA_FILTER_PAGE_SIZE": "50",
-            "AI_ASSISTED_LABEL": "AI_yes",
-            "AI_EXCLUDE_LABELS": "Exclude1",
-            "AI_TOOL_LABELS": "Tool1,Tool2",
-            "AI_ACTION_LABELS": "Act1",
         }
         _post(f"{server_url}/api/config", payload)
         data = _get(f"{server_url}/api/config")
@@ -621,10 +625,6 @@ class TestPostConfig:
         assert cfg["JIRA_ISSUE_TYPES"] == "Bug,Story"
         assert cfg["JIRA_CLOSED_SPRINTS_ONLY"] == "false"
         assert cfg["JIRA_FILTER_PAGE_SIZE"] == "50"
-        assert cfg["AI_ASSISTED_LABEL"] == "AI_yes"
-        assert cfg["AI_EXCLUDE_LABELS"] == "Exclude1"
-        assert cfg["AI_TOOL_LABELS"] == "Tool1,Tool2"
-        assert cfg["AI_ACTION_LABELS"] == "Act1"
 
     def test_post_config_ignores_unknown_keys(self, server_url, temp_root):
         """Unknown keys in the POST body must not be written to .env."""
@@ -648,21 +648,13 @@ class TestPostConfig:
 
 
 class TestGetConfigExtended:
-    def test_ai_label_fields_returned_when_present(self, server_url, temp_root):
+    def test_ai_label_fields_never_returned(self, server_url, temp_root):
+        """AI labels live per-filter in jira_filters.json — they are not part of
+        the global /api/config response, even when present in env files."""
         env = temp_root / ".env"
         env.write_text(
             "AI_ASSISTED_LABEL=AI_help\nAI_EXCLUDE_LABELS=Infra,Ops\nAI_TOOL_LABELS=Copilot\nAI_ACTION_LABELS=CodeGen\n"
         )
-        data = _get(f"{server_url}/api/config")
-        cfg = data["config"]
-        assert cfg["AI_ASSISTED_LABEL"] == "AI_help"
-        assert cfg["AI_EXCLUDE_LABELS"] == "Infra,Ops"
-        assert cfg["AI_TOOL_LABELS"] == "Copilot"
-        assert cfg["AI_ACTION_LABELS"] == "CodeGen"
-
-    def test_ai_label_fields_absent_when_not_set(self, server_url, temp_root):
-        env = temp_root / ".env"
-        env.write_text("JIRA_URL=https://x.atlassian.net\n")
         data = _get(f"{server_url}/api/config")
         cfg = data["config"]
         assert "AI_ASSISTED_LABEL" not in cfg
@@ -681,15 +673,6 @@ class TestGetConfigExtended:
         env.write_text("JIRA_URL=https://x.atlassian.net\n")
         data = _get(f"{server_url}/api/config")
         assert "JIRA_BOARD_ID" not in data["config"]
-
-    def test_empty_ai_labels_omitted(self, server_url, temp_root):
-        """Empty string values should not appear in the response."""
-        env = temp_root / ".env"
-        env.write_text("AI_ASSISTED_LABEL=\nAI_TOOL_LABELS=\n")
-        data = _get(f"{server_url}/api/config")
-        cfg = data["config"]
-        assert "AI_ASSISTED_LABEL" not in cfg
-        assert "AI_TOOL_LABELS" not in cfg
 
     def test_only_whitelisted_keys_returned(self, server_url, temp_root):
         """Arbitrary keys in .env must not leak through GET /api/config."""
