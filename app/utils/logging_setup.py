@@ -6,13 +6,20 @@ and mirrors output to stdout.
 
 Custom level SUCCESS (25) sits between INFO (20) and WARNING (30).
 Usage: logging.getLogger(__name__).success("message")
+
+Root logger level is read from the LOG_LEVEL env var (resolved from
+config/defaults.env or .env, see app.core.config for the loading pattern).
+Accepted values: DEBUG, INFO, SUCCESS, WARNING, ERROR, CRITICAL.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
+
+from dotenv import dotenv_values as _dotenv_values
 
 # ---------------------------------------------------------------------------
 # Custom SUCCESS level
@@ -30,10 +37,36 @@ def _success(self: logging.Logger, message: str, *args: object, **kwargs: object
 logging.Logger.success = _success  # type: ignore[attr-defined]
 
 # ---------------------------------------------------------------------------
+# Env loading (defaults.env then .env; never override values already set)
+# ---------------------------------------------------------------------------
+
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+_DEFAULTS_PATH = _PROJECT_ROOT / "config" / "defaults.env"
+_ENV_PATH = _PROJECT_ROOT / ".env"
+
+for _k, _v in {**_dotenv_values(_DEFAULTS_PATH), **_dotenv_values(_ENV_PATH)}.items():
+    if _k not in os.environ and _v is not None:
+        os.environ[_k] = _v
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
-_LOG_DIR = Path(__file__).resolve().parent.parent.parent / "generated" / "logs"
+_LOG_DIR = _PROJECT_ROOT / "generated" / "logs"
+
+_LEVELS: dict[str, int] = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "SUCCESS": SUCCESS_LEVEL,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+    "CRITICAL": logging.CRITICAL,
+}
+
+
+def _resolve_log_level() -> int:
+    name = (os.getenv("LOG_LEVEL", "") or "").strip().upper()
+    return _LEVELS.get(name, logging.DEBUG)
 
 
 def setup_logging() -> tuple[logging.Logger, Path]:
@@ -59,7 +92,7 @@ def setup_logging() -> tuple[logging.Logger, Path]:
     stream_handler.setFormatter(formatter)
 
     root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
+    root.setLevel(_resolve_log_level())
     root.addHandler(file_handler)
     root.addHandler(stream_handler)
 
