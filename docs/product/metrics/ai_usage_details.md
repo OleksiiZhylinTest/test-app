@@ -57,13 +57,16 @@ training priorities, and adoption strategies.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `AI_ASSISTED_LABEL` | `AI_assistance` | An issue must carry this label to be included in the breakdown sample |
-| `AI_TOOL_LABELS` | _(empty)_ | Comma-separated labels identifying AI tools. Example: `AI_Tool_Copilot,AI_Tool_ChatGPT,AI_Tool_Gemini` |
-| `AI_ACTION_LABELS` | _(empty)_ | Comma-separated labels identifying AI use-cases. Example: `AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing` |
+| `AI_ASSISTED_LABEL` | _(empty)_ | The exact umbrella label that marks an issue as AI-assisted. **When unset/empty**, classification falls back to `AI_TOOL_LABELS` / `AI_ACTION_LABELS`: any issue carrying at least one of those labels is treated as AI-assisted and included in the breakdown sample. |
+| `AI_TOOL_LABELS` | _(empty)_ | Comma-separated labels identifying AI tools. Example: `AI_Tool_Copilot,AI_Tool_ChatGPT,AI_Tool_Gemini`. Doubles as a classification signal when `AI_ASSISTED_LABEL` is unset. |
+| `AI_ACTION_LABELS` | _(empty)_ | Comma-separated labels identifying AI use-cases. Example: `AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing`. Doubles as a classification signal when `AI_ASSISTED_LABEL` is unset. |
 
 > If `AI_TOOL_LABELS` or `AI_ACTION_LABELS` are empty, the corresponding breakdown will be
 > an empty list and the pie chart will not render. You must configure these variables to
 > see tool/action breakdowns.
+>
+> If all three variables are empty, no issue is classified as AI-assisted and the breakdown
+> sample is empty.
 
 **Example `.env` configuration:**
 ```
@@ -75,7 +78,9 @@ AI_ACTION_LABELS=AI_Case_CodeGen,AI_Case_Review,AI_Case_Testing,AI_Case_Docs,AI_
 ## Calculation
 
 1. **Collect all done AI-assisted issues** — across all fetched sprints, collect every unique
-   done issue (by `key`) that carries the `AI_ASSISTED_LABEL` label. Duplicate issue keys
+   done issue (by `key`) classified as AI-assisted. An issue is AI-assisted when it carries
+   the `AI_ASSISTED_LABEL` label (when set), or — when `AI_ASSISTED_LABEL` is unset/empty —
+   when it carries any label from `AI_TOOL_LABELS` or `AI_ACTION_LABELS`. Duplicate issue keys
    are deduplicated; each issue is counted once regardless of how many sprints it appears in.
 2. **Count total AI-assisted issues** — `ai_assisted_issue_count = len(ai_issues)`.
 3. **Tool breakdown** — for each label in `AI_TOOL_LABELS`, count how many AI-assisted issues
