@@ -21,16 +21,16 @@
 ## Test Pyramid
 
 ```text
-              /  E2E  \              117 tests  (18%)  (Playwright browser UI)  → tests/e2e/
+              /  E2E  \              119 tests  (18%)  (Playwright browser UI)  → tests/e2e/
              /----------\
             / Integration \           19 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
           /    Component      \      165 tests  (25%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   348 tests  (54%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   348 tests  (53%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     649 tests total
+                                     651 tests total
 ```
 
 ## Coverage Matrix
@@ -105,5 +105,5 @@ tests\run_e2e_tests.bat
 | `integration/test_integration.py` | Integration |    6  | Full pipeline, filter flow, server  |
 | `integration/test_fetch_ssl_cert.py` | Integration |   10  | fetch_ssl_cert function + CLI smoke |
 | `e2e/test_e2e.py`                 | E2E         |    3  | CLI subprocess, server health       |
-| `e2e/test_e2e_ui.py`              | E2E         |   32  | Playwright browser UI tests         || `e2e/test_dau_survey_ui.py`      | E2E         |   23  | DAU survey form Playwright tests    |
+| `e2e/test_e2e_ui.py`              | E2E         |   32  | Playwright browser UI tests         || `e2e/test_dau_survey_ui.py`      | E2E         |   25  | DAU survey form Playwright tests    |
 | `e2e/test_e2e_connection.py`     | E2E         |   41  | Connection panel Playwright tests   |

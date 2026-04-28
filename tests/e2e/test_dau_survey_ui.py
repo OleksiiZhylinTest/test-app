@@ -382,3 +382,34 @@ def test_fs_api_unavailable_falls_back_to_download(page: Page) -> None:
     expect(page.locator("#confirmation")).to_be_visible(timeout=3000)
     clicked = page.evaluate("() => window.__downloadClicked")
     assert clicked is True, "Browser download fallback was not triggered"
+
+
+# ---------------------------------------------------------------------------
+# Group 9: New Survey button
+# ---------------------------------------------------------------------------
+
+
+def test_new_survey_button_returns_to_form(page: Page) -> None:
+    """Clicking 'New Survey' on the confirmation hides it and shows the form again."""
+    _goto(page)
+    _fill_all(page)
+    page.locator("#btn-submit").click()
+    expect(page.locator("#confirmation")).to_be_visible(timeout=3000)
+    page.locator("#btn-new-survey").click()
+    expect(page.locator("#survey-form")).to_be_visible()
+    expect(page.locator("#confirmation")).to_be_hidden()
+
+
+def test_new_survey_button_clears_role_and_usage_but_keeps_username(page: Page) -> None:
+    """Reset clears role and radio selection; username remains (per DAU-F-003)."""
+    _goto(page)
+    _fill_all(page, username="alice123", role="QA / Test Engineer", card_index=2)
+    page.locator("#btn-submit").click()
+    expect(page.locator("#confirmation")).to_be_visible(timeout=3000)
+    page.locator("#btn-new-survey").click()
+    expect(page.locator("#input-username")).to_have_value("alice123")
+    expect(page.locator("#select-role")).to_have_value("")
+    for i in range(4):
+        expect(page.locator(".radio-card").nth(i)).not_to_have_class(re.compile(r"selected"))
+    expect(page.locator("#progress-count")).to_have_text("1 of 3 answered")
+    expect(page.locator("#btn-submit")).to_be_disabled()
