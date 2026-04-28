@@ -6,10 +6,11 @@ AI Assistance Trend tracks the percentage of completed story points that were de
 AI tool assistance, sprint by sprint. It answers the question: *"Is our team actually using
 AI tools, and is that usage growing over time?"*
 
-The metric works by detecting a designated Jira label (default: `AI_assistance`) on completed
-issues. When combined with velocity data, it reveals not just whether AI adoption is happening
-but whether it correlates with higher throughput and shorter cycle times — making it the core
-measure for an AI adoption programme.
+The metric works by detecting either a designated umbrella Jira label (`AI_ASSISTED_LABEL`)
+on completed issues, or — when no umbrella label is configured — any of the more granular
+`AI_TOOL_LABELS` / `AI_ACTION_LABELS` values. When combined with velocity data, it reveals
+not just whether AI adoption is happening but whether it correlates with higher throughput
+and shorter cycle times — making it the core measure for an AI adoption programme.
 
 ## Use Cases
 
@@ -43,14 +44,16 @@ measure for an AI adoption programme.
 |---|---|---|---|
 | `story_points` | `customfield_10016` | number | Issues with no points contribute 0 to both totals |
 | `status` | `status` | string | Used to identify done issues |
-| `labels` | `labels` | array | Must contain `AI_ASSISTED_LABEL` value to be counted as AI-assisted |
+| `labels` | `labels` | array | Must contain `AI_ASSISTED_LABEL` (when set) or any value from `AI_TOOL_LABELS` / `AI_ACTION_LABELS` (when `AI_ASSISTED_LABEL` is unset) to be counted as AI-assisted |
 | `sprint` | `customfield_10020` | array | Groups issues by sprint |
 
 ## Required Configuration
 
 | Variable | Default | Effect |
 |---|---|---|
-| `AI_ASSISTED_LABEL` | `AI_assistance` | The exact Jira label that marks an issue as AI-assisted |
+| `AI_ASSISTED_LABEL` | _(empty)_ | The exact umbrella label that marks an issue as AI-assisted. **When unset/empty**, classification falls back to `AI_TOOL_LABELS` / `AI_ACTION_LABELS`: any issue carrying at least one of those labels is treated as AI-assisted. |
+| `AI_TOOL_LABELS` | _(empty)_ | Comma-separated labels identifying AI tools (e.g. `AI_Tool_Copilot,AI_Tool_ChatGPT`). When `AI_ASSISTED_LABEL` is unset, presence of any of these labels classifies an issue as AI-assisted. |
+| `AI_ACTION_LABELS` | _(empty)_ | Comma-separated labels identifying AI use-cases (e.g. `AI_Case_CodeGen,AI_Case_Review`). When `AI_ASSISTED_LABEL` is unset, presence of any of these labels classifies an issue as AI-assisted. |
 | `AI_EXCLUDE_LABELS` | _(empty)_ | Comma-separated labels; issues carrying any of these are excluded from **both** numerator and denominator. Use for overhead, non-delivery work (e.g. `admin`, `spike`). |
 | `JIRA_SCHEMA_NAME` | _(unset)_ | CLI-only fallback (`python main.py`); schema entry in `config/jira_schema.json` (field IDs including story points). UI runs use the active filter's `params.schema_name`, which overrides this env var via `/api/generate`. |
 
@@ -72,8 +75,10 @@ For each sprint:
 1. **Filter to done issues** — keep issues whose `status.name` (lowercased) is in `done_statuses`.
 2. **Apply exclusions** — remove issues that carry any label in `AI_EXCLUDE_LABELS`.
 3. **Sum total story points** (`total_sp`) — sum `story_points` for all remaining done issues.
-4. **Sum AI story points** (`ai_sp`) — sum `story_points` for done issues that also carry the
-   `AI_ASSISTED_LABEL` label.
+4. **Sum AI story points** (`ai_sp`) — sum `story_points` for done issues classified as
+   AI-assisted: when `AI_ASSISTED_LABEL` is set, the issue must carry that exact label;
+   when `AI_ASSISTED_LABEL` is unset, the issue must carry at least one label from
+   `AI_TOOL_LABELS` or `AI_ACTION_LABELS`. When all three are unset, no issue is counted.
 5. **Compute percentage:**
 
 ```
@@ -115,8 +120,11 @@ def compute_ai_assistance_trend(
     sprint_issues: dict[int, list[dict]],
     ai_assisted_label: str | None = None,       # defaults to config.AI_ASSISTED_LABEL
     ai_exclude_labels: list[str] | None = None, # defaults to config.AI_EXCLUDE_LABELS
+    ai_tool_labels: list[str] | None = None,    # defaults to config.AI_TOOL_LABELS
+    ai_action_labels: list[str] | None = None,  # defaults to config.AI_ACTION_LABELS
     story_points_field: str | None = None,
     done_statuses: frozenset[str] | None = None,
+    estimation_type: str | None = None,
 ) -> list[dict]:
     ...
 ```

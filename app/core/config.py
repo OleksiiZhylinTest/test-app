@@ -53,8 +53,9 @@ DAU_NORMALIZED_DIR: str = os.getenv(
 )
 
 # AI Adoption metrics labels
-# Label that marks an issue as AI-assisted (default: AI_assistance)
-AI_ASSISTED_LABEL = os.getenv("AI_ASSISTED_LABEL", "AI_assistance").strip() or "AI_assistance"
+# Umbrella label that marks an issue as AI-assisted. When unset/empty, classification
+# falls back to checking AI_TOOL_LABELS / AI_ACTION_LABELS membership (see metrics.py).
+AI_ASSISTED_LABEL = os.getenv("AI_ASSISTED_LABEL", "").strip()
 # Comma-separated labels whose issues are excluded from the AI% denominator
 AI_EXCLUDE_LABELS = [lbl.strip() for lbl in os.getenv("AI_EXCLUDE_LABELS", "").split(",") if lbl.strip()]
 # Comma-separated labels identifying AI tools (e.g. AI_Tool_Copilot,AI_Tool_ChatGPT)

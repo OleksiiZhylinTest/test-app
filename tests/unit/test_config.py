@@ -271,7 +271,7 @@ _BASE_ENV = {"JIRA_URL": "https://x.atlassian.net", "JIRA_EMAIL": "a@b.com", "JI
 
 def test_ai_assisted_label_default():
     cfg = _reload_config(_BASE_ENV)
-    assert cfg.AI_ASSISTED_LABEL == "AI_assistance"
+    assert cfg.AI_ASSISTED_LABEL == ""
 
 
 def test_ai_assisted_label_custom():

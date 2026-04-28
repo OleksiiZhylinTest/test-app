@@ -364,6 +364,67 @@ def test_ai_trend_jira_tickets_mode_counts_issues_not_story_points():
     assert result[0]["ai_pct"] == 50.0
 
 
+def test_ai_trend_fallback_uses_tool_labels_when_assisted_label_empty():
+    sprint = make_sprint(1, "S1")
+    issues = [
+        make_issue_with_labels("X-1", "Done", 5.0, ["AI_Tool_Copilot"]),
+        make_issue_with_labels("X-2", "Done", 3.0, []),
+    ]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="",
+        ai_exclude_labels=[],
+        ai_tool_labels=["AI_Tool_Copilot"],
+        ai_action_labels=[],
+    )
+    assert result[0]["ai_sp"] == 5.0
+    assert result[0]["ai_pct"] == 62.5
+
+
+def test_ai_trend_fallback_uses_action_labels_when_assisted_label_empty():
+    sprint = make_sprint(1, "S1")
+    issues = [make_issue_with_labels("X-1", "Done", 4.0, ["AI_Case_CodeGen"])]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="",
+        ai_exclude_labels=[],
+        ai_tool_labels=[],
+        ai_action_labels=["AI_Case_CodeGen"],
+    )
+    assert result[0]["ai_pct"] == 100.0
+
+
+def test_ai_trend_fallback_no_labels_yields_zero():
+    sprint = make_sprint(1, "S1")
+    issues = [make_issue_with_labels("X-1", "Done", 5.0, ["AI_Tool_Copilot"])]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="",
+        ai_exclude_labels=[],
+        ai_tool_labels=[],
+        ai_action_labels=[],
+    )
+    assert result[0]["ai_pct"] == 0.0
+
+
+def test_ai_trend_explicit_label_overrides_fallback():
+    # When ai_assisted_label is set, tool/action labels do NOT promote an issue.
+    sprint = make_sprint(1, "S1")
+    issues = [make_issue_with_labels("X-1", "Done", 5.0, ["AI_Tool_Copilot"])]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="AI_assistance",
+        ai_exclude_labels=[],
+        ai_tool_labels=["AI_Tool_Copilot"],
+        ai_action_labels=[],
+    )
+    assert result[0]["ai_pct"] == 0.0
+
+
 # ---------------------------------------------------------------------------
 # compute_ai_usage_details
 # ---------------------------------------------------------------------------
@@ -446,6 +507,40 @@ def test_ai_usage_empty_labels():
     assert result["ai_assisted_issue_count"] == 1
     assert result["tool_breakdown"] == []
     assert result["action_breakdown"] == []
+
+
+def test_ai_usage_fallback_uses_tool_or_action_labels():
+    sprint = make_sprint(1)
+    issues = [
+        make_issue_with_labels("X-1", "Done", 1.0, ["AI_Tool_Copilot"]),
+        make_issue_with_labels("X-2", "Done", 1.0, ["AI_Case_CodeGen"]),
+        make_issue_with_labels("X-3", "Done", 1.0, []),
+    ]
+    result = metrics.compute_ai_usage_details(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="",
+        ai_tool_labels=["AI_Tool_Copilot"],
+        ai_action_labels=["AI_Case_CodeGen"],
+    )
+    assert result["ai_assisted_issue_count"] == 2
+    tool_labels = [r["label"] for r in result["tool_breakdown"]]
+    action_labels = [r["label"] for r in result["action_breakdown"]]
+    assert "AI_Tool_Copilot" in tool_labels
+    assert "AI_Case_CodeGen" in action_labels
+
+
+def test_ai_usage_explicit_label_overrides_fallback():
+    sprint = make_sprint(1)
+    issues = [make_issue_with_labels("X-1", "Done", 1.0, ["AI_Tool_Copilot"])]
+    result = metrics.compute_ai_usage_details(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="AI_assistance",
+        ai_tool_labels=["AI_Tool_Copilot"],
+        ai_action_labels=[],
+    )
+    assert result["ai_assisted_issue_count"] == 0
 
 
 # ---------------------------------------------------------------------------

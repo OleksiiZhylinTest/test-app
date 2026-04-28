@@ -247,11 +247,34 @@ def _get_labels(issue: dict[str, Any]) -> list[str]:
     return [str(lbl) for lbl in labels if lbl]
 
 
+def _is_ai_assisted(
+    labels: list[str],
+    ai_assisted_label: str,
+    ai_tool_labels: list[str],
+    ai_action_labels: list[str],
+) -> bool:
+    """True if the issue is AI-assisted.
+
+    Primary signal: ai_assisted_label is set and present on the issue.
+    Fallback (when ai_assisted_label is empty/unset): any label from
+    ai_tool_labels or ai_action_labels is present on the issue.
+    When all three are empty, returns False.
+    """
+    if ai_assisted_label:
+        return ai_assisted_label in labels
+    if not ai_tool_labels and not ai_action_labels:
+        return False
+    label_set = set(labels)
+    return bool(label_set.intersection(ai_tool_labels)) or bool(label_set.intersection(ai_action_labels))
+
+
 def compute_ai_assistance_trend(
     sprints: list[dict[str, Any]],
     sprint_issues: dict[int | str, list[dict[str, Any]]],
     ai_assisted_label: str | None = None,
     ai_exclude_labels: list[str] | None = None,
+    ai_tool_labels: list[str] | None = None,
+    ai_action_labels: list[str] | None = None,
     story_points_field: str | None = None,
     done_statuses: frozenset[str] | None = None,
     estimation_type: str | None = None,
@@ -270,6 +293,10 @@ def compute_ai_assistance_trend(
         ai_assisted_label = config.AI_ASSISTED_LABEL
     if ai_exclude_labels is None:
         ai_exclude_labels = config.AI_EXCLUDE_LABELS
+    if ai_tool_labels is None:
+        ai_tool_labels = config.AI_TOOL_LABELS
+    if ai_action_labels is None:
+        ai_action_labels = config.AI_ACTION_LABELS
     if estimation_type is None:
         estimation_type = config.ESTIMATION_TYPE
 
@@ -291,7 +318,7 @@ def compute_ai_assistance_trend(
                 continue
             pts = 1.0 if use_counts else _get_story_points(iss, story_points_field)
             total_sp += pts
-            if ai_assisted_label in labels:
+            if _is_ai_assisted(labels, ai_assisted_label, ai_tool_labels, ai_action_labels):
                 ai_sp += pts
         ai_pct = round(ai_sp / total_sp * 100, 1) if total_sp > 0 else 0.0
         rows.append(
@@ -340,7 +367,8 @@ def compute_ai_usage_details(
             key = iss.get("key") or ""
             if not _is_done(iss, done_statuses) or key in seen_keys:
                 continue
-            if ai_assisted_label in _get_labels(iss):
+            labels = _get_labels(iss)
+            if _is_ai_assisted(labels, ai_assisted_label, ai_tool_labels, ai_action_labels):
                 seen_keys.add(key)
                 ai_issues.append(iss)
 
