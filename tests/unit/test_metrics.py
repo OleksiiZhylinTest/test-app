@@ -673,6 +673,24 @@ def test_dedup_kanban_string_sprint_ids():
     assert result["week-2024-W02"] == [issue]
 
 
+def test_dedup_kanban_keeps_issues_with_sprint_field():
+    """KANBAN issues that carry a Jira sprint custom field must NOT be dropped.
+
+    Real Jira KANBAN boards (especially those built on top of SCRUM-capable projects)
+    return issues whose ``customfield_10020`` carries one or more sprint IDs. The
+    SCRUM attribution rule "drop if owner sprint not in fetched window" makes the
+    entire KANBAN report empty because none of the integer Jira sprint IDs match
+    the string period IDs (``week-2026-W17`` etc.) — fall back to placement instead.
+    """
+    s1 = {"id": "week-2024-W01", "name": "W01"}
+    s2 = {"id": "week-2024-W02", "name": "W02"}
+    iss_w01 = make_issue("K-1", "Done", 5.0, sprint_ids=[42])  # sprint 42 not in fetched
+    iss_w02 = make_issue("K-2", "Done", 8.0, sprint_ids=[99])
+    result = metrics.deduplicate_sprint_issues([s1, s2], {"week-2024-W01": [iss_w01], "week-2024-W02": [iss_w02]})
+    assert iss_w01 in result["week-2024-W01"]
+    assert iss_w02 in result["week-2024-W02"]
+
+
 def test_dedup_issue_without_key_not_moved():
     s1, s2 = make_sprint(1), make_sprint(2)
     keyless = {"fields": {"status": {"name": "Done"}}}

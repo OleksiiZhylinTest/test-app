@@ -205,6 +205,27 @@ def test_get_filter_jql_api_error(monkeypatch, mock_jira):
     assert jira_client.get_filter_jql(mock_jira) == ""
 
 
+def test_get_filter_jql_strips_trailing_order_by(monkeypatch, mock_jira):
+    """A trailing ORDER BY clause is dropped so the JQL is composable with parens + AND."""
+    monkeypatch.setattr("app.core.config.JIRA_FILTER_ID", 123)
+    mock_jira.get_filter.return_value = {"jql": "status = Done ORDER BY created DESC"}
+    assert jira_client.get_filter_jql(mock_jira) == "status = Done"
+
+
+def test_get_filter_jql_strips_order_by_case_insensitive(monkeypatch, mock_jira):
+    """ORDER BY stripping is case-insensitive."""
+    monkeypatch.setattr("app.core.config.JIRA_FILTER_ID", 123)
+    mock_jira.get_filter.return_value = {"jql": "project = X order by updated"}
+    assert jira_client.get_filter_jql(mock_jira) == "project = X"
+
+
+def test_get_filter_jql_no_order_by_unchanged(monkeypatch, mock_jira):
+    """JQL without ORDER BY is returned verbatim."""
+    monkeypatch.setattr("app.core.config.JIRA_FILTER_ID", 123)
+    mock_jira.get_filter.return_value = {"jql": "project = X AND status = Done"}
+    assert jira_client.get_filter_jql(mock_jira) == "project = X AND status = Done"
+
+
 # ---------------------------------------------------------------------------
 # get_issues_for_sprint
 # ---------------------------------------------------------------------------
@@ -400,6 +421,23 @@ def test_fetch_kanban_data_uses_config_filter_jql_as_fallback(mock_jira, monkeyp
 
     called_jql = mock_jira.get.call_args[1]["params"]["jql"]
     assert "project = SCRUM AND status = Done" in called_jql
+    assert "updated" in called_jql
+
+
+def test_fetch_kanban_data_strips_order_by_from_local_filter_jql(mock_jira, monkeypatch):
+    """A local JIRA_FILTER_JQL with ORDER BY is normalised before being wrapped in parens."""
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 1)
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
+    monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
+    monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "status = Done ORDER BY created DESC")
+    mock_jira.get.return_value = {"issues": []}
+
+    jira_client.fetch_kanban_data(mock_jira)
+
+    called_jql = mock_jira.get.call_args[1]["params"]["jql"]
+    assert "ORDER BY" not in called_jql.upper()
+    assert "(status = Done)" in called_jql
     assert "updated" in called_jql
 
 
