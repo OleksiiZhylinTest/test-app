@@ -444,6 +444,12 @@
     }
     .confirm-file-note strong { color: var(--text); }
 
+    .confirm-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 520px) {
       .app-header { padding: 20px 0 16px; }
@@ -511,6 +517,15 @@
             <polyline points="14 2 14 8 20 8" stroke="#6B778C" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
           <span id="conf-file-note">Saved as <strong>dau_report.json</strong></span>
+        </div>
+
+        <div class="confirm-actions">
+          <button class="btn btn-primary" id="btn-new-survey" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            New Survey
+          </button>
         </div>
       </div>
     </div>
@@ -685,6 +700,7 @@
       const progressBarWrap = document.getElementById('progress-bar-wrap');
       const formEl        = document.getElementById('survey-form');
       const confirmEl     = document.getElementById('confirmation');
+      const btnNewSurvey  = document.getElementById('btn-new-survey');
 
       // ── Restore username from localStorage ──
       try {
@@ -858,6 +874,26 @@
         await writable.close();
         return 'Saved as <strong>' + filename + '</strong> in <strong>' + dirHandle.name + '</strong>';
       }
+
+      // ── Reset survey to a fresh form (keeps username, clears role + usage) ──
+      function resetSurvey() {
+        selectRole.value = '';
+        state.role = '';
+
+        radioInputs.forEach(function (r) { r.checked = false; });
+        radioCards.forEach(function (c) { c.classList.remove('selected'); });
+        state.usage = '';
+
+        validateUsername();
+
+        confirmEl.classList.remove('visible');
+        formEl.classList.remove('hidden');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        selectRole.focus();
+      }
+
+      btnNewSurvey.addEventListener('click', resetSurvey);
 
       // ── Submit handler ──
       btnSubmit.addEventListener('click', async function () {
