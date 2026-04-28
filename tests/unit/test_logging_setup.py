@@ -105,8 +105,41 @@ def test_setup_logging_creates_log_directory(tmp_path, monkeypatch):
 
 
 @pytest.mark.unit
-def test_setup_logging_sets_debug_level(tmp_path, monkeypatch):
+def test_setup_logging_default_level_is_debug(tmp_path, monkeypatch):
+    """When LOG_LEVEL is unset, root logger defaults to DEBUG."""
     monkeypatch.setattr(logging_setup, "_LOG_DIR", tmp_path)
+    monkeypatch.delenv("LOG_LEVEL", raising=False)
+    logger, _ = setup_logging()
+    assert logger.level == logging.DEBUG
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "level_name,expected",
+    [
+        ("DEBUG", logging.DEBUG),
+        ("INFO", logging.INFO),
+        ("SUCCESS", SUCCESS_LEVEL),
+        ("WARNING", logging.WARNING),
+        ("ERROR", logging.ERROR),
+        ("CRITICAL", logging.CRITICAL),
+        ("info", logging.INFO),  # case-insensitive
+        ("  WARNING  ", logging.WARNING),  # whitespace-tolerant
+    ],
+)
+def test_setup_logging_level_configurable_via_env(tmp_path, monkeypatch, level_name, expected):
+    """LOG_LEVEL env var (set in config/defaults.env or .env) overrides the default."""
+    monkeypatch.setattr(logging_setup, "_LOG_DIR", tmp_path)
+    monkeypatch.setenv("LOG_LEVEL", level_name)
+    logger, _ = setup_logging()
+    assert logger.level == expected
+
+
+@pytest.mark.unit
+def test_setup_logging_unknown_level_falls_back_to_debug(tmp_path, monkeypatch):
+    """Unrecognized LOG_LEVEL values fall back to DEBUG rather than raising."""
+    monkeypatch.setattr(logging_setup, "_LOG_DIR", tmp_path)
+    monkeypatch.setenv("LOG_LEVEL", "NOPE")
     logger, _ = setup_logging()
     assert logger.level == logging.DEBUG
 
