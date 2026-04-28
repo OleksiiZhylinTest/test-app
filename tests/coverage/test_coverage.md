@@ -25,12 +25,12 @@
              /----------\
             / Integration \           19 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
-          /    Component      \      165 tests  (26%)  (filesystem, HTTP, data shapes)        → tests/component/
+          /    Component      \      165 tests  (25%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   343 tests  (53%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   348 tests  (54%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     644 tests total
+                                     649 tests total
 ```
 
 ## Coverage Matrix
@@ -92,9 +92,9 @@ tests\run_e2e_tests.bat
 | `unit/test_config.py`             | Unit        |   52  | Config loading, validation          |
 | `unit/test_cert_validation.py`    | Unit        |    5  | Certificate validation helpers      |
 | `unit/test_cli.py`                | Unit        |    4  | `app.cli.main()` orchestration      |
-| `unit/test_metrics.py`            | Unit        |   77  | All metrics functions incl. AI      |
+| `unit/test_metrics.py`            | Unit        |   78  | All metrics functions incl. AI      |
 | `unit/test_main_helpers.py`       | Unit        |    5  | `_timestamp_folder_name()`          |
-| `unit/test_jira_client.py`        | Unit        |   35  | All jira_client functions (mocked)  |
+| `unit/test_jira_client.py`        | Unit        |   39  | All jira_client functions (mocked)  |
 | `unit/test_server_handlers.py`    | Unit        |   32  | Internal `app.server` handler logic |
 | `unit/test_imports.py`            | Unit        |    8  | Module imports (smoke)              |
 | `unit/test_logging_setup.py`      | Unit        |   13  | Logging setup, SUCCESS level, file creation, format |

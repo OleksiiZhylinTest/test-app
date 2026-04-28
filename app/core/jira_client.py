@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -70,13 +71,26 @@ def get_sprints(jira: Jira, board_id: int) -> list[dict[str, Any]]:
     return ordered
 
 
+_ORDER_BY_RE = re.compile(r"\s+ORDER\s+BY\s+.*$", re.IGNORECASE | re.DOTALL)
+
+
+def _strip_order_by(jql: str) -> str:
+    """Drop a trailing ORDER BY clause so the JQL can be wrapped in parens and AND-ed safely."""
+    return _ORDER_BY_RE.sub("", jql).strip()
+
+
 def get_filter_jql(jira: Jira) -> str:
-    """Return the JQL string for the configured filter ID, or empty string if not set."""
+    """Return the JQL string for the configured filter ID, or empty string if not set.
+
+    A trailing ``ORDER BY`` clause is stripped: the metric pipeline never needs the original
+    ordering, and leaving it in place breaks composition (``(jql) AND ...`` is rejected by Jira
+    because ORDER BY may not appear inside parentheses).
+    """
     if config.JIRA_FILTER_ID is None:
         return ""
     try:
         f = jira.get_filter(config.JIRA_FILTER_ID)
-        return (f.get("jql") or "").strip()
+        return _strip_order_by((f.get("jql") or "").strip())
     except Exception as exc:
         logger.warning("Could not fetch JQL for filter %s: %s", config.JIRA_FILTER_ID, _sanitise_error(str(exc)))
         return ""
@@ -192,7 +206,8 @@ def fetch_kanban_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
         )
 
     # Prefer a Jira-hosted filter; fall back to the local JQL forwarded by the generate handler.
-    filter_jql = get_filter_jql(jira) or config.JIRA_FILTER_JQL
+    # Strip ORDER BY so the JQL can be wrapped in parens and AND-ed with the date constraint.
+    filter_jql = _strip_order_by(get_filter_jql(jira) or config.JIRA_FILTER_JQL or "")
     if filter_jql:
         logger.debug("Applying filter JQL: %s", filter_jql)
 

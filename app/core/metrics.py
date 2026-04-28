@@ -158,8 +158,17 @@ def deduplicate_sprint_issues(
 
     # Step 2 — primary attribution by sprint field. ``None`` means "drop":
     # the issue's owner sprint is outside our fetched window.
+    #
+    # KANBAN periods use string IDs (e.g. ``"week-2026-W17"``), so ``fetched_int_ids``
+    # is empty and the SCRUM-style owner-sprint attribution does not apply. In that
+    # mode we always use the fallback (placement-by-completion-date) instead of
+    # dropping issues whose Jira sprint field happens to carry a sprint ID.
+    has_int_sprints = bool(fetched_int_ids)
     issue_target: dict[str, int | str | None] = {}
     for key, iss in issue_by_key.items():
+        if not has_int_sprints:
+            issue_target[key] = fallback_target.get(key)
+            continue
         latest = _latest_sprint_id_from_issue(iss, sf_id)
         if latest is None:
             issue_target[key] = fallback_target.get(key)
