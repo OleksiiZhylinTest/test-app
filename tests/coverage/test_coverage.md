@@ -27,10 +27,10 @@
            /----------------\
           /    Component      \      165 tests  (26%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   332 tests  (52%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   343 tests  (53%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     633 tests total
+                                     644 tests total
 ```
 
 ## Coverage Matrix
@@ -89,7 +89,7 @@ tests\run_e2e_tests.bat
 
 | File                              | Layer       | Count | Covers                              |
 |-----------------------------------|-------------|-------|-------------------------------------|
-| `unit/test_config.py`             | Unit        |   46  | Config loading, validation          |
+| `unit/test_config.py`             | Unit        |   52  | Config loading, validation          |
 | `unit/test_cert_validation.py`    | Unit        |    5  | Certificate validation helpers      |
 | `unit/test_cli.py`                | Unit        |    4  | `app.cli.main()` orchestration      |
 | `unit/test_metrics.py`            | Unit        |   77  | All metrics functions incl. AI      |

@@ -60,6 +60,7 @@ class GenerateHandlerMixin:
                     "AI_EXCLUDE_LABELS",
                     "AI_TOOL_LABELS",
                     "AI_ACTION_LABELS",
+                    "DAU_PATH",
                 ]
                 filters = self._load_filters()
                 for _idx, _entry in enumerate(filters):

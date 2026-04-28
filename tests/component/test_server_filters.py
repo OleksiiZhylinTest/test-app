@@ -10,6 +10,7 @@ Covers JFM-D-003/004, JFM-P-001, JFM-P-003/004, JFM-P-008/009/010.
 from __future__ import annotations
 
 import json
+import shutil
 import threading
 import urllib.parse
 import urllib.request
@@ -25,17 +26,23 @@ pytestmark = pytest.mark.component
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _FILTERS_PATH = _PROJECT_ROOT / "config" / "jira_filters.json"
+_DAU_ROOT = _PROJECT_ROOT / "data" / "dau"
 
 
 @pytest.fixture
 def restore_filters():
-    """Backup config/jira_filters.json before the test and restore it afterwards."""
+    """Backup config/jira_filters.json and prune per-test data/dau/<slug>/ folders."""
     backup: bytes | None = _FILTERS_PATH.read_bytes() if _FILTERS_PATH.exists() else None
+    pre_dau_dirs = {p.name for p in _DAU_ROOT.iterdir() if p.is_dir()} if _DAU_ROOT.is_dir() else set()
     yield _FILTERS_PATH
     if backup is not None:
         _FILTERS_PATH.write_bytes(backup)
     elif _FILTERS_PATH.exists():
         _FILTERS_PATH.unlink()
+    if _DAU_ROOT.is_dir():
+        for p in _DAU_ROOT.iterdir():
+            if p.is_dir() and p.name not in pre_dau_dirs:
+                shutil.rmtree(p, ignore_errors=True)
 
 
 # ---------------------------------------------------------------------------

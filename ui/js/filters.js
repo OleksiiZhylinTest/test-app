@@ -182,11 +182,19 @@ function setRadio(name, value) {
   if (!matched && radios[0]) radios[0].checked = true;
 }
 
+function slugifyName(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 function clearFormFields() {
   const textIds = [
     'jira-project', 'jira-team-id', 'jira-issue-types',
     'jira-board-id', 'sprint-count', 'filter-id', 'jira-filter-page-size',
     'ai-assisted-label', 'ai-exclude-labels', 'ai-tool-labels', 'ai-action-labels',
+    'dau-path',
   ];
   textIds.forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; });
   const closed = document.getElementById('jira-closed-sprints-only');
@@ -213,6 +221,8 @@ function loadFilterIntoForm(entry) {
   setVal('ai-exclude-labels', params.AI_EXCLUDE_LABELS);
   setVal('ai-tool-labels',    params.AI_TOOL_LABELS);
   setVal('ai-action-labels',  params.AI_ACTION_LABELS);
+
+  setVal('dau-path', params.DAU_PATH);
 
   setRadio('filter-project-type',    params.PROJECT_TYPE    || 'SCRUM');
   setRadio('filter-estimation-type', params.ESTIMATION_TYPE || 'StoryPoints');
@@ -267,6 +277,13 @@ function resetFormForNewFilter() {
 
   const reportNameInput = document.getElementById('report-name');
   if (reportNameInput) reportNameInput.value = '';
+
+  const dauPathInput = document.getElementById('dau-path');
+  if (dauPathInput && nameInput) {
+    const slug = slugifyName(nameInput.value);
+    dauPathInput.value = slug ? `data/dau/${slug}` : '';
+    dauPathInput.dataset.syncedFrom = dauPathInput.value;
+  }
 }
 
 function isDefaultFilterSelected() {
@@ -338,11 +355,17 @@ export function initFilters(filterLog) {
 
   const filterNameInput = document.getElementById('filter-name');
   const reportNameInput = document.getElementById('report-name');
+  const dauPathInput    = document.getElementById('dau-path');
   if (filterNameInput && reportNameInput) {
     filterNameInput.addEventListener('input', () => {
       if (!reportNameInput.value || reportNameInput.dataset.syncedFrom === reportNameInput.value) {
         reportNameInput.value = filterNameInput.value;
         reportNameInput.dataset.syncedFrom = filterNameInput.value;
+      }
+      if (dauPathInput && (!dauPathInput.value || dauPathInput.dataset.syncedFrom === dauPathInput.value)) {
+        const slug = slugifyName(filterNameInput.value);
+        dauPathInput.value = slug ? `data/dau/${slug}` : '';
+        dauPathInput.dataset.syncedFrom = dauPathInput.value;
       }
     });
   }
@@ -416,6 +439,7 @@ export function initFilters(filterLog) {
       AI_EXCLUDE_LABELS:        document.getElementById('ai-exclude-labels').value.trim(),
       AI_TOOL_LABELS:           document.getElementById('ai-tool-labels').value.trim(),
       AI_ACTION_LABELS:         document.getElementById('ai-action-labels').value.trim(),
+      DAU_PATH:                 document.getElementById('dau-path').value.trim().replace(/\\/g, '/'),
     };
 
     const reportName = document.getElementById('report-name')?.value.trim() || filterName;

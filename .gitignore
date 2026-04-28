@@ -1,6 +1,9 @@
 # Secrets & local config
 .env
 dau_*.json
+data/dau/*/normalized/
+!data/dau/*/.gitkeep
+!data/dau/*/*/.gitkeep
 .vscode/mcp.json
 *settings.local.json
 
