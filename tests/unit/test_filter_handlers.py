@@ -387,6 +387,99 @@ def test_filter_data_persists_across_loads(monkeypatch, tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# DAU-F-027 — Per-filter DAU_PATH default and folder auto-creation
+# ---------------------------------------------------------------------------
+
+
+def test_default_filter_carries_dau_path(monkeypatch, tmp_path):
+    """The default filter exposes params.DAU_PATH = data/dau/default."""
+    srv, handler = _make_handler(monkeypatch, tmp_path)
+    _ensure_config_dir(tmp_path)
+
+    filters = handler._load_filters()
+    default = next(f for f in filters if f.get("is_default"))
+    assert default["params"].get("DAU_PATH") == "data/dau/default"
+
+
+def test_post_filter_defaults_dau_path_from_slug(monkeypatch, tmp_path):
+    """Saving a filter without DAU_PATH populates it as data/dau/<slug>."""
+    srv, handler = _make_handler(
+        monkeypatch,
+        tmp_path,
+        body={"name": "My Team", "params": {"JIRA_PROJECT": "PROJ"}},
+    )
+    _ensure_config_dir(tmp_path)
+
+    handler._handle_post_filter()
+    status, data = _json_response(handler)
+    assert status == 200 and data["ok"] is True
+
+    on_disk = json.loads((tmp_path / "config" / "jira_filters.json").read_text(encoding="utf-8"))
+    user = next(f for f in on_disk if f.get("slug") == "my_team")
+    assert user["params"]["DAU_PATH"] == "data/dau/my_team"
+
+
+def test_post_filter_creates_dau_original_folder_with_gitkeep(monkeypatch, tmp_path):
+    """Saving a filter creates <DAU_PATH>/original/.gitkeep on disk."""
+    srv, handler = _make_handler(
+        monkeypatch,
+        tmp_path,
+        body={"name": "Squad A", "params": {"JIRA_PROJECT": "PROJ"}},
+    )
+    _ensure_config_dir(tmp_path)
+
+    handler._handle_post_filter()
+
+    expected_dir = tmp_path / "data" / "dau" / "squad_a" / "original"
+    assert expected_dir.is_dir()
+    assert (expected_dir / ".gitkeep").is_file()
+
+
+def test_post_filter_normalises_backslashes_in_dau_path(monkeypatch, tmp_path):
+    """A Windows-style DAU_PATH ('data\\dau\\foo') is stored with forward slashes."""
+    srv, handler = _make_handler(
+        monkeypatch,
+        tmp_path,
+        body={
+            "name": "Win Filter",
+            "params": {"JIRA_PROJECT": "PROJ", "DAU_PATH": "data\\dau\\custom"},
+        },
+    )
+    _ensure_config_dir(tmp_path)
+
+    handler._handle_post_filter()
+    on_disk = json.loads((tmp_path / "config" / "jira_filters.json").read_text(encoding="utf-8"))
+    user = next(f for f in on_disk if f.get("slug") == "win_filter")
+    assert user["params"]["DAU_PATH"] == "data/dau/custom"
+
+
+def test_delete_filter_does_not_remove_dau_data(monkeypatch, tmp_path):
+    """Deleting a filter leaves its data/dau/<slug>/ folder intact."""
+    _ensure_config_dir(tmp_path)
+
+    # Create a filter (auto-creates data/dau/keepme/original)
+    srv, handler1 = _make_handler(
+        monkeypatch,
+        tmp_path,
+        body={"name": "Keep Me", "params": {"JIRA_PROJECT": "PROJ"}},
+    )
+    handler1._handle_post_filter()
+    dau_dir = tmp_path / "data" / "dau" / "keep_me"
+    survey_file = dau_dir / "original" / "dau_alice_20260101T120000Z.json"
+    survey_file.write_text("{}", encoding="utf-8")
+
+    # Delete the filter
+    _, handler2 = _make_handler(monkeypatch, tmp_path)
+    handler2._handle_delete_filter("keep_me")
+    status, data = _json_response(handler2)
+    assert status == 200 and data["ok"] is True
+
+    # Folder and survey file are still there
+    assert dau_dir.is_dir()
+    assert survey_file.is_file()
+
+
+# ---------------------------------------------------------------------------
 # JFM-FUT-001 — _handle_generate() applies filter params to subprocess env
 # ---------------------------------------------------------------------------
 

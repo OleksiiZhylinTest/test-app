@@ -22,7 +22,8 @@
       "AI_ASSISTED_LABEL": "ai_assisted",
       "AI_EXCLUDE_LABELS": "ai_not_applicable",
       "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
-      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
+      "DAU_PATH": "data/dau/default"
     }
   },
   {
@@ -48,7 +49,8 @@
       "AI_ASSISTED_LABEL": "",
       "AI_EXCLUDE_LABELS": "",
       "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
-      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
+      "DAU_PATH": "data/dau/alex_filter"
     }
   },
   {
@@ -74,7 +76,8 @@
       "AI_ASSISTED_LABEL": "ai_assisted",
       "AI_EXCLUDE_LABELS": "",
       "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
-      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
+      "DAU_PATH": "data/dau/test_filter"
     }
   },
   {
@@ -95,12 +98,13 @@
       "schema_name": "Test Schema",
       "JIRA_BOARD_ID": "1",
       "JIRA_SPRINT_COUNT": "10",
-      "JIRA_FILTER_ID": "10032",
+      "JIRA_FILTER_ID": "10033",
       "JIRA_FILTER_PAGE_SIZE": "100",
       "AI_ASSISTED_LABEL": "ai_assisted",
       "AI_EXCLUDE_LABELS": "ai_not_applicable",
       "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
-      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases"
+      "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
+      "DAU_PATH": "data/dau/kanban_story_points"
     }
   }
 ]

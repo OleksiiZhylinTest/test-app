@@ -44,7 +44,7 @@ For the metric definition, scoring rationale, and `compute_dau_metrics()` output
 | DAU-F-013 | If the FS API call fails for a non-cancel reason, the app falls back to download | Any error other than `AbortError` from `showDirectoryPicker` silently triggers the browser download fallback and shows the confirmation screen | ✓ Met |
 | DAU-F-014 | Output filename encodes the respondent and submission time | The saved filename follows the pattern `dau_<username>_<timestamp>.json` where `<timestamp>` is compact ISO-8601 UTC with no separators (e.g. `dau_alice123_20260327T130340Z.json`) | ✓ Met |
 | DAU-F-015 | Submission payload matches the defined schema | The written JSON object contains exactly: `username` (string), `role` (string), `usage` (string), `score` (number), `timestamp` (ISO-8601 string with `+00:00` offset). The `week` field is absent from the raw survey payload — it is derived from `timestamp` and added during the normalization step (`normalize_dau_responses`) | ✓ Met |
-| DAU-F-016 | Response files are saved to `generated/` by default | When team members follow the default workflow, response files are placed in the project's `generated/` directory so that `compute_dau_metrics()` can locate them without configuration | ✗ Not met |
+| DAU-F-016 | Response files are saved to a per-filter `data/dau/<slug>/original/` folder by default | When team members follow the default workflow for a given filter, response files are placed under that filter's `<DAU_PATH>/original/` (e.g. `data/dau/default/original/`) so that `compute_dau_metrics()` reads only data scoped to the active filter | ✓ Met |
 
 ---
 
@@ -57,7 +57,8 @@ For the metric definition, scoring rationale, and `compute_dau_metrics()` output
 | DAU-F-019 | `compute_dau_metrics` returns a `by_role` list with per-role averages and counts | A response set containing 2 Developers (scores 5 and 3.5) and 1 QA (score 1.5) returns `by_role` with entries `{"role": "Developer", "avg": 4.25, "count": 2}` and `{"role": "QA / Test Engineer", "avg": 1.5, "count": 1}` | ✓ Met |
 | DAU-F-020 | `compute_dau_metrics` returns a `breakdown` list with per-answer counts | Given 2 "Every day" responses and 1 "Not used" response, `breakdown` contains `{"answer": "Every day (5 days)", "count": 2}` and `{"answer": "Not used", "count": 1}` | ✓ Met |
 | DAU-F-021 | `build_metrics_dict()` calls `compute_dau_metrics()` and includes a `"dau"` key | The dict returned by `build_metrics_dict()` always contains a `"dau"` key whose value matches the shape defined in `dau_metric.md` | ✓ Met |
-| DAU-F-022 | The responses directory is configurable via `DAU_RESPONSES_DIR` environment variable | Setting `DAU_RESPONSES_DIR=/custom/path` causes `compute_dau_metrics` to read from that path; if unset, the default is `config/dau/` | ✓ Met |
+| DAU-F-022 | The responses directory is configurable via env vars or per-filter `DAU_PATH` | Setting `DAU_RESPONSES_DIR=/custom/path` causes `compute_dau_metrics` to read from that path. Otherwise the path is derived from `DAU_PATH` env var → default filter's `params.DAU_PATH` → legacy `config/dau/`. | ✓ Met |
+| DAU-F-027 | Each filter in `jira_filters.json` carries a `DAU_PATH` field that scopes its DAU survey data | Saving a filter without an explicit `DAU_PATH` populates it as `data/dau/<slug>` and creates the `<DAU_PATH>/original/` subdirectory with a `.gitkeep`. Selecting the filter in the UI causes `compute_dau_metrics` to read only files under that path. Deleting the filter does NOT remove the data folder | ✓ Met |
 
 ---
 
@@ -77,7 +78,7 @@ For the metric definition, scoring rationale, and `compute_dau_metrics()` output
 | ID | Requirement | Acceptance Criterion | Status |
 |----|-------------|----------------------|--------|
 | DAU-NFR-001 | All survey data is stored locally; no data is sent to any external service | Submitting the survey produces no outgoing network requests; verified by inspecting the browser's Network panel — zero requests are made on clicking Save | ✓ Met |
-| DAU-NFR-002 | Response files are excluded from version control | All files matching `dau_*.json` are listed in `.gitignore`; running `git check-ignore -v generated/dau_alice_20260327T130340Z.json` confirms the file is ignored | ✗ Not met |
+| DAU-NFR-002 | Response files are excluded from version control | All files matching `dau_*.json` are listed in `.gitignore`; per-filter `data/dau/*/normalized/` directories are also ignored; running `git check-ignore -v data/dau/default/original/dau_alice_20260327T130340Z.json` confirms the file is ignored | ✓ Met |
 | DAU-NFR-003 | No server process is required to submit the survey | The survey page can be opened directly as a local file (`file://` URL) and submitted successfully without a running server; the FS API or download fallback operates purely in the browser | ✓ Met |
 | DAU-NFR-004 | Survey page styling is consistent with the existing report aesthetic | Visual variables (accent colour `#0052CC`, font stack, card borders, shadow) match the HTML report template | ✓ Met |
 | DAU-NFR-005 | Form fields carry ARIA labels and the confirmation screen uses a live region | `aria-required="true"` is present on all required fields; the confirmation `<div>` has `role="region"` and `aria-live="polite"`; verified with an accessibility tree inspection | ✓ Met |

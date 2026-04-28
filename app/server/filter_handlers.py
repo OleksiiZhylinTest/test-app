@@ -35,12 +35,27 @@ class FilterHandlerMixin:
             "AI_EXCLUDE_LABELS": "ai_not_applicable",
             "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
             "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
+            "DAU_PATH": "data/dau/default",
         },
     }
 
     @staticmethod
     def _filters_config_path():
         return _root() / "config" / "jira_filters.json"
+
+    @staticmethod
+    def _ensure_dau_dir(dau_path: str) -> None:
+        """Create <root>/<dau_path>/original/ with a .gitkeep so survey responses have a home."""
+        if not dau_path:
+            return
+        try:
+            target = (_root() / dau_path / "original").resolve()
+            target.mkdir(parents=True, exist_ok=True)
+            gitkeep = target / ".gitkeep"
+            if not gitkeep.exists():
+                gitkeep.write_text("", encoding="utf-8")
+        except OSError as exc:
+            logger.warning("Could not create DAU dir %s: %s", dau_path, exc)
 
     def _load_filters(self) -> list[dict]:
         """Read config/jira_filters.json, creating it with the default entry if missing."""
@@ -162,6 +177,11 @@ class FilterHandlerMixin:
         slug = self._slugify(name) or "filter"
         created_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
 
+        dau_path = (params.get("DAU_PATH") or "").strip().replace("\\", "/")
+        if not dau_path:
+            dau_path = f"data/dau/{slug}"
+        params["DAU_PATH"] = dau_path
+
         filters = self._load_filters()
         idx = next((i for i, f in enumerate(filters) if f.get("filter_name", "").lower() == name.lower()), None)
         updated = idx is not None and not filters[idx].get("is_default")
@@ -184,6 +204,7 @@ class FilterHandlerMixin:
             filters.append(entry)
 
         self._save_filters(filters)
+        self._ensure_dau_dir(dau_path)
         self._send_json(
             200,
             {"ok": True, "updated": updated, "jql": jql, "slug": slug, "created_at": entry["created_at"]},

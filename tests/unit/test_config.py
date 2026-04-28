@@ -380,6 +380,54 @@ def test_metric_toggles_default_true():
     assert cfg.METRIC_DAU is True
 
 
+# ---------------------------------------------------------------------------
+# DAU-F-027 — DAU_RESPONSES_DIR / DAU_NORMALIZED_DIR derive from DAU_PATH
+# ---------------------------------------------------------------------------
+
+
+def test_dau_path_env_var_drives_responses_dir():
+    """DAU_RESPONSES_DIR resolves to <DAU_PATH>/original when DAU_PATH is set."""
+    cfg = _reload_config({**_BASE_ENV, "DAU_PATH": "data/dau/team_alpha"})
+    assert cfg.DAU_RESPONSES_DIR.endswith(str(Path("data/dau/team_alpha/original")))
+
+
+def test_dau_path_env_var_drives_normalized_dir():
+    """DAU_NORMALIZED_DIR resolves to <DAU_PATH>/normalized when DAU_PATH is set."""
+    cfg = _reload_config({**_BASE_ENV, "DAU_PATH": "data/dau/team_alpha"})
+    assert cfg.DAU_NORMALIZED_DIR.endswith(str(Path("data/dau/team_alpha/normalized")))
+
+
+def test_dau_path_absolute_env_var_used_verbatim(tmp_path):
+    """An absolute DAU_PATH is used directly without prepending project root."""
+    abs_path = tmp_path / "alt_dau"
+    cfg = _reload_config({**_BASE_ENV, "DAU_PATH": str(abs_path)})
+    assert cfg.DAU_RESPONSES_DIR == str(abs_path / "original")
+    assert cfg.DAU_NORMALIZED_DIR == str(abs_path / "normalized")
+
+
+def test_dau_responses_dir_env_overrides_dau_path():
+    """An explicit DAU_RESPONSES_DIR wins over the value derived from DAU_PATH."""
+    cfg = _reload_config({**_BASE_ENV, "DAU_PATH": "data/dau/foo", "DAU_RESPONSES_DIR": "/tmp/explicit_raw"})
+    assert cfg.DAU_RESPONSES_DIR == "/tmp/explicit_raw"
+    # DAU_NORMALIZED_DIR still derives from DAU_PATH
+    assert cfg.DAU_NORMALIZED_DIR.endswith(str(Path("data/dau/foo/normalized")))
+
+
+def test_dau_normalized_dir_env_overrides_dau_path():
+    """An explicit DAU_NORMALIZED_DIR wins over the value derived from DAU_PATH."""
+    cfg = _reload_config({**_BASE_ENV, "DAU_PATH": "data/dau/foo", "DAU_NORMALIZED_DIR": "/tmp/explicit_norm"})
+    assert cfg.DAU_NORMALIZED_DIR == "/tmp/explicit_norm"
+    assert cfg.DAU_RESPONSES_DIR.endswith(str(Path("data/dau/foo/original")))
+
+
+def test_dau_path_falls_back_to_default_filter_when_env_unset():
+    """When DAU_PATH env is unset, the default filter's DAU_PATH (data/dau/default) is used."""
+    cfg = _reload_config(_BASE_ENV)
+    # Project's default filter declares DAU_PATH = data/dau/default
+    assert cfg.DAU_RESPONSES_DIR.endswith(str(Path("data/dau/default/original")))
+    assert cfg.DAU_NORMALIZED_DIR.endswith(str(Path("data/dau/default/normalized")))
+
+
 def test_metric_toggles_explicit_false():
     env = {
         **_BASE_ENV,
