@@ -65,6 +65,10 @@ echo  Copying config (schemas and filters)...
 robocopy "config"    "%STAGING_DIR%\config"    /E /XD %ROBOCOPY_DIR_EXCLUDES% /XF %ROBOCOPY_FILE_EXCLUDES% /NFL /NDL /NJH /NJS >nul
 if errorlevel 8 ( echo [ERROR] Failed to copy config\ & goto :ABORT )
 
+echo  Copying DAU survey data...
+robocopy "data"      "%STAGING_DIR%\data"      /E /XD %ROBOCOPY_DIR_EXCLUDES% /XF %ROBOCOPY_FILE_EXCLUDES% /NFL /NDL /NJH /NJS >nul
+if errorlevel 8 ( echo [ERROR] Failed to copy data\ & goto :ABORT )
+
 echo  Copying tools...
 mkdir "%STAGING_DIR%\tools"
 if errorlevel 1 ( echo [ERROR] Failed to create tools\ & goto :ABORT )
