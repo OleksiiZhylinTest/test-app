@@ -635,6 +635,7 @@
       Chart.register({
         id: 'avgDauLabels',
         afterDatasetsDraw: function(chart) {
+          if (chart.canvas.id !== 'dauTrendChart') return;
           var lineIdx = 1;
           if (!chart.data.datasets[lineIdx] || chart.data.datasets[lineIdx].type !== 'line') return;
           var meta = chart.getDatasetMeta(lineIdx);
