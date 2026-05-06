@@ -8,6 +8,7 @@ Run once before first use — or whenever the Jira TLS certificate changes:
 The certificate is saved to certs/jira_ca_bundle.pem and is picked up
 automatically by the Jira API client (via JIRA_SSL_CERT in app/config.py).
 """
+
 import os
 import socket
 import ssl
@@ -124,6 +125,7 @@ if __name__ == "__main__":
     # Load .env so the script works even when run independently
     try:
         from dotenv import load_dotenv
+
         load_dotenv(ROOT / ".env")
     except ImportError:
         pass  # python-dotenv not installed; rely on environment variables

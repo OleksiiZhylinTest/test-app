@@ -1,12 +1,14 @@
 """Take screenshots of each UI tab for product/features.md documentation."""
-import time
+
 from pathlib import Path
+
 from playwright.sync_api import sync_playwright
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "product" / "screenshots"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 BASE_URL = "http://localhost:8080"
+
 
 def take_screenshots():
     with sync_playwright() as p:
@@ -85,6 +87,7 @@ def take_screenshots():
 
         browser.close()
     print(f"\nAll screenshots saved to: {OUT_DIR}")
+
 
 if __name__ == "__main__":
     take_screenshots()

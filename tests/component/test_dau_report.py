@@ -69,6 +69,15 @@ def test_html_dau_shows_team_avg(minimal_metrics_dict: dict, tmp_path: Path) -> 
     assert "3.5 / 5" in out.read_text(encoding="utf-8")
 
 
+def test_dau_team_avg_shown_in_html(minimal_metrics_dict: dict, tmp_path: Path) -> None:
+    """MC-FMT-107: summary line shows team_avg as 'X / 5' (absolute) and team_avg_pct as '(Y%)'."""
+    out = tmp_path / "report.html"
+    generate_html(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "3.5 / 5" in content
+    assert "70.0%" in content
+
+
 def test_html_dau_section_absent_when_no_responses(empty_metrics_dict: dict, tmp_path: Path) -> None:
     out = tmp_path / "report.html"
     generate_html(empty_metrics_dict, out)
