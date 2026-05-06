@@ -369,3 +369,60 @@ def test_load_dau_records_preserves_existing_week(tmp_path: Path) -> None:
     _write(tmp_path, "dau_a_20260101T000000Z.json", _response("a", "Not used", week="2026-W01"))
     records = _load_dau_records(tmp_path)
     assert records[0]["week"] == "2026-W01"
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-006 — DAU team_avg is absolute (0-5 scale), not a percentage
+# ---------------------------------------------------------------------------
+
+
+def test_compute_dau_metrics_team_avg(tmp_path: Path) -> None:
+    """MC-FMT-006: team_avg is an average days-per-week score on the 0-5 scale, not 0-100."""
+    _write(tmp_path, "dau_a_20260101T000000Z.json", _response("a", "Every day (5 days)"))
+    _write(tmp_path, "dau_b_20260102T000000Z.json", _response("b", "Not used"))
+    result = compute_dau_metrics(tmp_path)
+    assert result["team_avg"] == pytest.approx(2.5, abs=0.01)
+    assert 0.0 <= result["team_avg"] <= 5.0, "team_avg must be on the 0-5 days-per-week scale"
+
+
+def test_compute_dau_metrics_no_data(tmp_path: Path) -> None:
+    """MC-FMT-006 + MC-FMT-007: both team_avg and team_avg_pct are None when there are no responses."""
+    result = compute_dau_metrics(tmp_path)
+    assert result["team_avg"] is None
+    assert result["team_avg_pct"] is None
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-007 — DAU team_avg_pct is a 0-100 percentage derived from team_avg
+# ---------------------------------------------------------------------------
+
+
+def test_compute_dau_metrics_team_avg_pct(tmp_path: Path) -> None:
+    """MC-FMT-007: team_avg_pct = (team_avg / 5) * 100, rounded to 1 dp."""
+    _write(tmp_path, "dau_a_20260101T000000Z.json", _response("a", "Every day (5 days)"))
+    _write(tmp_path, "dau_b_20260102T000000Z.json", _response("b", "Most days (3\u20134 days)"))
+    result = compute_dau_metrics(tmp_path)
+    expected_avg = (5.0 + 3.5) / 2
+    expected_pct = round(expected_avg / 5.0 * 100, 1)
+    assert result["team_avg"] == pytest.approx(expected_avg, abs=0.01)
+    assert result["team_avg_pct"] == pytest.approx(expected_pct, abs=0.1)
+    assert 0.0 <= result["team_avg_pct"] <= 100.0
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-008 — DAU Trend: each weekly row's team_avg_pct follows the same formula
+# ---------------------------------------------------------------------------
+
+
+def test_compute_dau_trend_team_avg_pct(tmp_path: Path) -> None:
+    """MC-FMT-008: trend row team_avg_pct = (team_avg / 5) * 100."""
+    _write(tmp_path, "dau_a_20260327T100000Z.json", _response("a", "Every day (5 days)", week="2026-W13"))
+    _write(tmp_path, "dau_b_20260320T100000Z.json", _response("b", "Not used", week="2026-W12"))
+    trend = compute_dau_trend(tmp_path)
+    by_week = {r["week"]: r for r in trend}
+    assert by_week["2026-W13"]["team_avg"] == pytest.approx(5.0, abs=0.01)
+    assert by_week["2026-W13"]["team_avg_pct"] == pytest.approx(100.0, abs=0.1)
+    assert by_week["2026-W12"]["team_avg"] == pytest.approx(0.0, abs=0.01)
+    assert by_week["2026-W12"]["team_avg_pct"] == pytest.approx(0.0, abs=0.1)
+    for row in trend:
+        assert 0.0 <= row["team_avg_pct"] <= 100.0

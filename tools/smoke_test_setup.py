@@ -14,7 +14,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SETUP_SCRIPT = REPO_ROOT / "project_setup.bat"
 ENV_TEMPLATE = REPO_ROOT / ".env.example"
@@ -173,10 +172,10 @@ def test_missing_template_warns_and_skips_creation() -> None:
         _assert(result.returncode == 0, f"expected success, got {result.returncode}\n{output}")
         _assert(not (workdir / ".env").exists(), ".env should not be created without a template")
         _assert("'%.env.example%' not found" not in output, "unexpected malformed placeholder in output")
-        _assert(
-            f"'.env.example' not found at '{env_template_path}'. Skipping '.env' creation at '{env_path}'." in log_output,
-            "missing-template warning with exact paths absent",
+        expected_warning = (
+            f"'.env.example' not found at '{env_template_path}'. Skipping '.env' creation at '{env_path}'."
         )
+        _assert(expected_warning in log_output, "missing-template warning with exact paths absent")
 
 
 def test_keep_flag_skips_prompt_and_preserves_env() -> None:

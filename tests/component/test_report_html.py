@@ -251,3 +251,57 @@ def test_velocity_header_reflects_estimation_type_tickets(tmp_path, minimal_metr
     generate_html(minimal_metrics_dict, out)
     content = out.read_text(encoding="utf-8")
     assert "tickets" in content.lower() or "Tickets" in content
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-101 — Velocity chart Y axis must NOT show a percent suffix
+# ---------------------------------------------------------------------------
+
+
+def test_velocity_chart_y_axis_has_no_percent_suffix(tmp_path, minimal_metrics_dict):
+    """MC-FMT-101: velocity bar chart ticks are plain numbers; no % callback on the Y axis."""
+    out = tmp_path / "report.html"
+    generate_html(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    # Isolate the velocity chart JS initialisation block (the IIFE that contains velocityChart init).
+    # Search from the JS getElementById call (not the HTML canvas element) to the end of the IIFE.
+    script_anchor = "getElementById('velocityChart')"
+    script_start = content.find(script_anchor)
+    assert script_start != -1, "velocityChart JS initialisation not found in HTML"
+    iife_end = content.find("})();", script_start)
+    velocity_script = content[script_start : iife_end + len("})();")]
+    # The velocity Y-axis must not use a % tick callback
+    assert "return v + '%'" not in velocity_script
+    assert "+ '%'" not in velocity_script
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-102 — Velocity data table values must NOT carry a percent suffix
+# ---------------------------------------------------------------------------
+
+
+def test_velocity_table_values_have_no_percent_suffix(tmp_path, minimal_metrics_dict):
+    """MC-FMT-102: velocity table cells show plain numbers; 20.0% must not appear."""
+    out = tmp_path / "report.html"
+    generate_html(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    # minimal_metrics_dict has velocity 20.0 — it must not appear as "20.0%"
+    assert "20.0%" not in content
+    assert "20%" not in content
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-105 — AI Usage Details pie charts render pct values with % suffix
+# ---------------------------------------------------------------------------
+
+
+def test_ai_usage_pie_chart_pct_labels_present(tmp_path, minimal_metrics_dict):
+    """MC-FMT-105: pie chart labels append % to pct values; pct data is present in serialised JSON."""
+    out = tmp_path / "report.html"
+    generate_html(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    # The template serialises ai_usage_details as JSON — pct values must be present
+    assert "100.0" in content  # AI_Tool_Copilot pct from minimal_metrics_dict
+    assert "50.0" in content  # AI_Case_CodeGen / AI_Case_Review pct
+    # The JS callback that appends % to pie slice labels must be present in the script
+    assert "toFixed(1) + '%'" in content or "+ '%'" in content

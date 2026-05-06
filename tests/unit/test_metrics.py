@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from app.core import metrics
-from tests.conftest import make_issue, make_issue_with_labels, make_sprint
+from tests.conftest import make_issue, make_issue_with_changelog, make_issue_with_labels, make_sprint
 
 pytestmark = pytest.mark.unit
 
@@ -803,3 +803,170 @@ def test_velocity_excludes_ticket_carried_to_unfetched_active_sprint():
     by_sid = {row["sprint_id"]: row for row in velocity}
     assert by_sid[6]["velocity"] == 18.0, "Sprint 6 velocity must exclude the carry-over to Sprint 7"
     assert by_sid[5]["velocity"] == 0.0, "Sprint 5 must not retain the carry-over either"
+
+
+# ---------------------------------------------------------------------------
+# MC-V-OUT-002 / MC-V-OUT-003 — output shape: dates and sprint_id
+# ---------------------------------------------------------------------------
+
+
+def test_velocity_row_start_end_date_are_iso_or_none():
+    """MC-V-OUT-002: start_date/end_date are ISO-8601 strings when the sprint has dates, None when absent."""
+    sprint_with_dates = make_sprint(1, start="2026-03-01", end="2026-03-14")
+    sprint_no_dates = {"id": 2, "name": "No Dates"}
+    result = metrics.compute_velocity([sprint_with_dates, sprint_no_dates], {1: [], 2: []})
+    by_sid = {r["sprint_id"]: r for r in result}
+    assert by_sid[1]["start_date"] is not None
+    assert by_sid[1]["end_date"] is not None
+    assert isinstance(by_sid[1]["start_date"], str)
+    assert isinstance(by_sid[1]["end_date"], str)
+    assert by_sid[2]["start_date"] is None
+    assert by_sid[2]["end_date"] is None
+
+
+def test_velocity_row_sprint_id_matches_input():
+    """MC-V-OUT-003: sprint_id in output equals the id field of the input sprint."""
+    sprint = make_sprint(42, "My Sprint")
+    result = metrics.compute_velocity([sprint], {42: []})
+    assert result[0]["sprint_id"] == 42
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-002 — AI Assistance Trend: ai_sp and total_sp are absolute story points
+# ---------------------------------------------------------------------------
+
+
+def test_compute_ai_trend_basic():
+    """MC-FMT-002: ai_sp and total_sp are plain story-point sums, not normalised to 0-100."""
+    sprint = make_sprint(1, "S1")
+    issues = [
+        make_issue_with_labels("X-1", "Done", 6.0, ["AI_assistance"]),
+        make_issue_with_labels("X-2", "Done", 4.0, []),
+    ]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint], {1: issues}, ai_assisted_label="AI_assistance", ai_exclude_labels=[]
+    )
+    row = result[0]
+    assert row["total_sp"] == 10.0
+    assert row["ai_sp"] == 6.0
+    assert row["total_sp"] <= 1000, "total_sp is a raw sum, not capped at 100"
+    assert row["ai_sp"] <= 1000, "ai_sp is a raw sum, not capped at 100"
+
+
+def test_ai_trend_all_done_ai_assisted():
+    """MC-FMT-002 + MC-FMT-003: when every done issue is AI-assisted, ai_sp == total_sp and ai_pct == 100.0."""
+    sprint = make_sprint(1, "S1")
+    issues = [
+        make_issue_with_labels("X-1", "Done", 5.0, ["AI_assistance"]),
+        make_issue_with_labels("X-2", "Done", 3.0, ["AI_assistance"]),
+    ]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint], {1: issues}, ai_assisted_label="AI_assistance", ai_exclude_labels=[]
+    )
+    row = result[0]
+    assert row["ai_sp"] == row["total_sp"]
+    assert row["ai_pct"] == 100.0
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-003 — AI Assistance Trend: ai_pct is a 0-100 percentage
+# ---------------------------------------------------------------------------
+
+
+def test_ai_trend_basic_percentage():
+    """MC-FMT-003: ai_pct = (ai_sp / total_sp) * 100, rounded to 1 dp."""
+    sprint = make_sprint(1, "S1")
+    issues = [
+        make_issue_with_labels("X-1", "Done", 3.0, ["AI_assistance"]),
+        make_issue_with_labels("X-2", "Done", 1.0, []),
+    ]
+    result = metrics.compute_ai_assistance_trend(
+        [sprint], {1: issues}, ai_assisted_label="AI_assistance", ai_exclude_labels=[]
+    )
+    row = result[0]
+    expected_pct = round(3.0 / 4.0 * 100, 1)
+    assert row["ai_pct"] == expected_pct
+    assert 0.0 <= row["ai_pct"] <= 100.0
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-004 — AI Usage Details: pct values are percentages (can exceed 100%)
+# ---------------------------------------------------------------------------
+
+
+def test_ai_usage_details_tool_breakdown_pct():
+    """MC-FMT-004: tool pct = count / ai_assisted_issue_count * 100."""
+    sprint = make_sprint(1)
+    issues = [
+        make_issue_with_labels("X-1", "Done", 1.0, ["AI_assistance", "AI_Tool_Copilot"]),
+        make_issue_with_labels("X-2", "Done", 1.0, ["AI_assistance", "AI_Tool_Copilot"]),
+        make_issue_with_labels("X-3", "Done", 1.0, ["AI_assistance"]),
+    ]
+    result = metrics.compute_ai_usage_details(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="AI_assistance",
+        ai_tool_labels=["AI_Tool_Copilot"],
+        ai_action_labels=[],
+    )
+    assert result["ai_assisted_issue_count"] == 3
+    tool_row = result["tool_breakdown"][0]
+    assert tool_row["label"] == "AI_Tool_Copilot"
+    assert tool_row["count"] == 2
+    expected_pct = round(2 / 3 * 100, 1)
+    assert tool_row["pct"] == pytest.approx(expected_pct, abs=0.1)
+
+
+def test_ai_usage_details_action_breakdown_pct():
+    """MC-FMT-004: action pct can exceed 100% when an issue carries multiple action labels."""
+    sprint = make_sprint(1)
+    issues = [
+        make_issue_with_labels(
+            "X-1",
+            "Done",
+            1.0,
+            ["AI_assistance", "AI_Case_CodeGen", "AI_Case_Review"],
+        ),
+    ]
+    result = metrics.compute_ai_usage_details(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="AI_assistance",
+        ai_tool_labels=[],
+        ai_action_labels=["AI_Case_CodeGen", "AI_Case_Review"],
+    )
+    assert result["ai_assisted_issue_count"] == 1
+    pcts = {r["label"]: r["pct"] for r in result["action_breakdown"]}
+    assert pcts["AI_Case_CodeGen"] == 100.0
+    assert pcts["AI_Case_Review"] == 100.0
+    total_pct = sum(pcts.values())
+    assert total_pct > 100.0, "Sum of pcts can exceed 100% for multi-label issues"
+
+
+# ---------------------------------------------------------------------------
+# MC-FMT-005 — Cycle Time: output fields are absolute days, not percentages
+# ---------------------------------------------------------------------------
+
+
+def test_cycle_time_fields_are_absolute_days():
+    """MC-FMT-005: mean_days, median_days, min_days, max_days are plain day floats."""
+    issues = [
+        make_issue_with_changelog(
+            "X-1",
+            in_progress_ts="2026-03-01T09:00:00+00:00",
+            done_ts="2026-03-03T09:00:00+00:00",
+        ),
+        make_issue_with_changelog(
+            "X-2",
+            in_progress_ts="2026-03-05T09:00:00+00:00",
+            done_ts="2026-03-09T09:00:00+00:00",
+        ),
+    ]
+    result = metrics.compute_cycle_time(issues)
+    assert result["mean_days"] == pytest.approx(3.0, abs=0.1)
+    assert result["median_days"] == pytest.approx(3.0, abs=0.1)
+    assert result["min_days"] == pytest.approx(2.0, abs=0.1)
+    assert result["max_days"] == pytest.approx(4.0, abs=0.1)
+    for field in ("mean_days", "median_days", "min_days", "max_days"):
+        assert result[field] >= 0.0, f"{field} must be non-negative"
+        assert result[field] <= 1000.0, f"{field} is a day count, not a percentage (0-100)"

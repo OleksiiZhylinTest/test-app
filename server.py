@@ -1,7 +1,6 @@
 """Entry point — delegates to app.server."""
-import sys
 
-from app.server import run, Server, Handler, PORT, ROOT, MIME, guess_mime  # re-exported for tests
+from app.server import MIME, PORT, ROOT, Handler, Server, guess_mime, run  # noqa: F401 — re-exported for tests
 from app.utils.logging_setup import setup_logging
 
 if __name__ == "__main__":

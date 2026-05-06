@@ -1,7 +1,8 @@
 """Entry point — delegates to app.cli."""
+
 import sys
 
-from app.cli import main, _parse_args, _timestamp_folder_name  # re-exported for tests
+from app.cli import _parse_args, _timestamp_folder_name, main  # noqa: F401 — re-exported for tests
 from app.utils.logging_setup import setup_logging
 
 if __name__ == "__main__":

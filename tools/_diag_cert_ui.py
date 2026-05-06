@@ -1,6 +1,8 @@
 """Diagnostic Playwright script: checks Fetch Certificate button visibility."""
-import sys
+
 import json
+import sys
+
 sys.path.insert(0, r"c:\Users\Oleksii_Zhylin\VSCodeProjects\test-app\.tmplib")
 
 from playwright.sync_api import sync_playwright
@@ -16,18 +18,30 @@ with sync_playwright() as p:
     page.on("pageerror", lambda err: errors.append(f"[pageerror] {err}"))
 
     # Mock APIs the old server doesn't have, to avoid blocking
-    page.route("**/api/config", lambda route: route.fulfill(
-        status=200, content_type="application/json",
-        body=json.dumps({"ok": True, "configured": True, "config": {}}),
-    ))
-    page.route("**/api/reports", lambda route: route.fulfill(
-        status=200, content_type="application/json",
-        body=json.dumps({"reports": []}),
-    ))
-    page.route("**/api/filters", lambda route: route.fulfill(
-        status=200, content_type="application/json",
-        body=json.dumps({"filters": []}),
-    ))
+    page.route(
+        "**/api/config",
+        lambda route: route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps({"ok": True, "configured": True, "config": {}}),
+        ),
+    )
+    page.route(
+        "**/api/reports",
+        lambda route: route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps({"reports": []}),
+        ),
+    )
+    page.route(
+        "**/api/filters",
+        lambda route: route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps({"filters": []}),
+        ),
+    )
 
     page.goto(URL, wait_until="domcontentloaded", timeout=5000)
     page.wait_for_timeout(1000)
@@ -65,7 +79,7 @@ with sync_playwright() as p:
 
     # Is the button in the viewport (vertically)?
     if box and viewport:
-        in_viewport = box['y'] <= viewport['height'] and box['y'] + box['height'] >= 0
+        in_viewport = box["y"] <= viewport["height"] and box["y"] + box["height"] >= 0
         print(f"Button Y={box['y']:.0f}, viewport height={viewport['height']} -> in viewport: {in_viewport}")
 
     # Page scroll height
