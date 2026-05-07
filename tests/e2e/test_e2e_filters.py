@@ -492,13 +492,9 @@ def test_save_sends_schema_from_filter_dropdown(page: Page, live_server_url: str
         page.locator("#filter-schema-select").select_option("Custom_Schema")
 
     with allure.step("Click Save and wait for the POST to land"):
-        page.locator("#btn-save-jira-filter").click()
-        page.wait_for_function("() => !!window && true", timeout=3000)
-        # Poll until captured body arrives
-        for _ in range(30):
-            if captured.get("body"):
-                break
-            page.wait_for_timeout(100)
+        with page.expect_response("**/api/filters") as resp_info:
+            page.locator("#btn-save-jira-filter").click()
+        resp_info.value  # blocks until the route handler fulfills; captured["body"] is set
 
     with allure.step("Captured body.params.schema_name matches the dropdown value"):
         body = captured.get("body") or {}

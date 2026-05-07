@@ -126,8 +126,11 @@ def server_url():
     port = server.server_address[1]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    yield f"http://127.0.0.1:{port}"
-    server.shutdown()
+    try:
+        yield f"http://127.0.0.1:{port}"
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 # ---------------------------------------------------------------------------

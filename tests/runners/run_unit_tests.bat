@@ -15,4 +15,4 @@ if exist ".venv\Scripts\python.exe" (
 
 echo  Running UNIT tests...
 echo.
-%PYTHON% -m pytest tests\unit\ -v -m unit
+%PYTHON% -m pytest tests\unit\ -v -m unit -n auto --dist=loadscope --tb=short

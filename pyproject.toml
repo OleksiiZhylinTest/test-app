@@ -12,6 +12,7 @@ markers = [
 
 [tool.playwright]
 browser = "chromium"
+timeout = 5000
 
 [project]
 requires-python = ">=3.12"

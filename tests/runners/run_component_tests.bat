@@ -15,4 +15,4 @@ if exist ".venv\Scripts\python.exe" (
 
 echo  Running COMPONENT tests...
 echo.
-%PYTHON% -m pytest tests\component\ -v -m component
+%PYTHON% -m pytest tests\component\ -v -m component -n auto --dist=loadscope --tb=short
