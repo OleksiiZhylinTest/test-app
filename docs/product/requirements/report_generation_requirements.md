@@ -55,6 +55,10 @@ metric toggles, and report output.
 | RG-MT-001 | Generate tab shows 4 metric toggle checkboxes | Checkboxes for: Velocity Trend, AI Assistance Trend, AI Usage Details, DAU | ✓ Met |
 | RG-MT-002 | All metric toggles default to enabled | On first load (no localStorage), all 4 checkboxes are checked | ✓ Met |
 | RG-MT-003 | Disabled metrics are excluded from the generated report | Unchecking "Velocity Trend" removes the velocity section from HTML and MD output | ✓ Met |
+| RG-MT-007 | MD report renders AI Assistance Trend section when enabled | When `metric_ai_assistance_trend=true`, MD output includes a bar chart and table for AI % per sprint | ✓ Met |
+| RG-MT-008 | MD report renders AI Usage Details section when enabled | When `metric_ai_usage_details=true`, MD output includes tool and action breakdown tables | ✓ Met |
+| RG-MT-009 | MD report includes Sprint Issues section listing done tickets per sprint | Sprint Issues section shows key, summary, points, status, AI-assisted flag, excluded flag, and labels for all done issues used in metric calculations | ✓ Met |
+| RG-MT-010 | MD report includes Diagnostics appendix with config snapshot and cycle time stats | Diagnostics section shows run info, Jira config, AI label config, and cycle time statistics | ✓ Met |
 | RG-MT-004 | Metric toggle state is sent to the generate endpoint | The generate request includes boolean parameters for each metric (e.g. `metric_velocity=true`) | ✓ Met |
 | RG-MT-005 | Metric toggle state persists across page reloads via localStorage | After unchecking DAU and reloading, DAU remains unchecked | ✓ Met |
 | RG-MT-006 | At least one metric must be enabled to generate a report | The Generate button is disabled when all 4 checkboxes are unchecked | ✓ Met |

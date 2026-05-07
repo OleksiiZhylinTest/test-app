@@ -65,6 +65,40 @@ def minimal_metrics_dict() -> dict:
                 "response_count": 2,
             }
         ],
+        "sprint_issue_details": [
+            {
+                "sprint_id": 1,
+                "sprint_name": "Sprint Alpha",
+                "issues": [
+                    {
+                        "key": "PROJ-1",
+                        "summary": "Implement login feature",
+                        "story_points": 5.0,
+                        "status": "Done",
+                        "labels": ["AI_assistance", "AI_Tool_Copilot"],
+                        "is_ai_assisted": True,
+                        "is_excluded": False,
+                    },
+                    {
+                        "key": "PROJ-2",
+                        "summary": "Fix pagination bug",
+                        "story_points": 3.0,
+                        "status": "Done",
+                        "labels": [],
+                        "is_ai_assisted": False,
+                        "is_excluded": False,
+                    },
+                ],
+            }
+        ],
+        "cycle_time": {
+            "mean_days": 3.5,
+            "median_days": 3.0,
+            "min_days": 1.0,
+            "max_days": 7.0,
+            "sample_size": 4,
+            "values": [1.0, 2.5, 4.5, 7.0],
+        },
     }
 
 
@@ -88,4 +122,13 @@ def empty_metrics_dict() -> dict:
         "project_key": None,
         "dau": {"team_avg": None, "team_avg_pct": None, "response_count": 0, "by_role": [], "breakdown": []},
         "dau_trend": [],
+        "sprint_issue_details": [],
+        "cycle_time": {
+            "mean_days": None,
+            "median_days": None,
+            "min_days": None,
+            "max_days": None,
+            "sample_size": 0,
+            "values": [],
+        },
     }
