@@ -352,8 +352,7 @@ def test_generate_with_filter_sse_streaming(page: Page, live_server_url: str):
     # Switch to Generate tab and select the filter
     page.get_by_role("tab", name="Generate Report").click()
     select = page.locator("#generate-filter-select")
-    # Select the first non-placeholder option
-    page.wait_for_timeout(500)
+    expect(select.locator("option").nth(1)).to_be_attached()
     select.select_option(index=1)
 
     btn = page.locator("#btn-generate")
@@ -388,7 +387,7 @@ def test_log_clear_button(page: Page, live_server_url: str):
 
     page.get_by_role("tab", name="Generate Report").click()
     select = page.locator("#generate-filter-select")
-    page.wait_for_timeout(500)
+    expect(select.locator("option").nth(1)).to_be_attached()
     select.select_option(index=1)
     page.locator("#btn-generate").click()
 
@@ -515,7 +514,7 @@ def _open_report_options(page: Page) -> None:
     details = page.locator("#report-options")
     if not details.get_attribute("open"):
         details.locator("summary").click()
-        page.wait_for_timeout(200)
+        expect(details).to_have_attribute("open", "")
 
 
 def _open_jql_builder(page: Page) -> None:

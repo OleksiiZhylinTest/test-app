@@ -1,24 +1,24 @@
 # /test
 
-Run the full CI test suite (lint + type checking + security + unit + component tests).
+Run the full CI test suite (all stages) in parallel.
 
 ## Usage
 
 ```bash
-/test                    # run unit + component + lint + mypy + bandit
-/test --integration      # also include integration tests
-/test --e2e              # also include e2e tests
-/test --all              # run everything
+/test                        # run ALL stages in parallel (default)
+/test --skip-integration     # skip integration tests (no Jira needed)
+/test --skip-e2e             # skip E2E tests (no browser needed)
+/test --skip-integration --skip-e2e   # lint + unit + component + windows + security only
 ```
 
 ## Implementation
 
-Delegates to `python tests/runners/run_all_checks.py` with optional flags. This runner:
-- Runs ruff (format check), mypy (type check), and bandit (security check) in parallel
-- Runs pytest with appropriate markers and thread pool
-- Sets PYTHONPATH correctly
-- Handles Windows/Unix differences
-- Returns unified exit code
+Delegates to `python tests/runners/run_all_checks.py` with optional skip flags. This runner:
+- Launches all active stages concurrently via threads
+- Lint stage: ruff check, ruff format, mypy, bandit — sequential within the stage
+- Test stages: pytest with appropriate markers per stage
+- Security stage: pip-audit against requirements.txt
+- Returns unified exit code; prints failed stage output only
 
 ## Test Conventions
 

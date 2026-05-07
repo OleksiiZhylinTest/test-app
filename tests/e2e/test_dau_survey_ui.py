@@ -337,7 +337,6 @@ def test_fs_api_abort_keeps_form_intact(page: Page) -> None:
     page.goto(SURVEY_URL, wait_until="domcontentloaded", timeout=5000)
     _fill_all(page)
     page.locator("#btn-submit").click()
-    page.wait_for_timeout(500)
     expect(page.locator("#survey-form")).to_be_visible()
     expect(page.locator("#confirmation")).to_be_hidden()
 

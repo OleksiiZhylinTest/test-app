@@ -15,4 +15,4 @@ if exist ".venv\Scripts\python.exe" (
 
 echo  Running INTEGRATION tests...
 echo.
-%PYTHON% -m pytest tests\integration\ -v -m integration
+%PYTHON% -m pytest tests\integration\ -v -m integration -n auto --dist=loadscope --tb=short

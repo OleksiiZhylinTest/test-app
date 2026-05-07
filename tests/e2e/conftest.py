@@ -58,11 +58,14 @@ def live_server_url():
             time.sleep(0.2)
     else:
         server.shutdown()
+        server.server_close()
         raise RuntimeError(f"Server did not start on port {port}")
 
-    yield f"http://127.0.0.1:{port}"
-
-    server.shutdown()
+    try:
+        yield f"http://127.0.0.1:{port}"
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 # ---------------------------------------------------------------------------

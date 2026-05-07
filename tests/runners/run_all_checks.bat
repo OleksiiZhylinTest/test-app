@@ -4,11 +4,10 @@ cd /d "%~dp0..\.."
 ::  run_all_checks.bat  —  local mirror of the full CI pipeline
 ::
 ::  Usage:
-::    run_all_checks.bat               run all auto stages (lint, unit,
-::                                     component, windows, security) in parallel
-::    run_all_checks.bat --integration also run integration tests (needs Jira)
-::    run_all_checks.bat --e2e         also run E2E tests (needs Jira + browser)
-::    run_all_checks.bat --all         run every stage including integration + e2e
+::    run_all_checks.bat                    run ALL stages (lint, unit, component,
+::                                          windows, security, integration, e2e)
+::    run_all_checks.bat --skip-integration skip integration tests
+::    run_all_checks.bat --skip-e2e         skip E2E tests (needs Jira + browser)
 ::
 ::  Jira credentials are read from the .env file or environment variables.
 

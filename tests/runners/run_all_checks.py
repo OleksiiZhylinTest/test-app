@@ -3,7 +3,9 @@ Parallel CI stage runner — orchestrates all run_all_checks stages concurrently
 Called by tests/runners/run_all_checks.bat; can also be invoked directly.
 
 Usage:
-    python tests/runners/run_all_checks.py
+    python tests/runners/run_all_checks.py                    # run all stages
+    python tests/runners/run_all_checks.py --skip-integration
+    python tests/runners/run_all_checks.py --skip-e2e
 """
 
 from __future__ import annotations
@@ -52,6 +54,12 @@ def _run(stage: Stage) -> None:
         stage.returncode = 1
 
 
+def _venv_tool(name: str) -> str:
+    """Return the venv path for a tool if it exists, otherwise fall back to PATH."""
+    candidate = os.path.join(".venv", "Scripts", name + ".exe")
+    return candidate if os.path.exists(candidate) else name
+
+
 def _find_pip_audit(python: str) -> list[str] | None:
     """Return a working pip-audit invocation, or None if not installed."""
     for candidate in ([python, "-m", "pip_audit"], ["pip-audit"]):
@@ -65,18 +73,22 @@ def _find_pip_audit(python: str) -> list[str] | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--integration", action="store_true")
-    parser.add_argument("--e2e", action="store_true")
-    parser.add_argument("--all", action="store_true", dest="all_stages")
+    parser.add_argument("--skip-integration", action="store_true")
+    parser.add_argument("--skip-e2e", action="store_true")
     args = parser.parse_args()
 
     python = r".venv\Scripts\python.exe" if os.path.exists(r".venv\Scripts\python.exe") else "python"
     pip_audit = _find_pip_audit(python)
+    ruff = _venv_tool("ruff")
+    mypy = _venv_tool("mypy")
+    bandit = _venv_tool("bandit")
 
     xdist = ["-n", "auto", "--dist=loadscope", "--tb=short"]
 
     stages = [
-        Stage("Lint", ["cmd", "/c", "tests\\runners\\run_lint.bat"]),
+        Stage("Ruff", ["cmd", "/c", f"{ruff} check app/ tests/ && {ruff} format --check app/ tests/"]),
+        Stage("Mypy", [mypy, "app/", "--ignore-missing-imports", "--python-version", "3.12"]),
+        Stage("Bandit", [bandit, "-r", "app/", "-q"]),
         Stage("Unit", ["cmd", "/c", "tests\\runners\\run_unit_tests.bat"]),
         Stage("Component", ["cmd", "/c", "tests\\runners\\run_component_tests.bat"]),
         Stage("Windows", [python, "-m", "pytest", "tests", "-m", "windows_only", *xdist]),
@@ -84,12 +96,12 @@ def main() -> int:
         Stage(
             "Integration",
             ["cmd", "/c", "tests\\runners\\run_integration_tests.bat"],
-            skip=not (args.integration or args.all_stages),
+            skip=args.skip_integration,
         ),
         Stage(
             "E2E",
             ["cmd", "/c", "tests\\runners\\run_e2e_tests.bat"],
-            skip=not (args.e2e or args.all_stages),
+            skip=args.skip_e2e,
         ),
     ]
 
