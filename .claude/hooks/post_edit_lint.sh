@@ -3,24 +3,29 @@
 # Post-edit hook: auto-format Python files after editing
 # Triggered after Edit or Write tool modifies a .py file
 # Exit code 0 = success (formatting applied), non-zero = format error
+# Claude Code passes tool input as JSON on stdin (field: tool_input.file_path)
 
-if [[ ! "$1" =~ \.py$ ]]; then
+INPUT=$(cat)
+FILE=$(python3 -c "import sys,json; d=json.loads(sys.argv[1]); print(d.get('tool_input',{}).get('file_path',''))" "$INPUT" 2>/dev/null)
+
+if [[ ! "$FILE" =~ \.py$ ]]; then
     exit 0  # Not a Python file, skip
 fi
-
-FILE="$1"
 
 # Check if file exists and is readable
 if [[ ! -f "$FILE" ]]; then
     exit 0
 fi
 
-# Skip files in tests/ or non-source dirs
-if [[ "$FILE" =~ ^tests/ ]] || [[ "$FILE" =~ __pycache__ ]]; then
+# Skip non-source dirs
+if [[ "$FILE" =~ __pycache__ ]]; then
     exit 0
 fi
 
-cd "$(dirname "$FILE")/.." || exit 1
+# Resolve project root via git to handle any nesting depth
+PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)
+if [[ -z "$PROJECT_ROOT" ]]; then exit 0; fi
+cd "$PROJECT_ROOT" || exit 0
 
 # Run ruff format (auto-fix) on the edited file
 if command -v ruff &>/dev/null; then
