@@ -132,7 +132,7 @@ def compute_ai_assistance_trend(
 **Output shape (one item per sprint):**
 ```python
 {
-    "sprint_id":   int,
+    "sprint_id":   int | str,  # str for KANBAN ISO-week period IDs (e.g. "2026-W13")
     "sprint_name": str,
     "start_date":  str | None,  # ISO-8601 or None
     "end_date":    str | None,  # ISO-8601 or None

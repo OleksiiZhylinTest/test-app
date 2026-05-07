@@ -146,7 +146,7 @@ def compute_custom_trends(
     return []
 ```
 
-**Location in `metrics_dict`:** `metrics["custom_trends"]` — a list (empty by default).
+**Location in `metrics_dict`:** `metrics["custom_trends"]` — a list, **once wired into `build_metrics_dict()`**. The key is absent from `metrics_dict` until you add the call; see step 2 of the extension checklist below.
 
 **Full extension checklist** (from the project's [Extension Patterns](../../../.cursor/rules/extension-patterns.mdc)):
 

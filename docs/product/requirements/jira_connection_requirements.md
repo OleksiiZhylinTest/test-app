@@ -35,7 +35,7 @@ This document defines requirements for establishing and validating a connection 
 | JCR-C-002 | Missing `JIRA_EMAIL` is detected before any network call | `validate_config()` returns an error message for a missing `JIRA_EMAIL`; the CLI exits with code 1 without making any HTTP request | ✓ Met | `test_validate_config_missing_email` |
 | JCR-C-003 | Missing `JIRA_API_TOKEN` is detected before any network call | `validate_config()` returns an error message for a missing `JIRA_API_TOKEN`; the CLI exits with code 1 without making any HTTP request | ✓ Met | `test_validate_config_missing_token` |
 | JCR-C-004 | `JIRA_URL` trailing slashes are stripped automatically | A `JIRA_URL` value with one or more trailing slashes is normalised during config load; no double-slash URL is ever passed to the Jira client | ✓ Met | `test_jira_url_trailing_slash_stripped`, `test_jira_url_multiple_trailing_slashes_stripped` |
-| JCR-C-005 | `JIRA_BOARD_ID` is optional | When `JIRA_BOARD_ID` is absent from `.env`, the application auto-discovers the first accessible board without raising an error | ✓ Met | `test_get_board_id_from_api` |
+| JCR-C-005 | `JIRA_BOARD_ID` is optional | When `JIRA_BOARD_ID` is absent from `.env`, the application auto-discovers the first accessible board without raising an error | ✗ Not met | — |
 | JCR-C-006 | `JIRA_SPRINT_COUNT` defaults to 10 when not set | When `JIRA_SPRINT_COUNT` is absent from `.env`, `config.JIRA_SPRINT_COUNT` evaluates to `10` | ✓ Met | `test_sprint_count_default` |
 | JCR-C-007 | `JIRA_FILTER_ID` is optional | When `JIRA_FILTER_ID` is absent, issues are fetched without a filter JQL constraint and no error is raised | ✓ Met | `test_filter_id_empty` |
 
