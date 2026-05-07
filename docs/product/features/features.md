@@ -38,11 +38,11 @@ The main workflow tab. Triggers report generation and displays live output.
 
 | Option | Values | Default | Persisted |
 |--------|--------|---------|-----------|
-| **Project Type** radio | Scrum / Kanban | Scrum | `localStorage` |
-| **Estimation Type** radio | Story Points / Jira Tickets | Story Points | `localStorage` |
 | **Metric Sections** checkboxes | Velocity Trend, AI Assistance Trend, AI Usage Details, DAU Survey, DAU Trend | all enabled | `localStorage` |
 
 At least one metric section must be enabled; the Generate button is disabled when all are unchecked.
+
+> **Project Type** and **Estimation Type** are configured per-filter in the Filter Builder tab (under **Report Scope**), not here.
 
 #### Output panel
 
@@ -87,6 +87,16 @@ from a filter, those values override `defaults.env` for the run.
 | Exclude Labels | `AI_EXCLUDE_LABELS` | Comma-separated labels excluded from the AI % denominator |
 | Tool Labels | `AI_TOOL_LABELS` | Labels identifying AI tools (e.g. `AI_Tool_Copilot,AI_Tool_ChatGPT`) |
 | Action Labels | `AI_ACTION_LABELS` | Labels identifying AI use-cases (e.g. `AI_Case_CodeGen,AI_Case_Review`) |
+
+#### DAU Survey Data section (collapsible)
+
+Collapsible `<details>` section for configuring the per-filter DAU survey response folder.
+Each filter keeps its own `data/dau/<slug>/` tree so survey responses are not mixed between teams or projects.
+The folder is auto-created on save.
+
+| Field | Param key | Description |
+|-------|-----------|-------------|
+| DAU Path | `DAU_PATH` | Path relative to the project root where survey responses are stored. Responses live under `<DAU Path>/original/`; the normalised set is regenerated under `<DAU Path>/normalized/` on every report run. Default: `data/dau/<filter-slug>`. |
 
 ---
 
@@ -140,6 +150,7 @@ Each section can be independently toggled via the **Metric Sections** checkboxes
 | Section | Toggle | HTML | Markdown | Description |
 |---------|--------|------|----------|-------------|
 | **Velocity Trend** (or **Throughput Trend** for Kanban) | `METRIC_VELOCITY` | bar chart + running-average line | ASCII bar chart + table | Story points (or issue count) of done issues per sprint |
+| **Cycle Time** | `METRIC_CYCLE_TIME` | stats card (mean, median, min, max) | summary table | Days from "In Progress" to "Done" per issue, across the most recent 100 done issues |
 | **AI Assistance Trend** | `METRIC_AI_TREND` | line chart + per-sprint table | table | Per-sprint % of done story points carrying the AI-assisted label |
 | **AI Usage Details** | `METRIC_AI_USAGE` | two donut/bar charts (tools + use-cases) | tables | Breakdown of AI tool labels and AI use-case labels across AI-assisted issues |
 | **DAU Survey** | `METRIC_DAU` | team-average card + by-role table + usage-frequency bar chart | summary + by-role table | Team Daily Active Usage average from self-reported survey data |

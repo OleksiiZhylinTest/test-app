@@ -37,7 +37,7 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 | NFR-S-003 | The HTTP server is not reachable from other machines by default | The server binds exclusively to `127.0.0.1`; connections originating from any IP other than localhost are refused | ✓ Met |
 | NFR-S-004 | Schema file requests are restricted to safe filenames and extensions | Filenames containing `/` or `\` are rejected; only `.json` files are served from the schemas directory | ✓ Met |
 | NFR-S-005 | Sensitive configuration is excluded from version control | `.env` and any `.env.backup-*` files are listed in `.gitignore`; neither is ever committed to the repository | ✓ Met |
-| NFR-S-006 | Credentials are not included in error messages or logs | Exception messages, CLI stderr output, and SSE error events do not contain the values of `JIRA_API_TOKEN`, `JIRA_EMAIL`, or `JIRA_URL` | ⚠ Partial |
+| NFR-S-006 | Credentials are not included in error messages or logs | Exception messages, CLI stderr output, and SSE error events do not contain the values of `JIRA_API_TOKEN`, `JIRA_EMAIL`, or `JIRA_URL` | ⬜ N/T |
 
 ---
 
@@ -46,7 +46,7 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 | ID | Requirement | Acceptance Criterion | Status |
 |----|-------------|----------------------|--------|
 | NFR-U-001 | Report generation progress is visible in real time | The output panel on the Generate Report tab displays each line from the generation subprocess as it is produced, with no buffering delay visible to the user | ✓ Met |
-| NFR-U-002 | Jira credentials are remembered between sessions | After clicking Save on the Jira Connection tab, credentials pre-fill on the next browser session without any re-entry | ⚠ Partial |
+| NFR-U-002 | Jira credentials are remembered between sessions | After clicking Save on the Jira Connection tab, credentials pre-fill on the next browser session without any re-entry | ⬜ N/T |
 | NFR-U-003 | Generated reports are usable without the app running | Each HTML report is a fully self-contained file (inline CSS, Chart.js, and data); it opens correctly in a browser with no server or internet connection | ✓ Met |
 | NFR-U-004 | Past reports are discoverable from the UI | The Last Generated Reports list on the Generate Report tab shows all previously created reports sorted newest first, each with a direct link to open the HTML report | ✓ Met |
 | NFR-U-005 | Error states are communicated clearly to the user | Connection failures, missing credentials, and report generation errors each display a human-readable message in the relevant output panel or status badge; no raw stack trace is shown to the user | ✓ Met |
@@ -79,7 +79,7 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 
 | ID | Requirement | Acceptance Criterion | Status |
 |----|-------------|----------------------|--------|
-| NFR-C-001 | The application runs on Python 3.10, 3.11, and 3.12 | All unit and component tests pass without modification on Python 3.10, 3.11, and 3.12 | ⚠ Partial |
+| NFR-C-001 | The application runs on Python 3.10, 3.11, and 3.12 | All unit and component tests pass without modification on Python 3.10, 3.11, and 3.12 | ⬜ N/T |
 | NFR-C-002 | Windows installation requires no administrator rights | `project_setup.bat` completes successfully when run as a standard user; no UAC elevation prompt appears at any point during setup | ✓ Met |
 | NFR-C-003 | The browser UI functions correctly in all supported browsers | The Generate Report, Jira Connection, and Jira Filter tabs operate correctly in Chrome 90+, Edge 90+, Firefox 88+, and Safari 14+ with JavaScript enabled | ✓ Met |
 | NFR-C-004 | The CLI and browser UI produce identical reports from the same data | Running `python main.py` and triggering generation via `GET /api/generate` with the same Jira credentials and filter configuration produce reports with identical metric values | ✓ Met |
@@ -92,5 +92,5 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 |----|-------------|----------------------|--------|
 | NFR-A-001 | All interactive UI regions have semantic ARIA roles | Every tab (`role="tab"`), tab panel (`role="tabpanel"`), output log (`role="log"`), alert (`role="alert"`), and status indicator (`role="status"`) carries the correct ARIA role attribute | ✓ Met |
 | NFR-A-002 | Dynamic content updates are announced to screen readers | Output panels and status indicators that update without a page reload carry `aria-live="polite"` so that screen readers announce new content without interrupting the user | ✓ Met |
-| NFR-A-003 | Required form fields are identified programmatically | Fields that must be completed before saving (Jira URL, email, API token) carry `aria-required="true"` so that assistive technologies communicate the requirement to users | ✗ Not met |
+| NFR-A-003 | Required form fields are identified programmatically | Fields that must be completed before saving (Jira URL, email, API token) carry `aria-required="true"` so that assistive technologies communicate the requirement to users | ✓ Met |
 | NFR-A-004 | Decorative elements are hidden from assistive technology | Icons and visual-only elements carry `aria-hidden="true"` to prevent screen readers from announcing them as meaningful content | ✓ Met |
