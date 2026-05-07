@@ -152,8 +152,9 @@ def compute_custom_trends(
 
 1. Replace the body of `compute_custom_trends()` in `app/core/metrics.py`. Each returned
    dict must include `sprint_id` and `sprint_name` plus at least one metric value key.
-2. The function is already called in `build_metrics_dict()` and its result is already
-   included in `metrics["custom_trends"]` — no pipeline change needed.
+2. Call `compute_custom_trends()` inside `build_metrics_dict()` and include its result
+   in the returned dict as `"custom_trends"`. The function is a placeholder and is **not**
+   called by `build_metrics_dict()` by default.
 3. Both reporters already handle non-empty `custom_trends` automatically:
    - `app/reporters/report_md.py` renders a Markdown table.
    - `templates/report.html.j2` renders an HTML table.

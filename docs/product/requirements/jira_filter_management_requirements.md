@@ -71,13 +71,13 @@ This document defines requirements for the Jira filter management system: the de
 
 | ID | Requirement | Acceptance Criterion | Status | Tests |
 |----|-------------|----------------------|--------|-------|
-| JFM-UI-007 | An Active Schema dropdown is shown on the Filter Builder tab | `#filter-schema-select` is populated from `GET /api/schemas`; the selection reflects the currently-selected filter's `params.schema_name`, or `Default_Jira_Cloud` when "— New filter —" is active | ✗ Not met | — |
-| JFM-UI-008 | The Filter Name field is a dropdown that lists existing filters | `#filter-name-select` lists every entry returned by `GET /api/filters` plus a leading `— New filter —` option; the default filter is labelled with a `(default)` suffix | ✗ Not met | — |
-| JFM-UI-009 | Selecting an existing filter loads it into the form for editing | Picking a filter in `#filter-name-select` populates the form from its `params` (project, team, issue types, board, sprint count, radios, Active Schema) and hides `#filter-name` with its value mirroring the filter name | ✗ Not met | — |
-| JFM-UI-010 | Selecting "— New filter —" resets the form to a blank-template state | Picking `__new__` in `#filter-name-select` unhides `#filter-name`, pre-populates it per JFM-UI-001, and clears every param field (Active Schema resets to `Default_Jira_Cloud`, radios reset to `SCRUM` / `StoryPoints`) | ✗ Not met | — |
-| JFM-UI-011 | Save uses the schema chosen in the Filter Builder dropdown | `POST /api/filters` request body sets `params.schema_name` equal to the value of `#filter-schema-select` at the moment of save — independent of the Schema Setup tab's selection | ✗ Not met | — |
-| JFM-UI-012 | The Filter Builder's schema dropdown does not mutate localStorage or Schema Setup state | Changing `#filter-schema-select` leaves `localStorage.jira_schema_name` unchanged and does not alter the `#schema-select` value on the Schema Setup tab | ✗ Not met | — |
-| JFM-UI-013 | The default filter is read-only in the UI | When `Default_Jira_Filter` is selected in `#filter-name-select`, the Save button is disabled; it re-enables when any other entry (including `— New filter —`) is selected | ✗ Not met | — |
+| JFM-UI-007 | An Active Schema dropdown is shown on the Filter Builder tab | `#filter-schema-select` is populated from `GET /api/schemas`; the selection reflects the currently-selected filter's `params.schema_name`, or `Default_Jira_Cloud` when "— New filter —" is active | ✓ Met | — |
+| JFM-UI-008 | The Filter Name field is a dropdown that lists existing filters | `#filter-name-select` lists every entry returned by `GET /api/filters` plus a leading `— New filter —` option; the default filter is labelled with a `(default)` suffix | ✓ Met | — |
+| JFM-UI-009 | Selecting an existing filter loads it into the form for editing | Picking a filter in `#filter-name-select` populates the form from its `params` (project, team, issue types, board, sprint count, radios, Active Schema) and hides `#filter-name` with its value mirroring the filter name | ✓ Met | — |
+| JFM-UI-010 | Selecting "— New filter —" resets the form to a blank-template state | Picking `__new__` in `#filter-name-select` unhides `#filter-name`, pre-populates it per JFM-UI-001, and clears every param field (Active Schema resets to `Default_Jira_Cloud`, radios reset to `SCRUM` / `StoryPoints`) | ✓ Met | — |
+| JFM-UI-011 | Save uses the schema chosen in the Filter Builder dropdown | `POST /api/filters` request body sets `params.schema_name` equal to the value of `#filter-schema-select` at the moment of save — independent of the Schema Setup tab's selection | ✓ Met | — |
+| JFM-UI-012 | The Filter Builder's schema dropdown does not mutate localStorage or Schema Setup state | Changing `#filter-schema-select` leaves `localStorage.jira_schema_name` unchanged and does not alter the `#schema-select` value on the Schema Setup tab | ✓ Met | — |
+| JFM-UI-013 | The default filter is read-only in the UI | When `Default_Jira_Filter` is selected in `#filter-name-select`, the Save button is disabled; it re-enables when any other entry (including `— New filter —`) is selected | ✓ Met | — |
 
 ---
 

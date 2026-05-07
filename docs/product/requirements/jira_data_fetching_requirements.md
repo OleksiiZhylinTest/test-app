@@ -21,8 +21,8 @@ This document defines requirements for fetching Jira data used in metrics comput
 | ID | Requirement | Acceptance Criterion | Status | Tests |
 |----|-------------|----------------------|--------|-------|
 | JDF-B-001 | `JIRA_BOARD_ID` from config is used without making an API call | When `config.JIRA_BOARD_ID` is set, `get_board_id()` returns it immediately without calling `jira.boards()` | ✓ Met | `test_get_board_id_from_config` |
-| JDF-B-002 | The first accessible board is auto-discovered when no `JIRA_BOARD_ID` is configured | When `config.JIRA_BOARD_ID` is `None`, `get_board_id()` calls `jira.boards()` and returns the `id` of the first entry in the response | ✓ Met | `test_get_board_id_from_api` |
-| JDF-B-003 | An empty boards list raises a `ValueError` with an actionable message | When `jira.boards()` returns an empty list, `get_board_id()` raises `ValueError` with a message that suggests setting `JIRA_BOARD_ID` or checking account access | ✓ Met | `test_get_board_id_no_boards_raises` |
+| JDF-B-002 | The first accessible board is auto-discovered when no `JIRA_BOARD_ID` is configured | When `config.JIRA_BOARD_ID` is `None`, `get_board_id()` calls `jira.boards()` and returns the `id` of the first entry in the response | ✗ Not met | — |
+| JDF-B-003 | An empty boards list raises a `ValueError` with an actionable message | When `jira.boards()` returns an empty list, `get_board_id()` raises `ValueError` with a message that suggests setting `JIRA_BOARD_ID` or checking account access | ✗ Not met | — |
 
 ---
 
@@ -30,7 +30,7 @@ This document defines requirements for fetching Jira data used in metrics comput
 
 | ID | Requirement | Acceptance Criterion | Status | Tests |
 |----|-------------|----------------------|--------|-------|
-| JDF-SP-001 | Closed and active sprints are both returned | `get_sprints()` fetches sprints in both `closed` and `active` states and combines them into a single list | ✗ Not met | `test_get_sprints_sorted_desc_by_start_date` |
+| JDF-SP-001 | Closed and active sprints are both returned | `get_sprints()` fetches sprints in both `closed` and `active` states and combines them into a single list | ✓ Met | `test_get_sprints_sorted_desc_by_start_date` |
 | JDF-SP-002 | Sprints are sorted by `startDate` descending (newest first) | The list returned by `get_sprints()` is ordered so that the sprint with the most recent `startDate` appears first | ✓ Met | `test_get_sprints_sorted_desc_by_start_date` |
 | JDF-SP-003 | Sprint count is capped at `JIRA_SPRINT_COUNT` | `get_sprints()` returns at most `config.JIRA_SPRINT_COUNT` sprints (default 10); excess sprints are discarded after sorting | ✓ Met | `test_get_sprints_capped_at_sprint_count` |
 | JDF-SP-004 | An empty sprint list is tolerated without crashing | When the board has no sprints, `get_sprints()` returns an empty list and no exception is raised | ✓ Met | `test_get_sprints_empty` |

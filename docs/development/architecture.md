@@ -96,6 +96,7 @@ test-app/                          ← project root
 │   ├── core/                      ← business logic & infrastructure
 │   │   ├── __init__.py
 │   │   ├── config.py              ← env/dotenv loading, validation, constants
+│   │   ├── dau_normalizer.py      ← DAU survey dedup + normalization (called by cli.py)
 │   │   ├── jira_client.py         ← Jira REST API wrapper
 │   │   ├── metrics.py             ← pure metric computation functions
 │   │   └── schema.py              ← Jira field schema registry (load/save/query)
@@ -112,7 +113,8 @@ test-app/                          ← project root
 │
 ├── config/                        ← persistent config files (not generated)
 │   ├── jira_schema.json           ← Jira field schema definitions per instance
-│   └── jira_filters.json          ← saved JQL filters (default + user-saved)
+│   ├── jira_filters.json          ← saved JQL filters (default + user-saved)
+│   └── dau/                       ← DAU survey responses (per week, per filter; gitignored except .gitkeep)
 │
 ├── templates/
 │   └── report.html.j2             ← Jinja2 HTML template
@@ -189,8 +191,9 @@ test-app/                          ← project root
 | Module | Responsibility |
 |--------|----------------|
 | `app/core/config.py` | Loads `.env` from project root via `python-dotenv`. Exposes all `JIRA_*` and `AI_*` constants as module-level names. `validate_config()` returns a list of error strings. |
+| `app/core/dau_normalizer.py` | `normalize(src_dir, dst_dir)` — reads raw DAU survey JSON files recursively, deduplicates to one record per `(username, week)` keeping the latest submission, and writes clean files to `dst_dir`. Called by `app/cli.py` before metric computation. |
 | `app/core/jira_client.py` | Wraps `atlassian-python-api`. `create_client()` returns an authenticated `Jira` instance. `fetch_sprint_data()` returns `(sprints, sprint_issues)`. Handles pagination and optional filter JQL. |
-| `app/core/metrics.py` | Pure functions: `compute_velocity`, `compute_cycle_time`, `compute_ai_assistance_trend`, `compute_ai_usage_details`, `compute_custom_trends` (placeholder). `build_metrics_dict()` assembles all results into a single dict consumed by both reporters. |
+| `app/core/metrics.py` | Pure functions: `compute_velocity`, `compute_cycle_time`, `compute_ai_assistance_trend`, `compute_ai_usage_details`, `compute_dau_metrics`, `compute_dau_trend`, `compute_custom_trends` (placeholder — not called by default). `build_metrics_dict()` assembles all results into a single dict consumed by both reporters. |
 | `app/core/schema.py` | Loads/saves/queries Jira field schemas from `config/jira_schema.json`. Registry only — the module does not pick an "active" schema; active-schema selection is the caller's responsibility (CLI reads `JIRA_SCHEMA_NAME`; the dev server's `/api/generate` exports the selected filter's `params.schema_name` onto the subprocess env). Ships a built-in `Default_Jira_Cloud` schema as fallback. |
 | `app/reporters/report_html.py` | Renders `templates/report.html.j2` via Jinja2. Accepts a `section_visibility` dict to hide/show individual report sections. |
 | `app/reporters/report_md.py` | Builds a Markdown string (velocity bar chart, tables, cycle time stats) and writes to disk. Accepts a `section_visibility` dict to hide/show individual sections. |
@@ -249,9 +252,12 @@ test-app/                          ← project root
         "tool_breakdown": [{"label": str, "count": int, "pct": float}],
         "action_breakdown": [{"label": str, "count": int, "pct": float}]
     },
-    "custom_trends": list[dict],   # extensible; empty by default
+    "dau": dict,                   # from compute_dau_metrics(); empty dict when no survey data
+    "dau_trend": list[dict],       # from compute_dau_trend(); empty list when no survey data
     "ai_assisted_label": str,
     "ai_exclude_labels": list[str],
+    "schema_name": str | None,     # active schema name used for this run
+    "report_name": str | None,     # enriched by the generate handler from the selected filter
     "project_type": str,           # "Scrum" or "Kanban"
     "estimation_type": str,        # "StoryPoints" or "JiraTickets"
     "filter_name": str | None,     # enriched after Jira fetch
@@ -260,6 +266,8 @@ test-app/                          ← project root
     "project_key": str | None,
 }
 ```
+
+> **Note on `custom_trends`:** `compute_custom_trends()` exists in `app/core/metrics.py` as a placeholder but is **not** called by `build_metrics_dict()` by default. To use it, call it explicitly and add the result to the returned dict. See `docs/product/metrics/custom_trends.md` for the extension pattern.
 
 ---
 
