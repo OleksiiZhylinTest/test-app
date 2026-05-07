@@ -25,7 +25,10 @@ if [[ -z "$JIRA_HOST" || -z "$JIRA_EMAIL" || -z "$JIRA_API_TOKEN" ]]; then
     exit 1
 fi
 
-exec npx --yes "@anthropic-ai/jira-mcp@latest" \
+npx --yes "@anthropic-ai/jira-mcp@latest" \
     --host "$JIRA_HOST" \
     --email "$JIRA_EMAIL" \
-    --api-token "$JIRA_API_TOKEN"
+    --api-token "$JIRA_API_TOKEN" &
+MCP_PID=$!
+trap "kill $MCP_PID 2>/dev/null; wait $MCP_PID 2>/dev/null" TERM INT HUP QUIT
+wait $MCP_PID
