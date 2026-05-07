@@ -53,6 +53,7 @@ class GenerateHandlerMixin:
                     "JIRA_FILTER_PAGE_SIZE",
                     "JIRA_BOARD_ID",
                     "JIRA_SPRINT_COUNT",
+                    "JIRA_SPRINT_NAME_FILTER",
                     "JIRA_FILTER_ID",
                     "PROJECT_TYPE",
                     "ESTIMATION_TYPE",

@@ -192,7 +192,7 @@ function slugifyName(name) {
 function clearFormFields() {
   const textIds = [
     'jira-project', 'jira-team-id', 'jira-issue-types',
-    'jira-board-id', 'sprint-count', 'filter-id', 'jira-filter-page-size',
+    'jira-board-id', 'sprint-count', 'sprint-name-filter', 'filter-id', 'jira-filter-page-size',
     'ai-assisted-label', 'ai-exclude-labels', 'ai-tool-labels', 'ai-action-labels',
     'dau-path',
   ];
@@ -214,6 +214,7 @@ function loadFilterIntoForm(entry) {
   setVal('jira-closed-sprints-only', params.JIRA_CLOSED_SPRINTS_ONLY || FIELD_DEFAULTS.JIRA_CLOSED_SPRINTS_ONLY || 'true');
   setVal('jira-board-id',          params.JIRA_BOARD_ID);
   setVal('sprint-count',           params.JIRA_SPRINT_COUNT);
+  setVal('sprint-name-filter',     params.JIRA_SPRINT_NAME_FILTER);
   setVal('filter-id',              params.JIRA_FILTER_ID);
   setVal('jira-filter-page-size',  params.JIRA_FILTER_PAGE_SIZE);
 
@@ -433,6 +434,7 @@ export function initFilters(filterLog) {
       schema_name:              schemaName,
       JIRA_BOARD_ID:            document.getElementById('jira-board-id').value.trim(),
       JIRA_SPRINT_COUNT:        document.getElementById('sprint-count').value.trim(),
+      JIRA_SPRINT_NAME_FILTER:  document.getElementById('sprint-name-filter').value.trim(),
       JIRA_FILTER_ID:           filterId,
       JIRA_FILTER_PAGE_SIZE:    document.getElementById('jira-filter-page-size').value.trim(),
       AI_ASSISTED_LABEL:        document.getElementById('ai-assisted-label').value.trim(),

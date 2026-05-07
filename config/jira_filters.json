@@ -14,6 +14,7 @@
       "JIRA_CLOSED_SPRINTS_ONLY": "true",
       "JIRA_BOARD_ID": "",
       "JIRA_SPRINT_COUNT": "10",
+      "JIRA_SPRINT_NAME_FILTER": "",
       "JIRA_FILTER_ID": "",
       "JIRA_FILTER_PAGE_SIZE": "50",
       "PROJECT_TYPE": "SCRUM",
