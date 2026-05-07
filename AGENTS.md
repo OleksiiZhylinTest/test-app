@@ -26,7 +26,7 @@ Go directly to the source of truth — do not rely on summaries in other files:
 | `main.py` | Thin CLI entry-point; delegates to `app.cli` |
 | `server.py` | Thin server entry-point; delegates to `app.server` |
 | `app/cli.py` | Full report pipeline: config → fetch → metrics → parallel HTML+MD output |
-| `app/server.py` | Stdlib HTTPServer; serves `ui/index.html` and all `/api/*` routes |
+| `app/server/` | Stdlib HTTPServer package; `_base.py` is the handler base; serves `ui/index.html` and all `/api/*` routes |
 | `app/core/config.py` | Loads `.env`, exposes all constants, `validate_config()` |
 | `app/core/jira_client.py` | Jira REST wrapper; `fetch_sprint_data()` → `(sprints, sprint_issues)` |
 | `app/core/metrics.py` | Pure metric functions; `build_metrics_dict()` → dict consumed by reporters |

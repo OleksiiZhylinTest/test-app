@@ -9,9 +9,9 @@
         "--host",
         "jira.atlassian.net",
         "--email",
-        "${JIRA_EMAIL}",
+        "<YOUR_JIRA_EMAIL>",
         "--api-token",
-        "${JIRA_API_TOKEN}"
+        "<YOUR_JIRA_API_TOKEN>"
       ],
       "description": "Jira Cloud API access — query boards, sprints, issues directly"
     },
