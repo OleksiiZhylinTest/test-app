@@ -403,6 +403,79 @@ def compute_ai_usage_details(
     }
 
 
+def compute_sprint_issue_details(
+    sprints: list[dict[str, Any]],
+    sprint_issues: dict[int | str, list[dict[str, Any]]],
+    ai_assisted_label: str | None = None,
+    ai_exclude_labels: list[str] | None = None,
+    ai_tool_labels: list[str] | None = None,
+    ai_action_labels: list[str] | None = None,
+    story_points_field: str | None = None,
+    done_statuses: frozenset[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Per-sprint list of done issues with key, summary, points, status, labels, and AI flags.
+
+    Returns a list ordered by sprint (same order as ``compute_velocity``), each entry::
+
+        {
+            "sprint_id":   int | str,
+            "sprint_name": str,
+            "issues": [
+                {
+                    "key":          str,
+                    "summary":      str,
+                    "story_points": float,   # 0.0 if not set
+                    "status":       str,
+                    "labels":       list[str],
+                    "is_ai_assisted": bool,  # True even if also excluded
+                    "is_excluded":  bool,    # True if any ai_exclude_label matched
+                }
+            ]
+        }
+    """
+    if ai_assisted_label is None:
+        ai_assisted_label = config.AI_ASSISTED_LABEL
+    if ai_exclude_labels is None:
+        ai_exclude_labels = config.AI_EXCLUDE_LABELS
+    if ai_tool_labels is None:
+        ai_tool_labels = config.AI_TOOL_LABELS
+    if ai_action_labels is None:
+        ai_action_labels = config.AI_ACTION_LABELS
+    exclude_set = set(ai_exclude_labels or [])
+    result = []
+    for sprint in sprints:
+        sid = sprint.get("id")
+        if sid is None:
+            continue
+        issues = sprint_issues.get(sid) or []
+        issue_rows = []
+        for iss in issues:
+            if not _is_done(iss, done_statuses):
+                continue
+            fields = iss.get("fields") or {}
+            labels = _get_labels(iss)
+            is_excluded = bool(exclude_set and exclude_set.intersection(labels))
+            issue_rows.append(
+                {
+                    "key": iss.get("key") or "",
+                    "summary": fields.get("summary") or "",
+                    "story_points": _get_story_points(iss, story_points_field),
+                    "status": (fields.get("status") or {}).get("name") or "",
+                    "labels": labels,
+                    "is_ai_assisted": _is_ai_assisted(labels, ai_assisted_label, ai_tool_labels, ai_action_labels),
+                    "is_excluded": is_excluded,
+                }
+            )
+        result.append(
+            {
+                "sprint_id": sid,
+                "sprint_name": sprint.get("name") or f"Sprint {sid}",
+                "issues": issue_rows,
+            }
+        )
+    return result
+
+
 _DAU_SCORE_MAP: dict[str, float] = {
     "Every day (5 days)": 5.0,
     "Most days (3–4 days)": 3.5,
@@ -718,6 +791,12 @@ def build_metrics_dict(
         sprint_issues,
         done_statuses=done_fs,
     )
+    sprint_issue_details = compute_sprint_issue_details(
+        sprints,
+        sprint_issues,
+        story_points_field=sp_field,
+        done_statuses=done_fs,
+    )
     cycle_time = compute_cycle_time(issues_with_changelog or [], done_fs, ip_fs)
     dau = compute_dau_metrics(config.DAU_NORMALIZED_DIR)
     dau_trend = compute_dau_trend(config.DAU_NORMALIZED_DIR)
@@ -726,6 +805,7 @@ def build_metrics_dict(
         "cycle_time": cycle_time,
         "ai_assistance_trend": ai_trend,
         "ai_usage_details": ai_usage,
+        "sprint_issue_details": sprint_issue_details,
         "ai_assisted_label": config.AI_ASSISTED_LABEL,
         "ai_exclude_labels": config.AI_EXCLUDE_LABELS,
         "dau": dau,

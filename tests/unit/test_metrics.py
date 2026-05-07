@@ -183,6 +183,7 @@ def test_build_metrics_dict_keys():
         "generated_at",
         "ai_assistance_trend",
         "ai_usage_details",
+        "sprint_issue_details",
         "ai_assisted_label",
         "ai_exclude_labels",
         "dau",
@@ -970,3 +971,117 @@ def test_cycle_time_fields_are_absolute_days():
     for field in ("mean_days", "median_days", "min_days", "max_days"):
         assert result[field] >= 0.0, f"{field} must be non-negative"
         assert result[field] <= 1000.0, f"{field} is a day count, not a percentage (0-100)"
+
+
+# ---------------------------------------------------------------------------
+# compute_sprint_issue_details
+# ---------------------------------------------------------------------------
+
+
+def test_sprint_issue_details_basic_shape():
+    sprint = make_sprint(1, "S1")
+    issue = make_issue_with_labels("X-1", "Done", 5.0, [])
+    result = metrics.compute_sprint_issue_details([sprint], {1: [issue]})
+    assert len(result) == 1
+    assert result[0]["sprint_id"] == 1
+    assert result[0]["sprint_name"] == "S1"
+    assert len(result[0]["issues"]) == 1
+
+
+def test_sprint_issue_details_issue_fields():
+    sprint = make_sprint(1)
+    issue = make_issue_with_labels("X-1", "Done", 8.0, ["AI_assistance"])
+    issue["fields"]["summary"] = "My task"
+    result = metrics.compute_sprint_issue_details([sprint], {1: [issue]}, ai_assisted_label="AI_assistance")
+    row = result[0]["issues"][0]
+    assert row["key"] == "X-1"
+    assert row["summary"] == "My task"
+    assert row["story_points"] == 8.0
+    assert row["status"] == "Done"
+    assert row["labels"] == ["AI_assistance"]
+    assert row["is_ai_assisted"] is True
+    assert row["is_excluded"] is False
+
+
+def test_sprint_issue_details_excludes_non_done():
+    sprint = make_sprint(1)
+    issues = [
+        make_issue_with_labels("X-1", "Done", 5.0, []),
+        make_issue_with_labels("X-2", "In Progress", 3.0, []),
+    ]
+    result = metrics.compute_sprint_issue_details([sprint], {1: issues})
+    assert len(result[0]["issues"]) == 1
+    assert result[0]["issues"][0]["key"] == "X-1"
+
+
+def test_sprint_issue_details_excluded_flag():
+    sprint = make_sprint(1)
+    issues = [
+        make_issue_with_labels("X-1", "Done", 5.0, ["AI_assistance"]),
+        make_issue_with_labels("X-2", "Done", 3.0, ["excluded_label"]),
+    ]
+    result = metrics.compute_sprint_issue_details(
+        [sprint],
+        {1: issues},
+        ai_assisted_label="AI_assistance",
+        ai_exclude_labels=["excluded_label"],
+    )
+    rows = {r["key"]: r for r in result[0]["issues"]}
+    assert rows["X-1"]["is_excluded"] is False
+    assert rows["X-2"]["is_excluded"] is True
+
+
+def test_sprint_issue_details_ai_flag_independent_of_exclusion():
+    sprint = make_sprint(1)
+    issue = make_issue_with_labels("X-1", "Done", 5.0, ["AI_assistance", "excluded_label"])
+    result = metrics.compute_sprint_issue_details(
+        [sprint],
+        {1: [issue]},
+        ai_assisted_label="AI_assistance",
+        ai_exclude_labels=["excluded_label"],
+    )
+    row = result[0]["issues"][0]
+    assert row["is_ai_assisted"] is True
+    assert row["is_excluded"] is True
+
+
+def test_sprint_issue_details_multiple_sprints():
+    s1, s2 = make_sprint(1, "S1"), make_sprint(2, "S2")
+    i1 = make_issue_with_labels("X-1", "Done", 5.0, [])
+    i2 = make_issue_with_labels("X-2", "Done", 3.0, [])
+    result = metrics.compute_sprint_issue_details([s1, s2], {1: [i1], 2: [i2]})
+    assert len(result) == 2
+    assert result[0]["issues"][0]["key"] == "X-1"
+    assert result[1]["issues"][0]["key"] == "X-2"
+
+
+def test_sprint_issue_details_empty_sprint():
+    sprint = make_sprint(1)
+    result = metrics.compute_sprint_issue_details([sprint], {1: []})
+    assert result[0]["issues"] == []
+
+
+def test_build_metrics_dict_sprint_issue_details_key_present():
+    sprint = make_sprint(1)
+    issue = make_issue_with_labels("X-1", "Done", 5.0, ["AI_assistance"])
+    result = metrics.build_metrics_dict([sprint], {1: [issue]})
+    assert "sprint_issue_details" in result
+    assert isinstance(result["sprint_issue_details"], list)
+    assert len(result["sprint_issue_details"]) == 1
+    assert result["sprint_issue_details"][0]["sprint_id"] == 1
+
+
+def test_build_metrics_dict_sprint_issue_details_issue_shape():
+    sprint = make_sprint(1, "Alpha")
+    issue = make_issue_with_labels("X-1", "Done", 5.0, [])
+    result = metrics.build_metrics_dict([sprint], {1: [issue]})
+    issue_row = result["sprint_issue_details"][0]["issues"][0]
+    assert set(issue_row.keys()) == {
+        "key",
+        "summary",
+        "story_points",
+        "status",
+        "labels",
+        "is_ai_assisted",
+        "is_excluded",
+    }

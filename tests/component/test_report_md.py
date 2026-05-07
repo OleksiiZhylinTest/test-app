@@ -81,24 +81,175 @@ def test_md_table_data_row():
 
 
 # ---------------------------------------------------------------------------
-# MD report does NOT render AI sections (documents current behavior gap)
+# AI Assistance Trend section
 # ---------------------------------------------------------------------------
 
 
-def test_md_report_no_ai_assistance_section(tmp_path, minimal_metrics_dict):
-    """MD report currently does not render AI assistance trend section."""
+def test_md_report_ai_assistance_section_present(tmp_path, minimal_metrics_dict):
     out = tmp_path / "report.md"
     generate_md(minimal_metrics_dict, out)
     content = out.read_text(encoding="utf-8")
-    assert "## AI Assistance" not in content
+    assert "## AI Assistance Trend" in content
 
 
-def test_md_report_no_ai_usage_section(tmp_path, minimal_metrics_dict):
-    """MD report currently does not render AI usage details section."""
+def test_md_report_ai_assistance_shows_pct(tmp_path, minimal_metrics_dict):
     out = tmp_path / "report.md"
     generate_md(minimal_metrics_dict, out)
     content = out.read_text(encoding="utf-8")
-    assert "## AI Usage" not in content
+    assert "50.0%" in content
+
+
+def test_md_report_ai_assistance_table_headers(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "AI %" in content
+
+
+def test_md_report_ai_assistance_shows_label(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "AI_assistance" in content
+
+
+def test_md_report_ai_assistance_empty_data(tmp_path, empty_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(empty_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "## AI Assistance Trend" in content
+    assert "No AI assistance data" in content
+
+
+def test_md_report_ai_assistance_hidden_when_toggled_off(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out, section_visibility={"ai_assistance_trend": False})
+    content = out.read_text(encoding="utf-8")
+    assert "## AI Assistance Trend" not in content
+
+
+# ---------------------------------------------------------------------------
+# AI Usage Details section
+# ---------------------------------------------------------------------------
+
+
+def test_md_report_ai_usage_section_present(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "## AI Usage Details" in content
+
+
+def test_md_report_ai_usage_shows_count(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "2" in content
+    assert "AI-assisted" in content
+
+
+def test_md_report_ai_usage_tool_breakdown(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "AI_Tool_Copilot" in content
+
+
+def test_md_report_ai_usage_action_breakdown(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "AI_Case_CodeGen" in content
+
+
+def test_md_report_ai_usage_hidden_when_toggled_off(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out, section_visibility={"ai_usage_details": False})
+    content = out.read_text(encoding="utf-8")
+    assert "## AI Usage Details" not in content
+
+
+# ---------------------------------------------------------------------------
+# Sprint Issues section
+# ---------------------------------------------------------------------------
+
+
+def test_md_report_sprint_issues_section_present(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "## Sprint Issues" in content
+
+
+def test_md_report_sprint_issues_shows_issue_keys(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "PROJ-1" in content
+    assert "PROJ-2" in content
+
+
+def test_md_report_sprint_issues_shows_ai_flag(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "✓" in content
+
+
+def test_md_report_sprint_issues_absent_when_no_data(tmp_path, empty_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(empty_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "## Sprint Issues" not in content
+
+
+def test_md_report_sprint_issues_hidden_when_toggled_off(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out, section_visibility={"sprint_issues": False})
+    content = out.read_text(encoding="utf-8")
+    assert "## Sprint Issues" not in content
+
+
+# ---------------------------------------------------------------------------
+# Diagnostics section
+# ---------------------------------------------------------------------------
+
+
+def test_md_report_diagnostics_section_present(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "## Diagnostics" in content
+
+
+def test_md_report_diagnostics_cycle_time_stats(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "Cycle Time" in content
+    assert "3.5" in content  # mean_days
+
+
+def test_md_report_diagnostics_no_cycle_time_message(tmp_path, empty_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(empty_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "No cycle time data" in content
+
+
+def test_md_report_diagnostics_jira_config(tmp_path, minimal_metrics_dict):
+    minimal_metrics_dict["schema_name"] = "Default_Jira_Cloud"
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out)
+    content = out.read_text(encoding="utf-8")
+    assert "Default_Jira_Cloud" in content
+
+
+def test_md_report_diagnostics_hidden_when_toggled_off(tmp_path, minimal_metrics_dict):
+    out = tmp_path / "report.md"
+    generate_md(minimal_metrics_dict, out, section_visibility={"diagnostics": False})
+    content = out.read_text(encoding="utf-8")
+    assert "## Diagnostics" not in content
 
 
 # ---------------------------------------------------------------------------
