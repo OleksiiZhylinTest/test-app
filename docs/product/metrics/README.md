@@ -12,8 +12,8 @@ interpret the results — written for both product users and developers/AI Copil
 | [Cycle Time](cycle_time.md) | Average days from start to done per issue | yes | yes |
 | [AI Assistance Trend](ai_assistance_trend.md) | % of completed work that was AI-assisted, per sprint | yes | planned |
 | [AI Usage Details](ai_usage_details.md) | Breakdown of AI tools and use-cases across all AI-assisted issues | yes | planned |
-| DAU Survey | Team Daily Active Usage average from self-reported survey data | yes | yes |
-| DAU Trend | Week-over-week DAU average and adoption % | yes | yes |
+| [DAU Survey](dau_metric.md) | Team Daily Active Usage average from self-reported survey data | yes | yes |
+| [DAU Trend](dau_metric.md#compute_dau_trend-output-shape) | Week-over-week DAU average and adoption % | yes | yes |
 | [Custom Trends](custom_trends.md) | Extension point for team-specific metrics (placeholder — not active by default) | yes | yes |
 
 > **MD report gap:** AI Assistance Trend and AI Usage Details are currently rendered only in the HTML
@@ -73,7 +73,7 @@ or future built-in metrics.
 |---|---|---|
 | `JIRA_SCHEMA_NAME` | _(unset)_ | CLI-only fallback (`python main.py`); which schema entry in `config/jira_schema.json` to use. UI runs use the active filter's `params.schema_name` from `config/jira_filters.json`, which overrides this env var via `/api/generate`. |
 | `JIRA_SPRINT_COUNT` | `10` | Number of past sprints to include |
-| `AI_ASSISTED_LABEL` | `AI_assistance` | Label that marks an issue as AI-assisted |
+| `AI_ASSISTED_LABEL` | _(empty)_ | Label that marks an issue as AI-assisted. When unset, classification falls back to `AI_TOOL_LABELS` / `AI_ACTION_LABELS` |
 | `AI_EXCLUDE_LABELS` | _(empty)_ | Issues with these labels are excluded from the AI % denominator |
 | `AI_TOOL_LABELS` | _(empty)_ | Labels identifying AI tools (e.g. `AI_Tool_Copilot`) |
 | `AI_ACTION_LABELS` | _(empty)_ | Labels identifying AI use-cases (e.g. `AI_Case_CodeGen`) |

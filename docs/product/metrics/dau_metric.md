@@ -59,7 +59,7 @@ Each survey submission is stored as a single JSON file with the following shape:
 | `username` | string | Alphanumeric identifier, min 2 chars; used to identify the respondent |
 | `role` | string | Selected role from the dropdown |
 | `usage` | string | Raw survey answer text (one of the four scoring options) |
-| `score` | number | Mapped days-per-week score (0, 1.5, 3.5, or 5) |
+| `score` | number | Mapped days-per-week score (0, 1.5, 3.5, or 5) — stored for reference; `compute_dau_metrics()` ignores this field and recomputes from `usage` via `_DAU_SCORE_MAP` |
 | `timestamp` | string | ISO-8601 with UTC offset (`+00:00`) |
 | `week` | string | ISO week string computed from the submission time (e.g. `2026-W13`) |
 
