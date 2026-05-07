@@ -33,6 +33,10 @@ JIRA_BOARD_ID = int(_board_id) if _board_id.isdigit() else None
 _sprint_count = os.getenv("JIRA_SPRINT_COUNT", "10").strip()
 JIRA_SPRINT_COUNT = int(_sprint_count) if _sprint_count.isdigit() else 10
 
+# Optional: case-insensitive substring filter applied to sprint names before the count cap.
+# When set, only sprints whose name contains this string are included.
+JIRA_SPRINT_NAME_FILTER = os.getenv("JIRA_SPRINT_NAME_FILTER", "").strip()
+
 # Optional: schema_name in config/jira_schema.json (CLI). When unset, default schema from file is used.
 JIRA_SCHEMA_NAME = os.getenv("JIRA_SCHEMA_NAME", "").strip() or None
 

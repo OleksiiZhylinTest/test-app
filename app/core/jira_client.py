@@ -62,6 +62,10 @@ def get_sprints(jira: Jira, board_id: int) -> list[dict[str, Any]]:
         start += page_size
     result_active = jira.get_all_sprints_from_board(board_id, state="active", start=0, limit=10)
     active = (result_active.get("values") or []) if result_active is not None else []
+    if config.JIRA_SPRINT_NAME_FILTER:
+        _nf = config.JIRA_SPRINT_NAME_FILTER.lower()
+        all_closed = [s for s in all_closed if _nf in (s.get("name") or "").lower()]
+        active = [s for s in active if _nf in (s.get("name") or "").lower()]
     ordered = sorted(all_closed, key=lambda s: s.get("startDate") or "", reverse=True)
     if not config.JIRA_CLOSED_SPRINTS_ONLY:
         ordered = (active + ordered)[: config.JIRA_SPRINT_COUNT]

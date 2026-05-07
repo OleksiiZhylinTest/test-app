@@ -555,6 +555,19 @@
             <p class="form-helper">For SCRUM: number of past sprints to include. For KANBAN: number of weeks to look back. Default: <strong>10</strong>.</p>
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="sprint-name-filter">Sprint Name Filter</label>
+            <input
+              class="form-input"
+              type="text"
+              id="sprint-name-filter"
+              name="JIRA_SPRINT_NAME_FILTER"
+              placeholder="e.g. Team 2"
+              autocomplete="off"
+            />
+            <p class="form-helper">Optional. Only sprints whose name contains this text (case-insensitive) are included. Leave blank to include all sprints from the board.</p>
+          </div>
+
         </div>
       </details>
 

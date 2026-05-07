@@ -183,6 +183,66 @@ def test_get_sprints_active_sprint_comes_first(monkeypatch, mock_jira):
     assert result[2]["name"] == "S1"
 
 
+def test_get_sprints_filtered_by_name_substring(monkeypatch, mock_jira):
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Team 2")
+    sprints = [
+        {"id": 1, "name": "Sprint 1 for Team 1", "startDate": "2026-01-01"},
+        {"id": 2, "name": "Sprint 1 for Team 2", "startDate": "2026-01-02"},
+        {"id": 3, "name": "Sprint 1 for Team 3", "startDate": "2026-01-03"},
+        {"id": 4, "name": "Sprint 2 for Team 1", "startDate": "2026-02-01"},
+        {"id": 5, "name": "Sprint 2 for Team 2", "startDate": "2026-02-02"},
+        {"id": 6, "name": "Sprint 2 for Team 3", "startDate": "2026-02-03"},
+        {"id": 7, "name": "Sprint 3 for Team 1", "startDate": "2026-03-01"},
+        {"id": 8, "name": "Sprint 3 for Team 2", "startDate": "2026-03-02"},
+        {"id": 9, "name": "Sprint 3 for Team 3", "startDate": "2026-03-03"},
+    ]
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {"values": sprints},
+        {"values": []},  # active
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    names = [s["name"] for s in result]
+    assert len(result) == 3
+    assert all("Team 2" in n for n in names)
+
+
+def test_get_sprints_name_filter_case_insensitive(monkeypatch, mock_jira):
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "team 2")
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {
+            "values": [
+                {"id": 1, "name": "Sprint 1 for Team 2", "startDate": "2026-01-01"},
+                {"id": 2, "name": "Sprint 1 for Team 1", "startDate": "2026-01-02"},
+            ]
+        },
+        {"values": []},  # active
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    assert len(result) == 1
+    assert result[0]["name"] == "Sprint 1 for Team 2"
+
+
+def test_get_sprints_empty_name_filter_returns_all(monkeypatch, mock_jira):
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "")
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {
+            "values": [
+                {"id": 1, "name": "Sprint 1 for Team 1", "startDate": "2026-01-01"},
+                {"id": 2, "name": "Sprint 1 for Team 2", "startDate": "2026-01-02"},
+            ]
+        },
+        {"values": []},  # active
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    assert len(result) == 2
+
+
 # ---------------------------------------------------------------------------
 # get_filter_jql
 # ---------------------------------------------------------------------------
