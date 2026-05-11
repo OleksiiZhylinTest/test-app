@@ -9,38 +9,35 @@ const reportsSelect = () => document.getElementById('reports-filter-select');
 let _activeFilter = '';
 let _lastEntries  = [];
 
-function _slugToTitle(slug) {
-  return String(slug || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 function renderReports(entries) {
   _lastEntries = entries || [];
   const listEl   = reportsList();
   const emptyEl  = reportsEmpty();
   const selectEl = reportsSelect();
 
-  // Rebuild dropdown options from unique ts values (insertion order = newest-folder-first)
+  // Rebuild dropdown options from unique filter names (insertion order = newest-first)
   if (selectEl) {
     const seen = new Set();
-    const slugs = [];
+    const names = [];
     for (const e of _lastEntries) {
-      if (!seen.has(e.ts)) { seen.add(e.ts); slugs.push(e.ts); }
+      const key = e.filter_name || e.ts;
+      if (!seen.has(key)) { seen.add(key); names.push(key); }
     }
     // Preserve current selection if still valid
     if (_activeFilter && !seen.has(_activeFilter)) _activeFilter = '';
     selectEl.innerHTML = '<option value="">All filters</option>';
-    for (const slug of slugs) {
+    for (const name of names) {
       const opt = document.createElement('option');
-      opt.value = slug;
-      opt.textContent = _slugToTitle(slug);
-      if (slug === _activeFilter) opt.selected = true;
+      opt.value = name;
+      opt.textContent = name;
+      if (name === _activeFilter) opt.selected = true;
       selectEl.appendChild(opt);
     }
   }
 
   // Compute display subset
   const visible = _activeFilter
-    ? _lastEntries.filter((e) => e.ts === _activeFilter)
+    ? _lastEntries.filter((e) => (e.filter_name || e.ts) === _activeFilter)
     : _lastEntries.slice(0, 20);
 
   listEl.innerHTML = '';
@@ -92,8 +89,14 @@ export async function loadReports() {
       if (Array.isArray(data.reports)) {
         const serverKeys = new Set(data.reports.map((r) => `${r.ts}|${r.html_file}`));
         const local = store.getJSON(STORE_KEYS.REPORTS) || [];
+        const localMap = {};
+        for (const r of local) { localMap[`${r.ts}|${r.html_file}`] = r; }
+        const enriched = data.reports.map((r) => ({
+          ...r,
+          filter_name: localMap[`${r.ts}|${r.html_file}`]?.filter_name || null,
+        }));
         const localOnly = local.filter((r) => !serverKeys.has(`${r.ts}|${r.html_file}`));
-        renderReports([...data.reports, ...localOnly]);
+        renderReports([...enriched, ...localOnly]);
         return;
       }
     } catch {
@@ -103,10 +106,10 @@ export async function loadReports() {
   renderReports(store.getJSON(STORE_KEYS.REPORTS) || []);
 }
 
-export function addReport(ts, htmlFile, mdFile) {
+export function addReport(ts, htmlFile, mdFile, filterName) {
   const saved = store.getJSON(STORE_KEYS.REPORTS) || [];
   if (!saved.find((r) => r.ts === ts && r.html_file === htmlFile)) {
-    saved.unshift({ ts, html_file: htmlFile || null, md_file: mdFile || null });
+    saved.unshift({ ts, html_file: htmlFile || null, md_file: mdFile || null, filter_name: filterName || null });
     store.setJSON(STORE_KEYS.REPORTS, saved.slice(0, 50));
   }
   loadReports();
