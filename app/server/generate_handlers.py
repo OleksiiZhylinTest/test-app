@@ -150,3 +150,27 @@ class GenerateHandlerMixin:
                         }
                     )
         self._send_json(200, {"reports": entries})
+
+    def _handle_delete_report(self) -> None:
+        qs = parse_qs(urlparse(self.path).query)
+        ts = urlunquote((qs.get("ts") or [""])[0]).strip()
+        file = urlunquote((qs.get("file") or [""])[0]).strip()
+        if not ts or not file or ".." in ts or ".." in file or "/" in ts or "\\" in ts:
+            self._send_json(400, {"ok": False, "error": "Invalid parameters"})
+            return
+        reports_dir = self._reports_dir()
+        html_path = reports_dir / ts / file
+        if not html_path.is_file():
+            self._send_json(404, {"ok": False, "error": "Report not found"})
+            return
+        html_path.unlink()
+        md_path = html_path.with_suffix(".md")
+        if md_path.is_file():
+            md_path.unlink()
+        folder = reports_dir / ts
+        try:
+            if folder.is_dir() and not any(folder.iterdir()):
+                folder.rmdir()
+        except OSError:
+            pass
+        self._send_json(200, {"ok": True})

@@ -255,5 +255,7 @@ class HandlerBase(BaseHTTPRequestHandler):
         elif path.startswith("/api/filters/"):
             slug = urlunquote(path[len("/api/filters/") :])
             self._handle_delete_filter(slug)
+        elif path == "/api/reports":
+            self._handle_delete_report()
         else:
             self._send_json(404, {"ok": False, "error": "Not found"})

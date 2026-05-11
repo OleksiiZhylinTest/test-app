@@ -21,16 +21,16 @@
 ## Test Pyramid
 
 ```text
-              /  E2E  \              119 tests  (17%)  (Playwright browser UI)  → tests/e2e/
+              /  E2E  \              119 tests  (16%)  (Playwright browser UI)  → tests/e2e/
              /----------\
             / Integration \           19 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
-          /    Component      \      201 tests  (28%)  (filesystem, HTTP, data shapes)        → tests/component/
+          /    Component      \      205 tests  (28%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
         /        Unit            \   381 tests  (53%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     720 tests total
+                                     724 tests total
 ```
 
 ## Coverage Matrix
@@ -100,7 +100,7 @@ tests\run_e2e_tests.bat
 | `unit/test_logging_setup.py`      | Unit        |   22  | Logging setup, SUCCESS level, file creation, format |
 | `component/test_report_html.py`   | Component   |   31  | HTML template rendering, visibility |
 | `component/test_report_md.py`     | Component   |   37  | Markdown generation                 |
-| `component/test_server.py`        | Component   |   37  | HTTP routes, CORS, SSE              |
+| `component/test_server.py`        | Component   |   41  | HTTP routes, CORS, SSE              |
 | `component/test_contracts.py`     | Component   |   11  | Data shapes across boundaries       |
 | `integration/test_integration.py` | Integration |    6  | Full pipeline, filter flow, server  |
 | `integration/test_fetch_ssl_cert.py` | Integration |   10  | fetch_ssl_cert function + CLI smoke |
