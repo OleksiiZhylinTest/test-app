@@ -199,14 +199,15 @@ def test_positive_end_to_end_flow(page: Page, live_server_url: str) -> None:
             gen_select.select_option(label=_FILTER_NAME)
             expect(gen_select).not_to_have_class(re.compile(r"invalid"))
 
-        with allure.step("Click Generate Report → button enters busy state"):
+        with allure.step("Click Generate Report → generation starts"):
+            log = page.locator("#log-output")
             btn = page.locator("#btn-generate")
             btn.click()
-            expect(btn).to_be_disabled(timeout=5_000)
+            # "Starting report generation" is written synchronously inside runGenerateSSE()
+            # right after setBusy() on the same call stack — persists after SSE completes.
+            expect(log).to_contain_text("Starting report generation", timeout=5_000)
 
         with allure.step("Assert SSE output streams into log"):
-            log = page.locator("#log-output")
-            expect(log).to_contain_text("Starting report generation", timeout=10_000)
             expect(log).to_contain_text("Reports written")
 
         with allure.step("Assert generation completes and button re-enables"):
