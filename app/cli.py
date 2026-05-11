@@ -106,13 +106,13 @@ def main() -> int:
 
     metrics_dict["report_name"] = config.REPORT_NAME or metrics_dict.get("filter_name") or "AI Adoption Metrics Report"
 
-    folder_name = _timestamp_folder_name(metrics_dict["generated_at"])
-    report_dir = REPORTS_DIR / folder_name
+    stem = _report_name_slug(metrics_dict["report_name"])
+    ts = _timestamp_folder_name(metrics_dict["generated_at"])
+    report_dir = REPORTS_DIR / stem
     report_dir.mkdir(parents=True, exist_ok=True)
 
-    stem = _report_name_slug(metrics_dict["report_name"])
-    path_html = report_dir / f"{stem}.html"
-    path_md = report_dir / f"{stem}.md"
+    path_html = report_dir / f"{stem}_{ts}.html"
+    path_md = report_dir / f"{stem}_{ts}.md"
 
     section_visibility = {
         "velocity_trend": config.METRIC_VELOCITY,

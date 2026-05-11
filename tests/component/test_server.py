@@ -250,13 +250,22 @@ def test_get_reports_returns_empty_list_when_no_reports(server_url, tmp_path):
 
 
 def test_get_reports_returns_sorted_list(server_url, tmp_path):
-    """GET /api/reports returns folders sorted newest-first with ts/html_file/md_file keys."""
+    """GET /api/reports returns one entry per HTML file, folders sorted newest-first."""
     import app.server as srv
 
     reports_dir = tmp_path / "generated" / "reports"
     reports_dir.mkdir(parents=True)
-    for ts in ("2026-01-01T10-00-00", "2026-03-15T12-00-00", "2025-12-01T08-00-00"):
-        (reports_dir / ts).mkdir()
+    # Two filter folders, each with HTML+MD files
+    filter_a = reports_dir / "filter_a"
+    filter_a.mkdir()
+    (filter_a / "filter_a_2026-03-15T12-00-00.html").touch()
+    (filter_a / "filter_a_2026-03-15T12-00-00.md").touch()
+    (filter_a / "filter_a_2026-01-01T10-00-00.html").touch()
+    (filter_a / "filter_a_2026-01-01T10-00-00.md").touch()
+    filter_b = reports_dir / "filter_b"
+    filter_b.mkdir()
+    (filter_b / "filter_b_2025-12-01T08-00-00.html").touch()
+    (filter_b / "filter_b_2025-12-01T08-00-00.md").touch()
 
     orig = srv.ROOT
     srv.ROOT = tmp_path
@@ -268,13 +277,15 @@ def test_get_reports_returns_sorted_list(server_url, tmp_path):
 
     reports = data["reports"]
     assert len(reports) == 3
-    # Sorted descending by folder name
-    assert reports[0]["ts"] == "2026-03-15T12-00-00"
-    assert reports[1]["ts"] == "2026-01-01T10-00-00"
-    assert reports[2]["ts"] == "2025-12-01T08-00-00"
-    for entry in reports:
-        assert entry["html_file"] == "report.html"
-        assert entry["md_file"] == "report.md"
+    # filter_b folder sorts after filter_a alphabetically (descending → filter_b first)
+    assert reports[0]["ts"] == "filter_b"
+    assert reports[0]["html_file"] == "filter_b_2025-12-01T08-00-00.html"
+    assert reports[0]["md_file"] == "filter_b_2025-12-01T08-00-00.md"
+    # filter_a has two files; newest (2026-03-15) comes first within the folder
+    assert reports[1]["ts"] == "filter_a"
+    assert reports[1]["html_file"] == "filter_a_2026-03-15T12-00-00.html"
+    assert reports[2]["ts"] == "filter_a"
+    assert reports[2]["html_file"] == "filter_a_2026-01-01T10-00-00.html"
 
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { IS_SERVED, REPORT_OPTS_STORAGE_KEY, RPT_METRIC_IDS } from './config.js';
 import { openGenerateStream } from './api.js';
-import { addReport } from './reports.js';
+import { addReport, loadReports } from './reports.js';
 
 const GENERATE_BTN_IDLE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg> Generate Report`;
 
@@ -135,7 +135,7 @@ function runGenerateSSE(log, select, setBusy, resetBtn) {
 
   evtSource.onmessage = (e) => {
     const data = e.data;
-    const tsMatch = data.match(/generated[\\/]reports[\\/]([\dT:-]+)[\\/]/);
+    const tsMatch = data.match(/generated[\\/]reports[\\/]([^/\\]+)[\\/]/);
     if (tsMatch) lastReportTs = tsMatch[1];
 
     if (/reports written/i.test(data)) {
@@ -155,6 +155,7 @@ function runGenerateSSE(log, select, setBusy, resetBtn) {
     evtSource.close();
     log.line('✓ Done.', 'log-ok');
     if (lastReportTs) addReport(lastReportTs, lastHtmlFile, lastMdFile);
+    else loadReports();
     resetBtn();
   });
 
