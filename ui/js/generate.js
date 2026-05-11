@@ -154,7 +154,7 @@ function runGenerateSSE(log, select, setBusy, resetBtn) {
   evtSource.addEventListener('done', () => {
     evtSource.close();
     log.line('✓ Done.', 'log-ok');
-    if (lastReportTs) addReport(lastReportTs, lastHtmlFile, lastMdFile);
+    if (lastReportTs) addReport(lastReportTs, lastHtmlFile, lastMdFile, filterName);
     else loadReports();
     resetBtn();
   });
@@ -220,6 +220,6 @@ async function runGenerateSimulation(log, select, setBusy, resetBtn) {
   log.line(`Rendering Markdown report → ${outPath}${stem}.md`, 'log-ok');
   await sleep(150);
   log.line(`Done. ✓  Output written to ${outPath}`, 'log-ok');
-  addReport(ts, `${stem}.html`, `${stem}.md`);
+  addReport(ts, `${stem}.html`, `${stem}.md`, filterName);
   resetBtn();
 }
