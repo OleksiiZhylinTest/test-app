@@ -54,6 +54,14 @@ export async function deleteFilter(slug) {
   return fetch(`/api/filters/${encodeURIComponent(slug)}`, { method: 'DELETE' });
 }
 
+export async function deleteReport(ts, file) {
+  const res = await fetch(
+    `/api/reports?ts=${encodeURIComponent(ts)}&file=${encodeURIComponent(file)}`,
+    { method: 'DELETE' }
+  );
+  return res.json();
+}
+
 export async function getSchemas() {
   const res = await fetch('/api/schemas');
   return res.json();

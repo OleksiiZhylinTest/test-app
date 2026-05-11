@@ -171,6 +171,12 @@
         <div class="card-title">Last Generated Reports</div>
         <div class="card-subtitle">Previously generated reports in the <code>generated/reports/</code> folder.</div>
 
+        <div style="margin-bottom:10px;">
+          <label class="form-label" for="reports-filter-select">Filter</label>
+          <select class="form-input" id="reports-filter-select">
+            <option value="">All filters</option>
+          </select>
+        </div>
         <ul class="reports-list" id="reports-list" aria-label="Previously generated reports">
           <!-- Populated by JS -->
         </ul>
@@ -599,6 +605,10 @@
         <div class="card-title">Last Created Filters</div>
         <div class="card-subtitle">Previously saved Jira filters. Showing last 20 by creation date.</div>
 
+        <div style="margin-bottom:10px;">
+          <input class="form-input" type="search" id="filters-search"
+                 placeholder="Search filters…" autocomplete="off" />
+        </div>
         <ul class="reports-list" id="filters-list" aria-label="Previously saved filters">
           <!-- Populated by JS -->
         </ul>

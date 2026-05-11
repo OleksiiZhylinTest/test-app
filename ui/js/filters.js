@@ -14,13 +14,17 @@ let _filterCache = [];
 function renderFilters(entries) {
   const filtersList  = document.getElementById('filters-list');
   const filtersEmpty = document.getElementById('filters-empty');
+  const searchQuery  = (document.getElementById('filters-search')?.value || '').toLowerCase().trim();
+  const displayed    = searchQuery
+    ? (entries || []).filter((e) => (e.filter_name || e.name || '').toLowerCase().includes(searchQuery))
+    : (entries || []);
   filtersList.innerHTML = '';
-  if (!entries || entries.length === 0) {
+  if (!displayed.length) {
     filtersEmpty.hidden = false;
     return;
   }
   filtersEmpty.hidden = true;
-  entries.slice(0, 20).forEach((entry) => {
+  displayed.forEach((entry) => {
     const name      = entry.filter_name || entry.name || '(unnamed)';
     const slug      = entry.slug || entry.filename || '';
     const jql       = entry.jql || '';
@@ -96,7 +100,7 @@ function renderFilters(entries) {
   if (genSel) {
     const prevVal = genSel.value;
     genSel.innerHTML = '<option value="">— Select a saved filter —</option>';
-    entries.slice(0, 20).forEach((entry) => {
+    entries.forEach((entry) => {
       const name       = entry.filter_name || entry.name || '(unnamed)';
       const slug       = entry.slug || entry.filename || '';
       const jql        = entry.jql || '';
@@ -328,6 +332,11 @@ export function initFilters(filterLog) {
   if (!btnSaveJiraFilter) return;
 
   populateSchemaSelect();
+
+  const filtersSearch = document.getElementById('filters-search');
+  if (filtersSearch) {
+    filtersSearch.addEventListener('input', () => renderFilters(_filterCache));
+  }
 
   const nameSelect = document.getElementById('filter-name-select');
   if (nameSelect) {

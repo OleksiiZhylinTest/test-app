@@ -289,6 +289,112 @@ def test_get_reports_returns_sorted_list(server_url, tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# DELETE /api/reports
+# ---------------------------------------------------------------------------
+
+
+def test_delete_report_removes_files_and_folder(server_url, tmp_path):
+    """DELETE /api/reports removes HTML+MD and the folder when it becomes empty."""
+    import app.server as srv
+
+    reports_dir = tmp_path / "generated" / "reports"
+    folder = reports_dir / "alex_report"
+    folder.mkdir(parents=True)
+    html_file = folder / "alex_report_2026-05-11T10-30-00.html"
+    md_file = folder / "alex_report_2026-05-11T10-30-00.md"
+    html_file.touch()
+    md_file.touch()
+
+    orig = srv.ROOT
+    srv.ROOT = tmp_path
+    try:
+        req = urllib.request.Request(
+            f"{server_url}/api/reports?ts=alex_report&file=alex_report_2026-05-11T10-30-00.html",
+            method="DELETE",
+        )
+        resp = urllib.request.urlopen(req)
+        data = json.loads(resp.read())
+    finally:
+        srv.ROOT = orig
+
+    assert data == {"ok": True}
+    assert not html_file.exists()
+    assert not md_file.exists()
+    assert not folder.exists()
+
+
+def test_delete_report_keeps_folder_when_other_files_remain(server_url, tmp_path):
+    """DELETE /api/reports keeps the folder when other HTML files still exist."""
+    import app.server as srv
+
+    reports_dir = tmp_path / "generated" / "reports"
+    folder = reports_dir / "my_report"
+    folder.mkdir(parents=True)
+    (folder / "my_report_2026-05-11T10-00-00.html").touch()
+    (folder / "my_report_2026-05-11T10-00-00.md").touch()
+    (folder / "my_report_2026-05-10T09-00-00.html").touch()
+
+    orig = srv.ROOT
+    srv.ROOT = tmp_path
+    try:
+        req = urllib.request.Request(
+            f"{server_url}/api/reports?ts=my_report&file=my_report_2026-05-11T10-00-00.html",
+            method="DELETE",
+        )
+        resp = urllib.request.urlopen(req)
+        data = json.loads(resp.read())
+    finally:
+        srv.ROOT = orig
+
+    assert data == {"ok": True}
+    assert not (folder / "my_report_2026-05-11T10-00-00.html").exists()
+    assert not (folder / "my_report_2026-05-11T10-00-00.md").exists()
+    assert (folder / "my_report_2026-05-10T09-00-00.html").exists()
+    assert folder.exists()
+
+
+def test_delete_report_returns_404_for_missing(server_url, tmp_path):
+    """DELETE /api/reports returns 404 when the file does not exist."""
+    import app.server as srv
+
+    reports_dir = tmp_path / "generated" / "reports"
+    reports_dir.mkdir(parents=True)
+
+    orig = srv.ROOT
+    srv.ROOT = tmp_path
+    try:
+        with pytest.raises(urllib.error.HTTPError) as exc_info:
+            req = urllib.request.Request(
+                f"{server_url}/api/reports?ts=no_filter&file=no_file.html",
+                method="DELETE",
+            )
+            urllib.request.urlopen(req)
+    finally:
+        srv.ROOT = orig
+
+    assert exc_info.value.code == 404
+
+
+def test_delete_report_rejects_invalid_params(server_url, tmp_path):
+    """DELETE /api/reports returns 400 for empty or path-traversal params."""
+    import app.server as srv
+
+    orig = srv.ROOT
+    srv.ROOT = tmp_path
+    try:
+        for qs in ["ts=&file=report.html", "ts=../etc&file=report.html", "ts=ok&file=../../etc"]:
+            with pytest.raises(urllib.error.HTTPError) as exc_info:
+                req = urllib.request.Request(
+                    f"{server_url}/api/reports?{qs}",
+                    method="DELETE",
+                )
+                urllib.request.urlopen(req)
+            assert exc_info.value.code == 400, f"expected 400 for ?{qs}"
+    finally:
+        srv.ROOT = orig
+
+
+# ---------------------------------------------------------------------------
 # GET /api/cert-status
 # ---------------------------------------------------------------------------
 
