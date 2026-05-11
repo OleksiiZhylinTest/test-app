@@ -58,6 +58,14 @@
       >Filter Builder</button>
       <button
         role="tab"
+        id="tab-dau"
+        aria-controls="panel-dau"
+        aria-selected="false"
+        tabindex="-1"
+        class="tab-btn"
+      >DAU Data</button>
+      <button
+        role="tab"
         id="tab-generate"
         aria-controls="panel-generate"
         aria-selected="true"
@@ -901,6 +909,213 @@
       </div>
 
     </div><!-- /panel-schema -->
+
+    <!-- ── Tab: DAU Data ── -->
+    <div role="tabpanel" id="panel-dau" aria-labelledby="tab-dau" class="tab-panel" hidden>
+
+      <div class="report-desc" role="note">
+        <span class="report-desc-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0747A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </span>
+        <p>
+          View and manage <strong>Daily Active Usage (DAU)</strong> survey data per team. Import the
+          weekly Excel export from Microsoft Teams Polls, manually add or correct individual records,
+          and remove stale entries — all before generating the final report.
+        </p>
+      </div>
+
+      <!-- Filter selector -->
+      <div class="card">
+        <div class="card-title">Team / Filter</div>
+        <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;">
+          <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0;">
+            <label class="form-label" for="dau-filter-select">Select Team</label>
+            <select class="form-input" id="dau-filter-select" aria-label="Select team filter">
+              <option value="">— Select a team —</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" id="btn-dau-load" type="button" style="flex-shrink:0;margin-bottom:0;" aria-label="Load DAU records for selected team">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/>
+            </svg>
+            Load Records
+          </button>
+        </div>
+        <p class="form-error" id="err-dau-no-filter" style="margin-top:8px;">Please select a team filter first.</p>
+      </div>
+
+      <!-- Import from Excel -->
+      <div class="card">
+        <details class="filter-details" id="dau-import-details">
+          <summary>Import from Excel (.xlsx)</summary>
+          <div class="filter-details-body">
+            <p class="form-helper" style="margin-bottom:12px;">
+              Upload the weekly Microsoft Teams Polls export. Each row maps to one DAU record.
+              Existing records for the same user and week are kept unless the imported timestamp is newer.
+            </p>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="dau-import-week">Reporting week</label>
+                <select id="dau-import-week" class="form-input" aria-label="Select reporting week for import"></select>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:240px;margin-bottom:0;">
+                <label class="form-label" for="dau-import-file">Excel file</label>
+                <input
+                  class="form-input"
+                  type="file"
+                  id="dau-import-file"
+                  accept=".xlsx"
+                  aria-label="Select Excel file to import"
+                  style="padding:7px 10px;"
+                />
+              </div>
+              <button class="btn btn-primary" id="btn-dau-import" type="button" style="flex-shrink:0;margin-bottom:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Import
+              </button>
+            </div>
+            <p id="dau-import-status" class="form-helper" aria-live="polite" style="margin-top:10px;min-height:1.4em;"></p>
+          </div>
+        </details>
+      </div>
+
+      <!-- Records table -->
+      <div class="card">
+        <div class="card-title" style="flex-wrap:wrap;gap:0.5rem;">
+          <span>Records
+            <span id="dau-records-count" style="font-weight:400;font-size:0.85rem;color:var(--text-muted);margin-left:8px;"></span>
+          </span>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-left:auto;">
+            <select id="dau-page-size" class="form-input"
+                    style="width:auto;padding:4px 8px;font-size:0.8rem;"
+                    aria-label="Records per page">
+              <option value="50">Show 50</option>
+              <option value="100" selected>Show 100</option>
+              <option value="200">Show 200</option>
+              <option value="0">Show all</option>
+            </select>
+            <span id="dau-records-displayed" style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;"></span>
+          </div>
+        </div>
+        <!-- Record filters -->
+        <div id="dau-record-filters" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-bottom:0.75rem;">
+          <select id="dau-filter-week" class="form-input" style="width:auto;"
+                  aria-label="Filter by week">
+            <option value="">— All weeks —</option>
+          </select>
+          <input type="search" id="dau-filter-name" class="form-input" style="width:auto;"
+                 placeholder="Filter by name…" aria-label="Filter by username">
+          <select id="dau-filter-role" class="form-input" style="width:auto;"
+                  aria-label="Filter by role">
+            <option value="">— All roles —</option>
+            <option value="Developer">Developer</option>
+            <option value="QA / Test Engineer">QA / Test Engineer</option>
+            <option value="Business Analyst">Business Analyst</option>
+            <option value="Delivery Manager / Lead">Delivery Manager / Lead</option>
+            <option value="Other">Other</option>
+          </select>
+          <button id="btn-dau-clear-filters" class="btn btn-secondary"
+                  style="padding:6px 12px;" type="button">Clear filters</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="dau-records-table" style="width:100%;border-collapse:collapse;font-size:0.875rem;" aria-label="DAU records">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Week</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Username</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Role</th>
+                <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Usage</th>
+                <th style="text-align:right;padding:8px 10px;color:var(--text-muted);font-weight:600;">Score</th>
+                <th style="text-align:center;padding:8px 10px;color:var(--text-muted);font-weight:600;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dau-records-tbody">
+              <tr id="dau-empty-row">
+                <td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">
+                  Select a team and click Load Records.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add / Edit Record form -->
+      <div class="card">
+        <details class="filter-details" id="dau-form-details">
+          <summary id="dau-form-summary">Add Record</summary>
+          <div class="filter-details-body">
+            <input type="hidden" id="dau-rec-editing-key" value="" />
+
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:150px;">
+                <label class="form-label" for="dau-rec-week">ISO Week <span class="required-star" aria-hidden="true">*</span></label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="dau-rec-week"
+                  placeholder="e.g. 2026-W20"
+                  pattern="\d{4}-W\d{2}"
+                  autocomplete="off"
+                  aria-required="true"
+                />
+              </div>
+              <div class="form-group" style="flex:1;min-width:150px;">
+                <label class="form-label" for="dau-rec-username">Username <span class="required-star" aria-hidden="true">*</span></label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="dau-rec-username"
+                  placeholder="e.g. john_doe"
+                  autocomplete="off"
+                  aria-required="true"
+                />
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:180px;">
+                <label class="form-label" for="dau-rec-role">Role</label>
+                <select class="form-input" id="dau-rec-role" aria-label="Role">
+                  <option value="">— Not specified —</option>
+                  <option>Developer</option>
+                  <option>QA / Test Engineer</option>
+                  <option>Business Analyst</option>
+                  <option>Delivery Manager / Lead</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label class="form-label" for="dau-rec-usage">Usage <span class="required-star" aria-hidden="true">*</span></label>
+                <select class="form-input" id="dau-rec-usage" aria-required="true" aria-label="Usage frequency">
+                  <option value="">— Select usage —</option>
+                  <option>Every day (5 days)</option>
+                  <option>Most days (3–4 days)</option>
+                  <option>Rarely (1–2 days)</option>
+                  <option>Not used</option>
+                </select>
+              </div>
+            </div>
+
+            <p class="form-error" id="err-dau-record" style="margin-bottom:8px;"></p>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="btn-dau-save-record" type="button">Save Record</button>
+              <button class="btn btn-secondary" id="btn-dau-cancel-edit" type="button" style="display:none;">Cancel Edit</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+    </div><!-- /panel-dau -->
 
 
 

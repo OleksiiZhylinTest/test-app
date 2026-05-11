@@ -198,6 +198,8 @@ class HandlerBase(BaseHTTPRequestHandler):
             self._handle_get_reports()
         elif path == "/api/filters":
             self._handle_get_filters()
+        elif path == "/api/dau/records":
+            self._handle_dau_records_get()
         elif path == "/api/data-preview":
             self._handle_data_preview()
         elif path.startswith("/api/schema-detail/"):
@@ -241,6 +243,10 @@ class HandlerBase(BaseHTTPRequestHandler):
             self._handle_post_schema()
         elif path == "/api/filters":
             self._handle_post_filter()
+        elif path == "/api/dau/import":
+            self._handle_dau_import()
+        elif path == "/api/dau/records":
+            self._handle_dau_records_post()
         else:
             self._send_json(404, {"ok": False, "error": "Not found"})
 
@@ -257,5 +263,7 @@ class HandlerBase(BaseHTTPRequestHandler):
             self._handle_delete_filter(slug)
         elif path == "/api/reports":
             self._handle_delete_report()
+        elif path == "/api/dau/records":
+            self._handle_dau_records_delete()
         else:
             self._send_json(404, {"ok": False, "error": "Not found"})

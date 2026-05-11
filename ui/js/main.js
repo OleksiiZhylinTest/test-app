@@ -10,6 +10,7 @@ import { initFilterOptions } from './filter-options.js';
 import { initReportsFilter } from './reports.js';
 import { showFileModeBannerIfNeeded } from './file-mode-banner.js';
 import { restoreValues } from './restore.js';
+import { initDau } from './dau.js';
 
 try {
   const { activate: activateTab } = initTabs();
@@ -35,6 +36,7 @@ try {
   initGenerate(mainLog);
   initFilterOptions();
   initReportsFilter();
+  initDau();
   showFileModeBannerIfNeeded();
 
   window.restoreValuesReady = false;

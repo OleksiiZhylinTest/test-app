@@ -49,6 +49,7 @@ from ._base import (  # noqa: E402
 from .cert_handlers import CertHandlerMixin  # noqa: E402
 from .config_handlers import ConfigHandlerMixin  # noqa: E402
 from .connection_handlers import ConnectionHandlerMixin  # noqa: E402
+from .dau_handlers import DauHandlerMixin  # noqa: E402
 from .data_handlers import DataHandlerMixin  # noqa: E402
 from .filter_handlers import FilterHandlerMixin  # noqa: E402
 from .generate_handlers import GenerateHandlerMixin  # noqa: E402
@@ -63,6 +64,7 @@ class Handler(
     CertHandlerMixin,
     SchemaHandlerMixin,
     FilterHandlerMixin,
+    DauHandlerMixin,
     DataHandlerMixin,
     GenerateHandlerMixin,
     HandlerBase,

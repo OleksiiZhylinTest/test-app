@@ -151,6 +151,25 @@ on each Jira instance. Schemas are stored in `config/jira_schema.json`; the tab 
 
 ---
 
+### DAU Data tab (`#panel-dau`)
+
+A dedicated tab in `ui/index.html` for managing DAU (Daily Active Usage) survey data per team.
+
+| Element | Description |
+|---------|-------------|
+| Filter selector | Dropdown listing all configured Jira filters (teams); populated on tab activation |
+| Load button | Fetches records via `GET /api/dau/records?filter=<slug>` and renders the table |
+| Import from Excel | `<details>` section; file input accepts `.xlsx` MS Teams Polls exports; `POST /api/dau/import?filter=<slug>` with base64-encoded file; displays imported/skipped/warning counts after import |
+| Records table | Columns: Week, Username, Role, Usage, Score, Actions; Edit and Delete buttons per row |
+| Add / Edit Record form | `<details>` section; fields: ISO Week (e.g. `2026-W20`), Username, Role, Usage frequency; Save posts to `POST /api/dau/records?filter=<slug>`; Cancel Edit resets the form |
+| Delete | Confirmation dialog; `DELETE /api/dau/records?filter=<slug>&username=&week=`; adds deletion marker to `manual_overrides.json` |
+
+**Import column detection** is configured in `config/dau_import_config.json` (`column_detection` and `answer_mapping` keys). Answer text from the Excel export is case-insensitively mapped to canonical values before storing. Username is derived from the email address (prefix before `@`).
+
+**Manual overrides** are persisted in `<DAU_PATH>/manual_overrides.json` as a JSON array. Records survive report regeneration and are applied on top of imported data both in the editor view and in the normalizer pipeline.
+
+---
+
 ### DAU Survey page (`ui/dau_survey.html`)
 
 A self-contained survey form served statically by the dev server (and usable as a standalone file). Team members open it to submit their weekly AI usage frequency. Submissions are stored as `dau_*.json` files in the active filter's `<DAU_PATH>/original/` directory and processed by `app/core/dau_normalizer.py` before each report run.
