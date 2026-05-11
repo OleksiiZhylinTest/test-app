@@ -133,16 +133,20 @@ class GenerateHandlerMixin:
                 pass
 
     def _handle_get_reports(self) -> None:
-        """Return generated report folders, newest-first."""
+        """Return generated report files, one entry per HTML file, newest-first."""
         reports_dir = self._reports_dir()
         entries: list[dict[str, str]] = []
         if reports_dir.is_dir():
             for folder in sorted(reports_dir.iterdir(), reverse=True):
                 if not folder.is_dir():
                     continue
-                html_files = list(folder.glob("*.html"))
-                md_files = list(folder.glob("*.md"))
-                html_name = html_files[0].name if html_files else "report.html"
-                md_name = md_files[0].name if md_files else "report.md"
-                entries.append({"ts": folder.name, "html_file": html_name, "md_file": md_name})
+                md_map = {p.stem: p.name for p in folder.glob("*.md")}
+                for hf in sorted(folder.glob("*.html"), key=lambda p: p.name, reverse=True):
+                    entries.append(
+                        {
+                            "ts": folder.name,
+                            "html_file": hf.name,
+                            "md_file": md_map.get(hf.stem, "report.md"),
+                        }
+                    )
         self._send_json(200, {"reports": entries})
