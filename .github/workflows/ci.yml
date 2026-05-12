@@ -99,10 +99,45 @@ env:
 
 jobs:
 
+  # ── Detect Context ────────────────────────────────────────────────────────────
+  # Checks whether the current push is already covered by an open PR.
+  # When skip_push=true, all downstream jobs skip their push-triggered path so
+  # tests run exactly once (via the pull_request event) instead of twice.
+  detect-context:
+    name: Detect Context
+    runs-on: ubuntu-latest
+    outputs:
+      skip_push: ${{ steps.check.outputs.skip_push }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            COUNT=$(gh pr list \
+              --head "${{ github.ref_name }}" \
+              --repo "${{ github.repository }}" \
+              --state open \
+              --json number \
+              --jq 'length')
+            if [[ "$COUNT" -gt 0 ]]; then
+              echo "skip_push=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "skip_push=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "skip_push=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # ── Lint ─────────────────────────────────────────────────────────────────────
   lint:
     name: Lint (ruff)
     runs-on: ubuntu-latest
+    needs: [detect-context]
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && needs.detect-context.outputs.skip_push != 'true')
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -121,9 +156,13 @@ jobs:
   smoke-tests:
     name: Smoke Tests
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_smoke) ||
-      (github.event_name != 'workflow_dispatch' &&
+      (github.event_name == 'pull_request' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'push' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     steps:
       - uses: actions/checkout@v6
@@ -181,10 +220,15 @@ jobs:
   sanity-tests:
     name: Sanity Tests
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_sanity) ||
-      (github.event_name != 'workflow_dispatch' &&
+      (github.event_name == 'pull_request' &&
        vars.ENABLE_SANITY == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'push' &&
+       vars.ENABLE_SANITY == 'true' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     steps:
       - uses: actions/checkout@v6
@@ -240,10 +284,12 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_unit) ||
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        vars.ENABLE_UNIT == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     steps:
@@ -285,10 +331,12 @@ jobs:
   component-tests:
     name: Component Tests
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_component) ||
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        vars.ENABLE_COMPONENT == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     steps:
@@ -330,10 +378,15 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_integration) ||
-      (github.event_name != 'workflow_dispatch' &&
+      (github.event_name == 'pull_request' &&
        vars.ENABLE_INTEGRATION == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'push' &&
+       vars.ENABLE_INTEGRATION == 'true' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     env:
       JIRA_URL: ${{ secrets.JIRA_URL }}
@@ -378,10 +431,15 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_e2e) ||
-      (github.event_name != 'workflow_dispatch' &&
+      (github.event_name == 'pull_request' &&
        vars.ENABLE_E2E == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'push' &&
+       vars.ENABLE_E2E == 'true' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     env:
       JIRA_URL: ${{ secrets.JIRA_URL }}
@@ -446,10 +504,15 @@ jobs:
   windows-tests:
     name: Windows-specific Tests
     runs-on: windows-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_windows) ||
-      (github.event_name != 'workflow_dispatch' &&
+      (github.event_name == 'pull_request' &&
        vars.ENABLE_WINDOWS_TESTS == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'push' &&
+       vars.ENABLE_WINDOWS_TESTS == 'true' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     steps:
       - uses: actions/checkout@v6
@@ -483,10 +546,15 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    needs: [detect-context]
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_security) ||
-      (github.event_name != 'workflow_dispatch' &&
+      (github.event_name == 'pull_request' &&
        vars.ENABLE_SECURITY_SCAN == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'push' &&
+       vars.ENABLE_SECURITY_SCAN == 'true' &&
+       needs.detect-context.outputs.skip_push != 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
     steps:
       - uses: actions/checkout@v6
