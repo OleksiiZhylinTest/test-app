@@ -937,12 +937,6 @@
               <option value="">— Select a team —</option>
             </select>
           </div>
-          <button class="btn btn-secondary" id="btn-dau-load" type="button" style="flex-shrink:0;margin-bottom:0;" aria-label="Load DAU records for selected team">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5"/>
-            </svg>
-            Load Records
-          </button>
         </div>
         <p class="form-error" id="err-dau-no-filter" style="margin-top:8px;">Please select a team filter first.</p>
       </div>
@@ -1009,7 +1003,7 @@
                 </thead>
                 <tbody id="dau-roster-tbody">
                   <tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text-muted);">
-                    No roster entries. Select a team and click Load Records first.
+                    No roster entries. Select a team to load records.
                   </td></tr>
                 </tbody>
               </table>
@@ -1064,6 +1058,9 @@
                   aria-label="Filter by role">
             <option value="">— All roles —</option>
           </select>
+          <button id="btn-dau-delete-selected" class="btn"
+                  style="padding:6px 12px;background:var(--error);color:#fff;border-color:var(--error);"
+                  type="button" disabled>Delete Selected</button>
           <button id="btn-dau-clear-filters" class="btn btn-secondary"
                   style="padding:6px 12px;" type="button">Clear filters</button>
         </div>
@@ -1071,6 +1068,9 @@
           <table id="dau-records-table" style="width:100%;border-collapse:collapse;font-size:0.875rem;" aria-label="DAU records">
             <thead>
               <tr style="border-bottom:2px solid var(--border);">
+                <th style="padding:8px 10px;text-align:center;width:36px;">
+                  <input type="checkbox" id="dau-select-all" aria-label="Select all records" />
+                </th>
                 <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Week</th>
                 <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Username</th>
                 <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:600;">Role</th>
@@ -1081,8 +1081,8 @@
             </thead>
             <tbody id="dau-records-tbody">
               <tr id="dau-empty-row">
-                <td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">
-                  Select a team and click Load Records.
+                <td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">
+                  Select a team to load records.
                 </td>
               </tr>
             </tbody>
