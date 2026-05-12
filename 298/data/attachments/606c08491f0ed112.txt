@@ -1,0 +1,2 @@
+INFO     test.credentials:test_logging_setup.py:227 Starting pipeline run
+INFO     test.credentials:test_logging_setup.py:228 Connecting to Jira instance
