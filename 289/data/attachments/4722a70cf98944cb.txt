@@ -1,0 +1,4 @@
+DEBUG    app.core.jira_client:jira_client.py:180 Fetching KANBAN data for board 1 (as ISO week periods)
+DEBUG    app.core.jira_client:jira_client.py:225 Fetching KANBAN issues (jql='updated >= "2026-04-27"')
+DEBUG    app.core.jira_client:jira_client.py:250 Fetched 2 total KANBAN issue(s)
+INFO     app.core.jira_client:jira_client.py:263 KANBAN data ready: 2 period(s), 2 issue(s) placed in periods

@@ -1,0 +1,3 @@
+DEBUG    app.core.jira_client:jira_client.py:131 Fetching sprint data for board 5
+DEBUG    app.core.jira_client:jira_client.py:135 Applying filter JQL: project = TEST
+INFO     app.core.jira_client:jira_client.py:144 Sprint data ready: 2 sprint(s), 2 total issue(s)

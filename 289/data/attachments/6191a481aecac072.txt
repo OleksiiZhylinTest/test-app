@@ -1,0 +1,2 @@
+INFO     app.cli:cli.py:71 Report generation started (project_type=SCRUM, estimation_type=StoryPoints)
+DEBUG    app.core.schema:schema.py:121 Active schema: 'Default_Jira_Cloud' (17 fields)
