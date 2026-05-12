@@ -262,4 +262,6 @@ def get_dau_records(dau_path: str | Path) -> list[dict]:
     if overrides:
         _apply_overrides(best, overrides)
 
-    return sorted(best.values(), key=lambda r: (r.get("week", ""), r.get("username", "")))
+    result = sorted(best.values(), key=lambda r: (r.get("week", ""), r.get("username", "")))
+    logger.info("DAU records loaded: %s record(s) from %s", len(result), dau_path)
+    return result

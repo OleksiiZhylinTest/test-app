@@ -71,7 +71,8 @@ def get_sprints(jira: Jira, board_id: int) -> list[dict[str, Any]]:
         ordered = (active + ordered)[: config.JIRA_SPRINT_COUNT]
     else:
         ordered = ordered[: config.JIRA_SPRINT_COUNT]
-    logger.debug("Fetched %s sprint(s) (%s closed fetched, %s active)", len(ordered), len(all_closed), len(active))
+    logger.info("Fetched %s sprint(s) (%s closed fetched, %s active)", len(ordered), len(all_closed), len(active))
+    logger.debug("  Sprint names: %s", [s.get("name") for s in ordered])
     return ordered
 
 
@@ -140,7 +141,7 @@ def fetch_sprint_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
         issues = get_issues_for_sprint(jira, board_id, sid, jql=filter_jql)
         sprint_issues[sid] = issues
     total_issues = sum(len(v) for v in sprint_issues.values())
-    logger.debug(
+    logger.info(
         "Sprint data ready: %s sprint(s), %s total issue(s)",
         len(sprints),
         total_issues,
@@ -259,5 +260,5 @@ def fetch_kanban_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
             period_issues[pid].append(issue)
 
     placed = sum(len(v) for v in period_issues.values())
-    logger.debug("KANBAN data ready: %s period(s), %s issue(s) placed in periods", len(periods), placed)
+    logger.info("KANBAN data ready: %s period(s), %s issue(s) placed in periods", len(periods), placed)
     return periods, period_issues

@@ -764,7 +764,7 @@ def build_metrics_dict(
     """Build the single metrics dict used by both HTML and MD reporters."""
     sp_field, sprint_field, done_fs, ip_fs = _resolve_schema_params(schema)
     sprint_issues = deduplicate_sprint_issues(sprints, sprint_issues, sprint_field)
-    logger.debug("Computing metrics: %s sprint(s)", len(sprints))
+    logger.info("Computing metrics: %s sprint(s)", len(sprints))
 
     velocity = compute_velocity(sprints, sprint_issues, sp_field, done_fs)
 
