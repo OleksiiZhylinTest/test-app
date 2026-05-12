@@ -1,2 +1,0 @@
-DEBUG    app.core.jira_client:jira_client.py:131 Fetching sprint data for board 5
-INFO     app.core.jira_client:jira_client.py:144 Sprint data ready: 2 sprint(s), 1 total issue(s)

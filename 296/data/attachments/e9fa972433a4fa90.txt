@@ -1,0 +1,8 @@
+DEBUG    app.core.jira_client:jira_client.py:40 Using configured board ID: 5
+DEBUG    app.core.jira_client:jira_client.py:132 Fetching sprint data for board 5
+DEBUG    app.core.jira_client:jira_client.py:49 Fetching sprints for board 5 (limit=10)
+INFO     app.core.jira_client:jira_client.py:75 Fetched 1 sprint(s) (1 closed fetched, 0 active)
+DEBUG    app.core.jira_client:jira_client.py:76   Sprint names: ['S10']
+DEBUG    app.core.jira_client:jira_client.py:110 Fetching issues for sprint 10 (board 5, jql='')
+DEBUG    app.core.jira_client:jira_client.py:121 Sprint 10: fetched 1 issue(s)
+INFO     app.core.jira_client:jira_client.py:145 Sprint data ready: 1 sprint(s), 1 total issue(s)
