@@ -55,7 +55,23 @@ class DauHandlerMixin:
             logger.warning("DAU handler: could not read manual_overrides.json: %s", exc)
             return []
 
+    def _compact_overrides(self, dau_path: Path, overrides: list[dict]) -> list[dict]:
+        """Drop deletion markers whose raw files no longer exist (dead weight from old soft-delete)."""
+        result = []
+        for ov in overrides:
+            if ov.get("deleted"):
+                username = ov.get("username", "")
+                week = ov.get("week", "")
+                week_dir = dau_path / "original" / week
+                pat = re.compile(rf"^dau_{re.escape(username)}_", re.IGNORECASE)
+                if week_dir.is_dir() and any(pat.match(f.name) for f in week_dir.glob("dau_*.json")):
+                    result.append(ov)
+            else:
+                result.append(ov)
+        return result
+
     def _save_overrides(self, dau_path: Path, overrides: list[dict]) -> None:
+        overrides = self._compact_overrides(dau_path, overrides)
         path = self._overrides_path(dau_path)
         path.write_text(json.dumps(overrides, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -220,3 +236,90 @@ class DauHandlerMixin:
             return
 
         self._send_json(200, {"ok": True, **result})
+
+    # ── roster helpers ───────────────────────────────────────────────────────
+
+    @staticmethod
+    def _roster_path(dau_path: Path) -> Path:
+        return dau_path / "team_roster.json"
+
+    def _load_roster(self, dau_path: Path) -> dict[str, str]:
+        path = self._roster_path(dau_path)
+        if not path.is_file():
+            return {}
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return data if isinstance(data, dict) else {}
+        except Exception as exc:
+            logger.warning("DAU roster: could not read %s: %s", path, exc)
+            return {}
+
+    def _save_roster(self, dau_path: Path, roster: dict[str, str]) -> None:
+        dau_path.mkdir(parents=True, exist_ok=True)
+        self._roster_path(dau_path).write_text(
+            json.dumps(roster, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    # ── GET /api/dau/roster ──────────────────────────────────────────────────
+
+    def _handle_dau_roster_get(self) -> None:
+        slug = self._dau_filter_slug()
+        dau_path = self._dau_resolve_path(slug)
+        if dau_path is None:
+            self._send_json(400, {"ok": False, "error": "Unknown or missing filter slug"})
+            return
+        roster = self._load_roster(dau_path)
+        entries = [{"username": u, "role": r} for u, r in sorted(roster.items())]
+        self._send_json(200, {"ok": True, "roster": entries})
+
+    # ── POST /api/dau/roster ─────────────────────────────────────────────────
+
+    def _handle_dau_roster_post(self) -> None:
+        slug = self._dau_filter_slug()
+        dau_path = self._dau_resolve_path(slug)
+        if dau_path is None:
+            self._send_json(400, {"ok": False, "error": "Unknown or missing filter slug"})
+            return
+        body = self._read_json_body()
+        if body is None:
+            self._send_json(400, {"ok": False, "error": "Invalid JSON body"})
+            return
+        username = (body.get("username") or "").strip()
+        role = (body.get("role") or "").strip()
+        if not username:
+            self._send_json(400, {"ok": False, "error": "username is required"})
+            return
+        if role and role not in _VALID_ROLES:
+            self._send_json(400, {"ok": False, "error": f"Invalid role: {role!r}"})
+            return
+        roster = self._load_roster(dau_path)
+        roster[username] = role
+        try:
+            self._save_roster(dau_path, roster)
+        except OSError as exc:
+            self._send_json(500, {"ok": False, "error": str(exc)})
+            return
+        self._send_json(200, {"ok": True})
+
+    # ── DELETE /api/dau/roster ───────────────────────────────────────────────
+
+    def _handle_dau_roster_delete(self) -> None:
+        qs = parse_qs(urlparse(self.path).query)
+        slug = urlunquote((qs.get("filter") or [""])[0]).strip()
+        username = urlunquote((qs.get("username") or [""])[0]).strip()
+        dau_path = self._dau_resolve_path(slug)
+        if dau_path is None:
+            self._send_json(400, {"ok": False, "error": "Unknown or missing filter slug"})
+            return
+        if not username:
+            self._send_json(400, {"ok": False, "error": "username is required"})
+            return
+        roster = self._load_roster(dau_path)
+        roster.pop(username, None)
+        try:
+            self._save_roster(dau_path, roster)
+        except OSError as exc:
+            self._send_json(500, {"ok": False, "error": str(exc)})
+            return
+        self._send_json(200, {"ok": True})

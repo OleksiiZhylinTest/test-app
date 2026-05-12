@@ -9,6 +9,7 @@ const USAGE_OPTIONS = [
 
 let _currentSlug = '';
 let _records = [];
+let _roster = {}; // {username: role}
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,49 @@ function _populateImportWeekDropdown() {
     opt.textContent = w + (offset === 0 ? ' (current)' : '');
     if (w === current) opt.selected = true;
     sel.appendChild(opt);
+  }
+}
+
+function _weeksForYear(year) {
+  const result = [];
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const d = new Date(jan4);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  while (true) {
+    const w = _isoWeekString(d);
+    if (!w.startsWith(String(year))) break;
+    result.push(w);
+    d.setUTCDate(d.getUTCDate() + 7);
+  }
+  return result;
+}
+
+function _populateRecordWeekDropdown(selectedWeek) {
+  const sel = document.getElementById('dau-rec-week');
+  if (!sel) return;
+  const today = new Date();
+  const currentWeek = _isoWeekString(today);
+  const target = selectedWeek || currentWeek;
+  const currentYear = today.getFullYear();
+
+  const weeks = [..._weeksForYear(currentYear - 1), ..._weeksForYear(currentYear)].reverse();
+
+  sel.innerHTML = '';
+  let hasTarget = false;
+  weeks.forEach((w) => {
+    const opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = w + (w === currentWeek ? ' (current)' : '');
+    if (w === target) { opt.selected = true; hasTarget = true; }
+    sel.appendChild(opt);
+  });
+
+  if (!hasTarget && target) {
+    const opt = document.createElement('option');
+    opt.value = target;
+    opt.textContent = target;
+    opt.selected = true;
+    sel.insertBefore(opt, sel.firstChild);
   }
 }
 
@@ -189,6 +233,84 @@ async function _loadRecords(slug) {
   }
 }
 
+// ── roster ────────────────────────────────────────────────────────────────────
+
+async function _loadRoster(slug) {
+  _roster = {};
+  try {
+    const res = await fetch(`/api/dau/roster?filter=${encodeURIComponent(slug)}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Server error');
+    (data.roster || []).forEach((e) => { _roster[e.username] = e.role; });
+    _renderRoster(data.roster || []);
+  } catch (_) {
+    _renderRoster([]);
+  }
+}
+
+function _renderRoster(entries) {
+  const tbody = document.getElementById('dau-roster-tbody');
+  if (!tbody) return;
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text-muted);">No roster entries.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = entries.map((e) => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:6px 10px;">${_escHtml(e.username)}</td>
+      <td style="padding:6px 10px;">${_escHtml(e.role || '\u2014')}</td>
+      <td style="text-align:center;padding:6px 10px;">
+        <button class="btn btn-secondary dau-roster-remove-btn"
+          data-username="${_escHtml(e.username)}"
+          style="padding:3px 8px;font-size:0.8rem;" aria-label="Remove">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('.dau-roster-remove-btn').forEach((btn) => {
+    btn.addEventListener('click', () => _removeRosterEntry(btn.dataset.username));
+  });
+}
+
+async function _addRosterEntry() {
+  const usernameEl = document.getElementById('dau-roster-username');
+  const roleEl = document.getElementById('dau-roster-role');
+  const errEl = document.getElementById('err-dau-roster');
+  const username = (usernameEl?.value || '').trim();
+  const role = roleEl?.value || '';
+  if (!username) {
+    if (errEl) { errEl.textContent = 'Username is required'; errEl.classList.add('visible'); }
+    return;
+  }
+  if (errEl) { errEl.textContent = ''; errEl.classList.remove('visible'); }
+  try {
+    const res = await fetch(`/api/dau/roster?filter=${encodeURIComponent(_currentSlug)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, role }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Save failed');
+    if (usernameEl) usernameEl.value = '';
+    if (roleEl) roleEl.value = '';
+    await _loadRoster(_currentSlug);
+  } catch (err) {
+    if (errEl) { errEl.textContent = String(err); errEl.classList.add('visible'); }
+  }
+}
+
+async function _removeRosterEntry(username) {
+  if (!confirm(`Remove ${username} from the roster?`)) return;
+  try {
+    const params = new URLSearchParams({ filter: _currentSlug, username });
+    const res = await fetch(`/api/dau/roster?${params}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Delete failed');
+    await _loadRoster(_currentSlug);
+  } catch (err) {
+    alert(`Failed to remove roster entry: ${err}`);
+  }
+}
+
 // ── Excel import ──────────────────────────────────────────────────────────────
 
 async function _importExcel(slug, file) {
@@ -309,7 +431,7 @@ function _onEdit(username, week) {
   const summaryEl = document.getElementById('dau-form-summary');
   if (summaryEl) summaryEl.textContent = 'Edit Record';
 
-  document.getElementById('dau-rec-week').value          = rec.week || '';
+  _populateRecordWeekDropdown(rec.week || '');
   document.getElementById('dau-rec-username').value      = rec.username || '';
   document.getElementById('dau-rec-role').value          = rec.role || '';
   document.getElementById('dau-rec-usage').value         = rec.usage || '';
@@ -323,7 +445,8 @@ function _onEdit(username, week) {
 }
 
 function _resetForm() {
-  ['dau-rec-week', 'dau-rec-username'].forEach((id) => {
+  _populateRecordWeekDropdown(); // resets to current week
+  ['dau-rec-username'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -356,12 +479,15 @@ export function initDau() {
 
   if (!filterSelect) return;
 
+  _populateRecordWeekDropdown();
+
   // Populate dropdowns when the DAU tab is activated (lazy — avoids extra API calls on load)
   const tabBtn = document.getElementById('tab-dau');
   if (tabBtn) {
     tabBtn.addEventListener('click', () => {
       _populateFilterSelect();
       _populateImportWeekDropdown();
+      _populateRecordWeekDropdown();
     });
   }
 
@@ -382,6 +508,7 @@ export function initDau() {
       }
       errNoFilter?.classList.remove('visible');
       _currentSlug = slug;
+      await _loadRoster(slug);
       await _loadRecords(slug);
     });
   }
@@ -432,4 +559,18 @@ export function initDau() {
   // Page-size selector
   document.getElementById('dau-page-size')
     ?.addEventListener('change', () => _renderTable(_applyFilters()));
+
+  // Roster add/update button
+  document.getElementById('btn-dau-add-roster')
+    ?.addEventListener('click', () => _addRosterEntry());
+
+  // Auto-fill role from roster when username is entered (new records only)
+  document.getElementById('dau-rec-username')?.addEventListener('blur', () => {
+    const username = document.getElementById('dau-rec-username')?.value.trim() || '';
+    const editingKey = document.getElementById('dau-rec-editing-key')?.value || '';
+    if (!editingKey && username && _roster[username]) {
+      const roleEl = document.getElementById('dau-rec-role');
+      if (roleEl && !roleEl.value) roleEl.value = _roster[username];
+    }
+  });
 }
