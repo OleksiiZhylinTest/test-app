@@ -17,6 +17,7 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_create_client_returns_jira_instance(monkeypatch):
     monkeypatch.setattr("app.core.config.JIRA_URL", "https://test.atlassian.net")
     monkeypatch.setattr("app.core.config.JIRA_EMAIL", "user@test.com")
@@ -522,6 +523,7 @@ def test_fetch_kanban_data_filter_id_jql_takes_precedence_over_config_jql(mock_j
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_fetch_sprint_data_orchestration(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_BOARD_ID", 5)
     monkeypatch.setattr("app.core.config.JIRA_FILTER_ID", None)

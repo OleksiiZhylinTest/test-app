@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import threading
 import time
@@ -11,6 +12,29 @@ import urllib.request
 import allure
 import pytest
 from playwright.sync_api import Page
+
+
+def _chromium_available() -> bool:
+    """Probe whether Playwright Chromium is installed without launching a browser."""
+    try:
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as p:
+            path = p.chromium.executable_path
+            return bool(path) and os.path.exists(path)
+    except Exception:
+        return False
+
+
+def pytest_collection_modifyitems(config, items):
+    """Skip e2e tests gracefully if Playwright Chromium is not installed."""
+    if _chromium_available():
+        return
+    skip = pytest.mark.skip(reason="Playwright Chromium not installed; run: playwright install chromium")
+    for item in items:
+        path = str(item.fspath).replace("\\", "/")
+        if "/tests/e2e/" in path:
+            item.add_marker(skip)
 
 
 @pytest.fixture(scope="session")

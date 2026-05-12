@@ -148,6 +148,7 @@ def _mock_fetch_cert(page: Page, response: dict, status: int = 200) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_required_star_visible_on_jira_url_label(page: Page, live_server_url: str):
     """The Jira URL label has a visible red asterisk marking it as required."""
     _goto(page, live_server_url)

@@ -19,6 +19,7 @@ PYTHON = sys.executable
 PROJECT_ROOT = str(Path(__file__).resolve().parents[2])
 
 
+@pytest.mark.smoke
 def test_cli_clean_via_subprocess(tmp_path):
     """python main.py --clean → exit 0."""
     result = subprocess.run(
@@ -31,6 +32,7 @@ def test_cli_clean_via_subprocess(tmp_path):
     assert result.returncode == 0
 
 
+@pytest.mark.sanity
 def test_cli_no_credentials_via_subprocess():
     """python main.py with empty env → exit 1, stderr contains error."""
     env = {k: v for k, v in os.environ.items() if not k.startswith("JIRA_")}

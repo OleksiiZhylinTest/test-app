@@ -21,6 +21,7 @@ pytestmark = pytest.mark.component
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_get_root_returns_200(server_url):
     resp = urllib.request.urlopen(f"{server_url}/")
     assert resp.status == 200
@@ -82,6 +83,7 @@ def test_test_connection_invalid_json(server_url):
     assert exc_info.value.code == 400
 
 
+@pytest.mark.sanity
 def test_test_connection_valid_creds(server_url):
     mock_resp = MagicMock()
     mock_resp.read.return_value = json.dumps({"displayName": "Test", "emailAddress": "t@t.com"}).encode()
@@ -231,6 +233,7 @@ def test_generate_passes_filter_jql_env_var(tmp_path):
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.sanity
 def test_get_reports_returns_empty_list_when_no_reports(server_url, tmp_path):
     """GET /api/reports with an empty directory returns {"reports": []}."""
     import app.server as srv

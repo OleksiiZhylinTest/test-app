@@ -68,8 +68,16 @@ Workflow helpers invoked via `/command` in Claude Code. All AI assistants can us
 - `unit/` — pure functions, no I/O, no mocks of external services
 - `component/` — filesystem + HTTP, no inter-module orchestration
 - `integration/` — real multi-module interactions (may need Jira credentials)
-- `e2e/` — Playwright browser tests (requires Chromium)
+- `e2e/` — Playwright browser tests (requires Chromium; tests skip if missing)
 - Run all stages: `python tests/runners/run_all_checks.py`
+
+**Test tiers** (cross-layer markers — orthogonal to the pyramid):
+- `@pytest.mark.smoke` — critical happy paths spanning every layer (~1-2 min). Use after every feature implementation.
+- `@pytest.mark.sanity` — broader regression set (~5-10 min). Smoke is included; select with `-m "smoke or sanity"`.
+- Run smoke locally: `python tests/runners/run_all_checks.py --smoke`
+- Run sanity locally: `python tests/runners/run_all_checks.py --sanity`
+- Run full suite: `python tests/runners/run_all_checks.py` (or `--full`)
+- CI: `smoke-tests` job runs always; `sanity-tests` job is opt-in via `ENABLE_SANITY` repo var.
 
 **Requirements tracking:**
 - Every feature area has a `docs/product/requirements/<topic>_requirements.md` file.

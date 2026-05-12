@@ -38,6 +38,7 @@ def _reload_config(env: dict):
         return cfg
 
 
+@pytest.mark.smoke
 def test_validate_config_all_set():
     cfg = _reload_config(
         {
@@ -92,6 +93,7 @@ def test_validate_config_missing_token():
     assert len(errors) == 1
 
 
+@pytest.mark.sanity
 def test_validate_config_all_missing():
     cfg = _reload_config({"JIRA_URL": "", "JIRA_EMAIL": "", "JIRA_API_TOKEN": ""})
     assert len(cfg.validate_config()) == 4

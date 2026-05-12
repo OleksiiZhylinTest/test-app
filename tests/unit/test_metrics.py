@@ -15,6 +15,7 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize(
     "status,expected",
     [
@@ -73,6 +74,7 @@ def test_compute_velocity_kanban_periods():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_get_story_points_numeric_float():
     issue = make_issue("X-1", points=8.0)
     assert metrics._get_story_points(issue) == 8.0
@@ -116,6 +118,7 @@ def test_get_story_points_nested_value_dict():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_compute_velocity_all_done():
     sprint = make_sprint(1, "Sprint 1")
     issues = [make_issue("X-1", "Done", 5.0), make_issue("X-2", "Done", 3.0)]
@@ -125,6 +128,7 @@ def test_compute_velocity_all_done():
     assert result[0]["issue_count"] == 2
 
 
+@pytest.mark.sanity
 def test_compute_velocity_mixed_statuses():
     sprint = make_sprint(1)
     issues = [

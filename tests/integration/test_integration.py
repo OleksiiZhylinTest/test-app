@@ -18,6 +18,7 @@ pytestmark = pytest.mark.integration
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.smoke
 def test_main_pipeline_success(monkeypatch, tmp_path):
     """Mock jira_client functions, call main.main(), verify HTML/MD files are created."""
     sprints = [make_sprint(1, "Sprint 1", "2026-01-01", "2026-01-14")]

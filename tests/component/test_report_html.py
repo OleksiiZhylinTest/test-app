@@ -22,6 +22,7 @@ def test_templates_dir_not_inside_app():
     assert TEMPLATES_DIR.parent.name != "app"
 
 
+@pytest.mark.smoke
 def test_file_created(tmp_path, minimal_metrics_dict):
     out = tmp_path / "report.html"
     generate_html(minimal_metrics_dict, out)
@@ -56,6 +57,7 @@ def test_sprint_name_present(tmp_path, minimal_metrics_dict):
     assert "Sprint Alpha" in content
 
 
+@pytest.mark.sanity
 def test_velocity_value_present(tmp_path, minimal_metrics_dict):
     out = tmp_path / "report.html"
     generate_html(minimal_metrics_dict, out)
