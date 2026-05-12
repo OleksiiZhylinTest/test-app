@@ -9,6 +9,7 @@ from app.reporters.report_md import _md_table, generate_md
 pytestmark = pytest.mark.component
 
 
+@pytest.mark.smoke
 def test_file_created(tmp_path, minimal_metrics_dict):
     out = tmp_path / "report.md"
     generate_md(minimal_metrics_dict, out)
@@ -36,6 +37,7 @@ def test_sprint_name_present(tmp_path, minimal_metrics_dict):
     assert "Sprint Alpha" in content
 
 
+@pytest.mark.sanity
 def test_velocity_value_present(tmp_path, minimal_metrics_dict):
     out = tmp_path / "report.md"
     generate_md(minimal_metrics_dict, out)

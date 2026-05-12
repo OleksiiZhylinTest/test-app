@@ -2,7 +2,9 @@
 # CI Pipeline — AI Adoption Metrics Report
 # ──────────────────────────────────────────────────────────────────────────────
 #
-# STAGES (all disabled by default):
+# STAGES:
+#   smoke-tests       → cross-layer @pytest.mark.smoke (~1-2 min) — ALWAYS-ON on push/PR
+#   sanity-tests     → cross-layer "smoke or sanity" (~5-10 min) — opt-in via ENABLE_SANITY
 #   unit-tests        → pure functions, no I/O
 #   component-tests   → filesystem / HTTP, no cross-module orchestration
 #   integration-tests → full pipeline with mocked I/O (needs Jira secrets)
@@ -13,6 +15,7 @@
 # HOW TO ENABLE A STAGE:
 #   Automatic (push / PR):  GitHub → Settings → Variables → Actions
 #                           Set variable to the string  true
+#       ENABLE_SANITY            sanity-tests
 #       ENABLE_UNIT              unit-tests
 #       ENABLE_COMPONENT         component-tests
 #       ENABLE_INTEGRATION       integration-tests
@@ -45,6 +48,14 @@ on:
     branches: ["**"]
   workflow_dispatch:
     inputs:
+      run_smoke:
+        description: "Run Smoke Tests (cross-layer, ~1-2 min)"
+        type: boolean
+        default: true
+      run_sanity:
+        description: "Run Sanity Tests (smoke + sanity, ~5-10 min)"
+        type: boolean
+        default: false
       run_unit:
         description: "Run Unit Tests"
         type: boolean
@@ -103,6 +114,127 @@ jobs:
         run: ruff check app/ tests/
       - name: Check formatting
         run: ruff format --check app/ tests/
+
+  # ── Smoke Tests (always-on, cross-layer) ────────────────────────────────────
+  # Runs the curated `@pytest.mark.smoke` set across all layers (~1-2 min).
+  # Fast feedback on every push and PR. No opt-in variable.
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.run_smoke) ||
+      (github.event_name != 'workflow_dispatch' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Cache Playwright browser binary
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('requirements-dev.txt') }}
+
+      - name: Install Playwright system dependencies
+        run: playwright install-deps chromium
+
+      - name: Install Playwright browser binary
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: playwright install chromium
+
+      - name: Run smoke tests
+        run: >-
+          pytest tests/
+          -m "smoke and not windows_only"
+          -n auto --dist=loadscope
+          --tb=short
+          --junitxml=results/smoke.xml
+          --alluredir=generated/allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-results-smoke-${{ github.run_id }}
+          path: generated/allure-results/
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-results
+          path: results/smoke.xml
+
+  # ── Sanity Tests (opt-in, broader cross-layer) ──────────────────────────────
+  # Runs `smoke or sanity` set across all layers (~5-10 min).
+  # Gated by ENABLE_SANITY repo variable (or workflow_dispatch input).
+  sanity-tests:
+    name: Sanity Tests
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.run_sanity) ||
+      (github.event_name != 'workflow_dispatch' &&
+       vars.ENABLE_SANITY == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Cache Playwright browser binary
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('requirements-dev.txt') }}
+
+      - name: Install Playwright system dependencies
+        run: playwright install-deps chromium
+
+      - name: Install Playwright browser binary
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: playwright install chromium
+
+      - name: Run sanity tests
+        run: >-
+          pytest tests/
+          -m "(smoke or sanity) and not windows_only"
+          -n auto --dist=loadscope
+          --tb=short
+          --junitxml=results/sanity.xml
+          --alluredir=generated/allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-results-sanity-${{ github.run_id }}
+          path: generated/allure-results/
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sanity-results
+          path: results/sanity.xml
 
   # ── Unit Tests ──────────────────────────────────────────────────────────────
   unit-tests:
@@ -378,10 +510,12 @@ jobs:
   allure-report:
     name: Allure Report (GitHub Pages)
     runs-on: ubuntu-latest
-    needs: [unit-tests, component-tests, integration-tests, e2e-tests]
+    needs: [smoke-tests, sanity-tests, unit-tests, component-tests, integration-tests, e2e-tests]
     if: >
       always() &&
       (
+        needs.smoke-tests.result       != 'skipped' ||
+        needs.sanity-tests.result      != 'skipped' ||
         needs.unit-tests.result        != 'skipped' ||
         needs.component-tests.result   != 'skipped' ||
         needs.integration-tests.result != 'skipped' ||
@@ -424,6 +558,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lint
+      - smoke-tests
+      - sanity-tests
       - unit-tests
       - component-tests
       - integration-tests
@@ -442,6 +578,8 @@ jobs:
           echo "| Stage | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Smoke Tests | ${{ needs.smoke-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Sanity Tests | ${{ needs.sanity-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Component Tests | ${{ needs.component-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY

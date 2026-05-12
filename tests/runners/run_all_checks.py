@@ -3,9 +3,12 @@ Parallel CI stage runner — orchestrates all run_all_checks stages concurrently
 Called by tests/runners/run_all_checks.bat; can also be invoked directly.
 
 Usage:
-    python tests/runners/run_all_checks.py                    # run all stages
-    python tests/runners/run_all_checks.py --skip-integration
-    python tests/runners/run_all_checks.py --skip-e2e
+    python tests/runners/run_all_checks.py                    # full suite (all stages)
+    python tests/runners/run_all_checks.py --smoke            # cross-layer smoke (~1-2 min)
+    python tests/runners/run_all_checks.py --sanity           # smoke + sanity (~5-10 min)
+    python tests/runners/run_all_checks.py --full             # explicit full suite
+    python tests/runners/run_all_checks.py --skip-integration # full suite minus integration
+    python tests/runners/run_all_checks.py --skip-e2e         # full suite minus e2e
 """
 
 from __future__ import annotations
@@ -73,6 +76,10 @@ def _find_pip_audit(python: str) -> list[str] | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    tier = parser.add_mutually_exclusive_group()
+    tier.add_argument("--smoke", action="store_true", help="cross-layer smoke tier (~1-2 min)")
+    tier.add_argument("--sanity", action="store_true", help="smoke + sanity tier (~5-10 min)")
+    tier.add_argument("--full", action="store_true", help="full suite (default when no tier flag)")
     parser.add_argument("--skip-integration", action="store_true")
     parser.add_argument("--skip-e2e", action="store_true")
     args = parser.parse_args()
@@ -85,25 +92,36 @@ def main() -> int:
 
     xdist = ["-n", "auto", "--dist=loadscope", "--tb=short"]
 
-    stages = [
-        Stage("Ruff", ["cmd", "/c", f"{ruff} check app/ tests/ && {ruff} format --check app/ tests/"]),
-        Stage("Mypy", [mypy, "app/", "--ignore-missing-imports", "--python-version", "3.12"]),
-        Stage("Bandit", [bandit, "-r", "app/", "-q"]),
-        Stage("Unit", ["cmd", "/c", "tests\\runners\\run_unit_tests.bat"]),
-        Stage("Component", ["cmd", "/c", "tests\\runners\\run_component_tests.bat"]),
-        Stage("Windows", [python, "-m", "pytest", "tests", "-m", "windows_only", *xdist]),
-        Stage("Security", (pip_audit or ["pip-audit"]) + ["-r", "requirements.txt"]),
-        Stage(
-            "Integration",
-            ["cmd", "/c", "tests\\runners\\run_integration_tests.bat"],
-            skip=args.skip_integration,
-        ),
-        Stage(
-            "E2E",
-            ["cmd", "/c", "tests\\runners\\run_e2e_tests.bat"],
-            skip=args.skip_e2e,
-        ),
-    ]
+    if args.smoke or args.sanity:
+        marker = "smoke" if args.smoke else "smoke or sanity"
+        stages = [
+            Stage("Ruff", ["cmd", "/c", f"{ruff} check app/ tests/ && {ruff} format --check app/ tests/"]),
+            Stage("Mypy", [mypy, "app/", "--ignore-missing-imports", "--python-version", "3.12"]),
+            Stage("Bandit", [bandit, "-r", "app/", "-q"]),
+            Stage(f"Tests ({marker})", [python, "-m", "pytest", "tests", "-m", marker, *xdist]),
+        ]
+        if args.sanity:
+            stages.append(Stage("Security", (pip_audit or ["pip-audit"]) + ["-r", "requirements.txt"]))
+    else:
+        stages = [
+            Stage("Ruff", ["cmd", "/c", f"{ruff} check app/ tests/ && {ruff} format --check app/ tests/"]),
+            Stage("Mypy", [mypy, "app/", "--ignore-missing-imports", "--python-version", "3.12"]),
+            Stage("Bandit", [bandit, "-r", "app/", "-q"]),
+            Stage("Unit", ["cmd", "/c", "tests\\runners\\run_unit_tests.bat"]),
+            Stage("Component", ["cmd", "/c", "tests\\runners\\run_component_tests.bat"]),
+            Stage("Windows", [python, "-m", "pytest", "tests", "-m", "windows_only", *xdist]),
+            Stage("Security", (pip_audit or ["pip-audit"]) + ["-r", "requirements.txt"]),
+            Stage(
+                "Integration",
+                ["cmd", "/c", "tests\\runners\\run_integration_tests.bat"],
+                skip=args.skip_integration,
+            ),
+            Stage(
+                "E2E",
+                ["cmd", "/c", "tests\\runners\\run_e2e_tests.bat"],
+                skip=args.skip_e2e,
+            ),
+        ]
 
     active = [s for s in stages if not s.skip]
 

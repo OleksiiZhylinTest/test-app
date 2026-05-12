@@ -91,11 +91,13 @@ python main.py --clean-logs       # delete all generated/logs/ and exit
 python server.py                  # http://localhost:8080
 python server.py 9000             # custom port
 
-# Run all CI checks in parallel (lint + unit + component + windows + security)
-python tests/runners/run_all_checks.py
-python tests/runners/run_all_checks.py --integration   # also run integration tests
-python tests/runners/run_all_checks.py --e2e           # also run e2e tests
-python tests/runners/run_all_checks.py --all           # run everything
+# Run all CI checks in parallel (lint + unit + component + windows + integration + e2e + security)
+python tests/runners/run_all_checks.py                    # full suite (default)
+python tests/runners/run_all_checks.py --smoke            # cross-layer smoke (~1-2 min) — run after every feature
+python tests/runners/run_all_checks.py --sanity           # cross-layer smoke + sanity (~5-10 min) — run before push
+python tests/runners/run_all_checks.py --full             # explicit full suite
+python tests/runners/run_all_checks.py --skip-integration # full suite minus integration
+python tests/runners/run_all_checks.py --skip-e2e         # full suite minus e2e
 
 # Run a specific pytest subset directly
 pytest tests/ -v

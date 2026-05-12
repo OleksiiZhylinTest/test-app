@@ -28,6 +28,7 @@ pytestmark = pytest.mark.e2e
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.sanity
 def test_page_loads_with_title(page: Page, live_server_url: str):
     """Page loads with correct title and heading."""
     _goto(page, live_server_url)
@@ -45,6 +46,7 @@ def test_default_tab_is_generate(page: Page, live_server_url: str):
     expect(page.locator("#panel-filter")).to_be_hidden()
 
 
+@pytest.mark.sanity
 def test_all_three_tabs_visible(page: Page, live_server_url: str):
     """All three tab buttons are present in the tab bar."""
     _goto(page, live_server_url)
