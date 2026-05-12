@@ -44,6 +44,11 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 _DEFAULTS_PATH = _PROJECT_ROOT / "config" / "defaults.env"
 _ENV_PATH = _PROJECT_ROOT / ".env"
 
+# When running under the test profile, default to DEBUG before defaults.env injects INFO.
+# An explicit LOG_LEVEL in the caller's environment (e.g. CI) still takes precedence.
+if os.environ.get("APP_PROFILE", "").strip().lower() == "test" and "LOG_LEVEL" not in os.environ:
+    os.environ["LOG_LEVEL"] = "DEBUG"
+
 for _k, _v in {**_dotenv_values(_DEFAULTS_PATH), **_dotenv_values(_ENV_PATH)}.items():
     if _k not in os.environ and _v is not None:
         os.environ[_k] = _v

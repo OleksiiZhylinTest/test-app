@@ -8,6 +8,7 @@ import argparse
 import logging
 import re
 import shutil
+import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 
@@ -67,6 +68,13 @@ def main() -> int:
         logger.error("Copy .env.example to .env and set JIRA_URL, JIRA_EMAIL, JIRA_API_TOKEN.")
         return 1
 
+    logger.info(
+        "Report generation started (project_type=%s, estimation_type=%s)",
+        config.PROJECT_TYPE,
+        config.ESTIMATION_TYPE,
+    )
+    _t0 = time.perf_counter()
+
     jira = jira_client.create_client()
     try:
         if config.PROJECT_TYPE == "KANBAN":
@@ -89,6 +97,16 @@ def main() -> int:
         normalize_dau_responses(config.DAU_RESPONSES_DIR, config.DAU_NORMALIZED_DIR)
 
     metrics_dict = metrics.build_metrics_dict(sprints, sprint_issues, schema=active_schema)
+    _ct = metrics_dict.get("cycle_time") or {}
+    logger.info(
+        "Metrics assembled: velocity=%s sprint(s), cycle_time_mean=%.1f days (n=%s), "
+        "AI trend=%s sprint(s), DAU response_count=%s",
+        len(metrics_dict.get("velocity") or []),
+        (_ct.get("mean_days") or 0),
+        _ct.get("sample_size", 0),
+        len(metrics_dict.get("ai_assistance_trend") or []),
+        (metrics_dict.get("dau") or {}).get("response_count", 0),
+    )
 
     # Enrich with filter metadata for display in the report header
     if config.JIRA_FILTER_ID is not None:
@@ -129,5 +147,5 @@ def main() -> int:
         f_html.result()
         f_md.result()
 
-    logger.log(SUCCESS_LEVEL, "Reports written: %s, %s", path_html, path_md)
+    logger.log(SUCCESS_LEVEL, "Reports written in %.1f s: %s, %s", time.perf_counter() - _t0, path_html, path_md)
     return 0
