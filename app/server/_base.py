@@ -198,6 +198,8 @@ class HandlerBase(BaseHTTPRequestHandler):
             self._handle_get_reports()
         elif path == "/api/filters":
             self._handle_get_filters()
+        elif path == "/api/dau/config":
+            self._handle_dau_config_get()
         elif path == "/api/dau/records":
             self._handle_dau_records_get()
         elif path == "/api/dau/roster":

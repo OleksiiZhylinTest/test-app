@@ -1,6 +1,7 @@
 # Secrets & local config
 .env
 dau_*.json
+!config/dau_config.json
 data/dau/*/normalized/
 !data/dau/*/.gitkeep
 !data/dau/*/*/.gitkeep
