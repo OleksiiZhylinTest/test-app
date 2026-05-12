@@ -20,7 +20,7 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 
 | ID | Requirement | Acceptance Criterion | Status |
 |----|-------------|----------------------|--------|
-| NFR-P-001 | Report generation completes within a reasonable time | HTML and Markdown reports are both written to disk in under 60 seconds for a dataset of 10 sprints and up to 500 issues | ✗ Not met |
+| NFR-P-001 | Report generation completes within a reasonable time | HTML and Markdown reports are both written to disk in under 60 seconds for a dataset of 10 sprints and up to 500 issues | ⬜ N/T |
 | NFR-P-002 | HTML and Markdown reports are generated in parallel | Both report files are produced using `ThreadPoolExecutor(max_workers=2)`; generation of one report does not block the other | ✓ Met |
 | NFR-P-003 | The Jira connection test completes or times out promptly | The test-connection request times out after no more than 12 seconds; a result (success or failure) is shown to the user within that window | ✓ Met |
 | NFR-P-004 | Live progress output reaches the browser with minimal delay | SSE events from the report generation subprocess are forwarded to the browser output panel within 1 second of being written to stdout/stderr | ✓ Met |

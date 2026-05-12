@@ -90,12 +90,14 @@ test-app/                          ← project root
 │   │   ├── connection_handlers.py ← /api/test-connection
 │   │   ├── data_handlers.py       ← /api/reports, /generated/reports/…
 │   │   ├── filter_handlers.py     ← /api/filters (GET + POST + DELETE)
+│   │   ├── dau_handlers.py        ← /api/dau/* (records, roster, import, config)
 │   │   ├── generate_handlers.py   ← /api/generate (SSE stream)
 │   │   └── schema_handlers.py     ← /api/schemas (GET + POST + DELETE)
 │   │
 │   ├── core/                      ← business logic & infrastructure
 │   │   ├── __init__.py
 │   │   ├── config.py              ← env/dotenv loading, validation, constants
+│   │   ├── dau_importer.py        ← DAU Excel (.xlsx) import; column detection driven by config/dau_import_config.json
 │   │   ├── dau_normalizer.py      ← DAU survey dedup + normalization (called by cli.py)
 │   │   ├── jira_client.py         ← Jira REST API wrapper
 │   │   ├── metrics.py             ← pure metric computation functions
@@ -113,6 +115,7 @@ test-app/                          ← project root
 │
 ├── config/                        ← persistent config files (not generated)
 │   ├── defaults.env               ← non-sensitive defaults; committed (sprint count, metric toggles, etc.)
+│   ├── dau_config.json            ← DAU role list; tracked via `.gitignore` negation
 │   ├── jira_schema.json           ← Jira field schema definitions per instance
 │   └── jira_filters.json          ← saved JQL filters (default + user-saved)
 │
@@ -210,6 +213,7 @@ test-app/                          ← project root
 | Module | Responsibility |
 |--------|----------------|
 | `app/core/config.py` | Loads `.env` from project root via `python-dotenv`. Exposes all `JIRA_*` and `AI_*` constants as module-level names. `validate_config()` returns a list of error strings. |
+| `app/core/dau_importer.py` | Parses Microsoft Forms / Teams Polls `.xlsx` exports. `import_dau_excel_b64(data_b64, dau_path, target_week)` decodes base64 then delegates to `import_dau_excel()`. Column detection and answer-text mapping are driven by `config/dau_import_config.json`. Writes `dau_<username>_<ts>.json` files to `<dau_path>/original/<week>/`; newer timestamp wins per `(username, week)`. |
 | `app/core/dau_normalizer.py` | `normalize(src_dir, dst_dir)` — reads raw DAU survey JSON files recursively, deduplicates to one record per `(username, week)` keeping the latest submission, and writes clean files to `dst_dir`. Called by `app/cli.py` before metric computation. |
 | `app/core/jira_client.py` | Wraps `atlassian-python-api`. `create_client()` returns an authenticated `Jira` instance. `fetch_sprint_data()` returns `(sprints, sprint_issues)` for Scrum boards; `fetch_kanban_data()` returns the same shape for Kanban boards using ISO-week periods. Handles pagination and optional filter JQL. |
 | `app/core/metrics.py` | Pure functions: `compute_velocity`, `compute_cycle_time`, `compute_ai_assistance_trend`, `compute_ai_usage_details`, `compute_dau_metrics`, `compute_dau_trend`, `compute_custom_trends` (placeholder — not called by default). `build_metrics_dict()` assembles all results into a single dict consumed by both reporters. |
@@ -219,7 +223,7 @@ test-app/                          ← project root
 | `app/utils/cert_utils.py` | `validate_cert(Path)` — parses a PEM file with `cryptography`, returns a dict: `{valid, expires_at, days_remaining, subject}` (plus `error` on failure). |
 | `app/utils/logging_setup.py` | `setup_logging()` — configures the root logger with a timestamped `FileHandler` (`generated/logs/app-YYYYMMDD-HHMMSS.log`) and a `StreamHandler`; defines `SUCCESS_LEVEL = 25` and patches `.success()` onto `logging.Logger`. Called once per entry point. |
 | `app/cli.py` | Orchestrates the full report pipeline. Validates config, fetches Jira data, computes metrics, enriches with filter metadata, and generates HTML + MD in parallel via `ThreadPoolExecutor(max_workers=2)`. |
-| `app/server/` | Stdlib `HTTPServer` dev server package. `_base.py` contains the `Handler` class and routes `do_GET`/`do_POST`/`do_DELETE` to category handler modules (`cert_handlers`, `config_handlers`, `connection_handlers`, `data_handlers`, `filter_handlers`, `generate_handlers`, `schema_handlers`). |
+| `app/server/` | Stdlib `HTTPServer` dev server package. `_base.py` contains the `Handler` class and routes `do_GET`/`do_POST`/`do_DELETE` to category handler modules (`cert_handlers`, `config_handlers`, `connection_handlers`, `data_handlers`, `dau_handlers`, `filter_handlers`, `generate_handlers`, `schema_handlers`). |
 | `main.py` | Thin entry-point — re-exports `main`, `_parse_args`, `_timestamp_folder_name` from `app.cli` for test compatibility. |
 | `server.py` | Thin entry-point — re-exports `run`, `Server`, `Handler`, `PORT`, `ROOT`, `MIME`, `guess_mime` from `app.server` for test compatibility. |
 
@@ -387,7 +391,7 @@ At startup, `config/defaults.env` is loaded first, then `.env` overrides it. Val
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
-| `JIRA_BOARD_ID` | `int` | first available board | Numeric board ID; auto-detected if unset |
+| `JIRA_BOARD_ID` | `int` | _(required for Scrum)_ | Numeric board ID; required for Scrum boards — find it in the Jira board URL (`?rapidView=<id>`). Auto-discovery is not implemented; omitting this value raises `ValueError` at runtime. |
 | `JIRA_SPRINT_COUNT` | `int` | `10` | Number of past sprints to include |
 | `JIRA_SPRINT_NAME_FILTER` | `str` | _(empty)_ | Case-insensitive substring filter on sprint names; only matching sprints are included |
 | `JIRA_SCHEMA_NAME` | `str` | _(unset)_ | CLI-only fallback (`python main.py`). For UI runs, the active filter's `params.schema_name` is exported onto the subprocess env by `/api/generate?filter=<slug>` and overrides this value. |
@@ -446,6 +450,14 @@ All routes are served by `app/server.py` (stdlib `HTTPServer`). CORS headers (`A
 | `DELETE` | `/api/filters/<slug>` | Delete a user filter by slug (the default filter cannot be deleted) |
 | `GET` | `/api/reports` | List generated report directory names under `generated/reports/` |
 | `GET` | `/generated/reports/<path>` | Serve any file under `generated/reports/` |
+| `GET` | `/api/dau/config` | Return list of valid DAU roles from `config/dau_config.json` |
+| `GET` | `/api/dau/records` | List DAU records for `?filter=<slug>`; merged from raw JSON files and manual overrides |
+| `POST` | `/api/dau/records` | Add or update a DAU record; upserts into `<dau_path>/manual_overrides.json` |
+| `DELETE` | `/api/dau/records` | Delete a record (`?filter=<slug>&username=&week=`); removes raw files and override entries |
+| `POST` | `/api/dau/import` | Import DAU records from a base64-encoded `.xlsx` (`?filter=<slug>`); column detection via `config/dau_import_config.json` |
+| `GET` | `/api/dau/roster` | Return the team roster for `?filter=<slug>` |
+| `POST` | `/api/dau/roster` | Add or update a roster entry |
+| `DELETE` | `/api/dau/roster` | Remove a roster entry (`?filter=<slug>&username=`) |
 | `OPTIONS` | `*` | CORS preflight (returns 204) |
 
 ### SSE event types (`GET /api/generate`)

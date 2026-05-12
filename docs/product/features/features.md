@@ -18,6 +18,7 @@ It is the primary interface for configuring credentials, managing filters, and g
 | Filter Builder | `panel-filter` | — |
 | Jira Connection | `panel-connection` | — |
 | Jira Field Schema | `panel-schema` | — |
+| DAU Data | `panel-dau` | — |
 
 ---
 
@@ -158,11 +159,12 @@ A dedicated tab in `ui/index.html` for managing DAU (Daily Active Usage) survey 
 | Element | Description |
 |---------|-------------|
 | Filter selector | Dropdown listing all configured Jira filters (teams); populated on tab activation |
-| Load button | Fetches records via `GET /api/dau/records?filter=<slug>` and renders the table |
+| Auto-load | Records are fetched automatically via `GET /api/dau/records?filter=<slug>` whenever a filter is selected in the dropdown — no manual load button required |
 | Import from Excel | `<details>` section; file input accepts `.xlsx` MS Teams Polls exports; `POST /api/dau/import?filter=<slug>` with base64-encoded file; displays imported/skipped/warning counts after import |
-| Records table | Columns: Week, Username, Role, Usage, Score, Actions; Edit and Delete buttons per row |
+| Records table | Columns: _(checkbox)_, Week, Username, Role, Usage, Score, Actions; per-row checkboxes for bulk selection; **Delete Selected** button (enabled when ≥ 1 row is checked); select-all header checkbox with indeterminate state for partial selection; per-row Edit and Delete buttons |
 | Add / Edit Record form | `<details>` section; fields: ISO Week (e.g. `2026-W20`), Username, Role, Usage frequency; Save posts to `POST /api/dau/records?filter=<slug>`; Cancel Edit resets the form |
-| Delete | Confirmation dialog; `DELETE /api/dau/records?filter=<slug>&username=&week=`; adds deletion marker to `manual_overrides.json` |
+| Delete (single) | Confirmation dialog; `DELETE /api/dau/records?filter=<slug>&username=&week=`; removes raw file and override entry |
+| Delete Selected (bulk) | Confirmation dialog shows count; iterates checked rows and calls `DELETE /api/dau/records` for each; table reloads after all deletions complete |
 
 **Import column detection** is configured in `config/dau_import_config.json` (`column_detection` and `answer_mapping` keys). Answer text from the Excel export is case-insensitively mapped to canonical values before storing. Username is derived from the email address (prefix before `@`).
 
@@ -179,7 +181,7 @@ A self-contained survey form served statically by the dev server (and usable as 
 | Username | Alphanumeric identifier (min 2 chars); required |
 | Role | Dropdown (Developer, QA, BA, Lead, Other) |
 | Usage frequency | Four options: Every day / Most days / Rarely / Not used |
-| Submit | Writes a `dau_<username>_<timestamp>.json` file via `POST /api/dau` |
+| Submit | Writes a `dau_<username>_<timestamp>.json` file via the browser **File System Access API** (directory picker); falls back to a file download when the API is unavailable |
 
 ---
 
