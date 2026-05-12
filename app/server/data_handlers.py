@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from atlassian import Jira
 
 from app.core import config, jira_client
+from app.exceptions import JiraClientError
 
 logger = logging.getLogger(__name__)
 
@@ -119,12 +120,18 @@ class DataHandlerMixin:
                     },
                 )
 
-        except Exception as e:  # noqa: BLE001
-            logger.exception("Error in _handle_data_preview: %s", str(e))
+        except JiraClientError as e:
+            logger.exception("Jira error in _handle_data_preview: %s", str(e))
             self._send_json(  # type: ignore[attr-defined]
                 500,
                 {
                     "ok": False,
                     "error": f"Failed to fetch data preview: {jira_client._sanitise_error(str(e))}",
                 },
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.exception("Unexpected error in _handle_data_preview: %s", str(e))
+            self._send_json(  # type: ignore[attr-defined]
+                500,
+                {"ok": False, "error": "Internal error"},
             )

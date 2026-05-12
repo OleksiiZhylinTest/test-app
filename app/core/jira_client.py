@@ -10,6 +10,7 @@ from typing import Any
 from atlassian import Jira
 
 from app.core import config
+from app.exceptions import ConfigError
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def get_board_id(jira: Jira) -> int:
     if config.JIRA_BOARD_ID is not None:
         logger.debug("Using configured board ID: %s", config.JIRA_BOARD_ID)
         return config.JIRA_BOARD_ID
-    raise ValueError("JIRA_BOARD_ID is not set. Add it to config/defaults.env or .env.")
+    raise ConfigError("JIRA_BOARD_ID is not set. Add it to config/defaults.env or .env.")
 
 
 def get_sprints(jira: Jira, board_id: int) -> list[dict[str, Any]]:

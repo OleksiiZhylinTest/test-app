@@ -7,6 +7,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from app.exceptions import SchemaError
+
 logger = logging.getLogger(__name__)
 
 SCHEMA_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "jira_schema.json"
@@ -91,7 +93,10 @@ def _read_file(path: Path | None = None) -> dict[str, Any]:
 def _write_file(data: dict[str, Any], path: Path | None = None) -> None:
     p = path or SCHEMA_PATH
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    try:
+        p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    except OSError as exc:
+        raise SchemaError(f"Cannot write schema file {p}: {exc}") from exc
 
 
 def load_schemas(path: Path | None = None) -> list[dict[str, Any]]:
