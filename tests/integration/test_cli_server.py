@@ -65,6 +65,7 @@ def test_server_health_check():
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=PROJECT_ROOT,
+        env={**os.environ, "APP_PROFILE": "test"},
     )
     try:
         # Poll until server is ready (up to 15 s) instead of sleeping a fixed amount.

@@ -79,7 +79,8 @@ def run(port: int = PORT, host: str = HOST) -> None:
     logger.info("AI Adoption Metrics — dev server")
     logger.info("Listening on %s", url)
     logger.info("Press Ctrl+C to stop.")
-    webbrowser.open(url)
+    if _os.environ.get("APP_PROFILE", "default").strip().lower() != "test":
+        webbrowser.open(url)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
