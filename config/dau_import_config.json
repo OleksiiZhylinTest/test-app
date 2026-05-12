@@ -1,0 +1,18 @@
+{
+  "column_detection": {
+    "email_header_contains": "email",
+    "usage_header_contains": "how often",
+    "start_time_header_contains": "start time"
+  },
+  "answer_mapping": {
+    "every day - all working days": "Every day (5 days)",
+    "every day (5 days)": "Every day (5 days)",
+    "most days: 3-4 days last week": "Most days (3\u20134 days)",
+    "most days (3-4 days)": "Most days (3\u20134 days)",
+    "most days (3\u20134 days)": "Most days (3\u20134 days)",
+    "rarely: 1-2 days last week": "Rarely (1\u20132 days)",
+    "rarely (1-2 days)": "Rarely (1\u20132 days)",
+    "rarely (1\u20132 days)": "Rarely (1\u20132 days)",
+    "not used": "Not used"
+  }
+}
