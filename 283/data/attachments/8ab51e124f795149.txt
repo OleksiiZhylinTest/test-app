@@ -1,2 +1,0 @@
-[2026-05-12 15:18:21] [INFO] Starting pipeline run
-[2026-05-12 15:18:21] [INFO] Connecting to Jira instance
