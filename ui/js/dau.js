@@ -205,12 +205,18 @@ function _renderTable(records) {
   if (countEl) countEl.textContent = total ? `(${total})` : '';
 
   if (!display.length) {
-    tbody.innerHTML = `<tr id="dau-empty-row"><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No records found for this team.</td></tr>`;
+    tbody.innerHTML = `<tr id="dau-empty-row"><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">No records found for this team.</td></tr>`;
+    _syncBulkUI(tbody);
     return;
   }
 
   tbody.innerHTML = display.map((r) => `
     <tr data-username="${_escHtml(r.username)}" data-week="${_escHtml(r.week)}" style="border-bottom:1px solid var(--border);">
+      <td style="padding:7px 10px;text-align:center;">
+        <input type="checkbox" class="dau-row-check"
+          data-username="${_escHtml(r.username)}" data-week="${_escHtml(r.week)}"
+          aria-label="Select record ${_escHtml(r.username)} ${_escHtml(r.week)}" />
+      </td>
       <td style="padding:7px 10px;">${_escHtml(r.week)}</td>
       <td style="padding:7px 10px;">${_escHtml(r.username)}</td>
       <td style="padding:7px 10px;">${_escHtml(r.role || '—')}</td>
@@ -235,6 +241,24 @@ function _renderTable(records) {
   tbody.querySelectorAll('.dau-delete-btn').forEach((btn) => {
     btn.addEventListener('click', () => _onDelete(btn.dataset.username, btn.dataset.week));
   });
+
+  // Wire per-row checkboxes for bulk selection
+  tbody.querySelectorAll('.dau-row-check').forEach((cb) => {
+    cb.addEventListener('change', () => _syncBulkUI(tbody));
+  });
+  _syncBulkUI(tbody);
+}
+
+function _syncBulkUI(tbody) {
+  const checks = [...tbody.querySelectorAll('.dau-row-check')];
+  const checked = checks.filter((c) => c.checked);
+  const btn = document.getElementById('btn-dau-delete-selected');
+  if (btn) btn.disabled = !checked.length;
+  const selAll = document.getElementById('dau-select-all');
+  if (selAll) {
+    selAll.checked = checks.length > 0 && checked.length === checks.length;
+    selAll.indeterminate = checked.length > 0 && checked.length < checks.length;
+  }
 }
 
 // ── load records ─────────────────────────────────────────────────────────────
@@ -492,12 +516,35 @@ function _resetForm() {
   _setRecordError('');
 }
 
+// ── bulk delete ───────────────────────────────────────────────────────────────
+
+async function _onDeleteSelected() {
+  const checks = [...document.querySelectorAll('#dau-records-tbody .dau-row-check:checked')];
+  if (!checks.length) return;
+  if (!confirm(`Delete ${checks.length} record(s)?`)) return;
+
+  const btn = document.getElementById('btn-dau-delete-selected');
+  if (btn) btn.disabled = true;
+
+  let failed = 0;
+  for (const cb of checks) {
+    try {
+      const params = new URLSearchParams({ filter: _currentSlug, username: cb.dataset.username, week: cb.dataset.week });
+      const res = await fetch(`/api/dau/records?${params}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!data.ok) failed++;
+    } catch (_) { failed++; }
+  }
+
+  if (failed) alert(`${failed} deletion(s) failed.`);
+  await _loadRecords(_currentSlug);
+}
+
 // ── init ──────────────────────────────────────────────────────────────────────
 
 export function initDau() {
   const errNoFilter   = document.getElementById('err-dau-no-filter');
   const filterSelect  = document.getElementById('dau-filter-select');
-  const btnLoad       = document.getElementById('btn-dau-load');
   const btnImport     = document.getElementById('btn-dau-import');
   const importFileEl  = document.getElementById('dau-import-file');
   const btnSaveRecord = document.getElementById('btn-dau-save-record');
@@ -518,22 +565,12 @@ export function initDau() {
     });
   }
 
-  // Hide "no filter" error on selection change
-  if (filterSelect && errNoFilter) {
-    filterSelect.addEventListener('change', () => {
-      errNoFilter.classList.remove('visible');
-    });
-  }
-
-  // Load records button
-  if (btnLoad) {
-    btnLoad.addEventListener('click', async () => {
-      const slug = filterSelect?.value || '';
-      if (!slug) {
-        errNoFilter?.classList.add('visible');
-        return;
-      }
+  // Auto-load roster and records when the team filter changes
+  if (filterSelect) {
+    filterSelect.addEventListener('change', async () => {
       errNoFilter?.classList.remove('visible');
+      const slug = filterSelect.value || '';
+      if (!slug) return;
       _currentSlug = slug;
       await _loadRoster(slug);
       await _loadRecords(slug);
@@ -586,6 +623,17 @@ export function initDau() {
   // Page-size selector
   document.getElementById('dau-page-size')
     ?.addEventListener('change', () => _renderTable(_applyFilters()));
+
+  // Select-all checkbox
+  document.getElementById('dau-select-all')?.addEventListener('change', (e) => {
+    const tbody = document.getElementById('dau-records-tbody');
+    tbody?.querySelectorAll('.dau-row-check').forEach((cb) => { cb.checked = e.target.checked; });
+    if (tbody) _syncBulkUI(tbody);
+  });
+
+  // Bulk delete button
+  document.getElementById('btn-dau-delete-selected')
+    ?.addEventListener('click', () => _onDeleteSelected());
 
   // Roster add/update button
   document.getElementById('btn-dau-add-roster')
