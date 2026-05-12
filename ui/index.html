@@ -987,6 +987,58 @@
         </details>
       </div>
 
+      <!-- Team Roster -->
+      <div class="card">
+        <details class="filter-details" id="dau-roster-details">
+          <summary>Team Roster (Role Mapping)</summary>
+          <div class="filter-details-body">
+            <p class="form-helper" style="margin-bottom:12px;">
+              Map usernames to roles. Applied automatically during Excel import.
+              Also pre-fills the Role field when adding a record manually.
+            </p>
+            <div style="overflow-x:auto;margin-bottom:12px;">
+              <table id="dau-roster-table"
+                     style="width:100%;border-collapse:collapse;font-size:0.875rem;"
+                     aria-label="Team roster">
+                <thead>
+                  <tr style="border-bottom:2px solid var(--border);">
+                    <th style="text-align:left;padding:6px 10px;color:var(--text-muted);font-weight:600;">Username</th>
+                    <th style="text-align:left;padding:6px 10px;color:var(--text-muted);font-weight:600;">Role</th>
+                    <th style="text-align:center;padding:6px 10px;color:var(--text-muted);font-weight:600;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="dau-roster-tbody">
+                  <tr><td colspan="3" style="text-align:center;padding:16px;color:var(--text-muted);">
+                    No roster entries. Select a team and click Load Records first.
+                  </td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+              <div class="form-group" style="flex:1;min-width:150px;margin-bottom:0;">
+                <label class="form-label" for="dau-roster-username">Username</label>
+                <input class="form-input" type="text" id="dau-roster-username"
+                       placeholder="e.g. john_doe" autocomplete="off" />
+              </div>
+              <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0;">
+                <label class="form-label" for="dau-roster-role">Role</label>
+                <select class="form-input" id="dau-roster-role" aria-label="Role">
+                  <option value="">— Select role —</option>
+                  <option>Developer</option>
+                  <option>QA / Test Engineer</option>
+                  <option>Business Analyst</option>
+                  <option>Delivery Manager / Lead</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <button class="btn btn-secondary" id="btn-dau-add-roster" type="button"
+                      style="flex-shrink:0;margin-bottom:0;">Add / Update</button>
+            </div>
+            <p class="form-error" id="err-dau-roster" style="margin-top:8px;"></p>
+          </div>
+        </details>
+      </div>
+
       <!-- Records table -->
       <div class="card">
         <div class="card-title" style="flex-wrap:wrap;gap:0.5rem;">
@@ -1058,15 +1110,8 @@
             <div style="display:flex;gap:14px;flex-wrap:wrap;">
               <div class="form-group" style="flex:1;min-width:150px;">
                 <label class="form-label" for="dau-rec-week">ISO Week <span class="required-star" aria-hidden="true">*</span></label>
-                <input
-                  class="form-input"
-                  type="text"
-                  id="dau-rec-week"
-                  placeholder="e.g. 2026-W20"
-                  pattern="\d{4}-W\d{2}"
-                  autocomplete="off"
-                  aria-required="true"
-                />
+                <select class="form-input" id="dau-rec-week"
+                        aria-required="true" aria-label="ISO Week"></select>
               </div>
               <div class="form-group" style="flex:1;min-width:150px;">
                 <label class="form-label" for="dau-rec-username">Username <span class="required-star" aria-hidden="true">*</span></label>

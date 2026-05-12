@@ -153,6 +153,17 @@ def import_dau_excel(xlsx_bytes: bytes, dau_path: str | Path, target_week: str |
         return {"imported": 0, "skipped": 0, "errors": [f"Could not detect columns: {'; '.join(missing)}"]}
 
     root_path = Path(dau_path).resolve()
+
+    roster: dict[str, str] = {}
+    roster_path = root_path / "team_roster.json"
+    try:
+        if roster_path.is_file():
+            data = json.loads(roster_path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                roster = data
+    except Exception as exc:
+        logger.warning("DAU importer: could not load team_roster.json: %s", exc)
+
     imported = 0
     skipped = 0
     errors: list[str] = []
@@ -205,7 +216,7 @@ def import_dau_excel(xlsx_bytes: bytes, dau_path: str | Path, target_week: str |
 
         record: dict = {
             "username": username,
-            "role": "",
+            "role": roster.get(username, ""),
             "usage": usage,
             "score": score,
             "timestamp": iso_ts,
