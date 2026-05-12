@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 import app.cli as cli
+from app.exceptions import JiraApiError, JiraNetworkError
 
 pytestmark = pytest.mark.unit
 
@@ -42,6 +43,25 @@ def test_main_returns_1_when_fetch_sprint_data_fails(monkeypatch, caplog):
 
     assert rc == 1
     assert "Failed to fetch Jira data: boom" in caplog.text
+
+
+@pytest.mark.parametrize("exc", [JiraNetworkError("ssl fail"), JiraApiError("500")])
+def test_main_returns_1_when_jira_client_error_raised(monkeypatch, caplog, exc):
+    mock_jira = object()
+
+    monkeypatch.setattr(cli.config, "validate_config", lambda: [])
+    monkeypatch.setattr(cli.jira_client, "create_client", lambda: mock_jira)
+    monkeypatch.setattr(
+        cli.jira_client,
+        "fetch_sprint_data",
+        lambda jira, e=exc: (_ for _ in ()).throw(e),
+    )
+    monkeypatch.setattr("sys.argv", ["main.py"])
+
+    rc = cli.main()
+
+    assert rc == 1
+    assert "Failed to fetch Jira data" in caplog.text
 
 
 def test_main_keeps_running_when_filter_name_lookup_fails(monkeypatch, tmp_path):

@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from app.core import jira_client
+from app.exceptions import ConfigError
 from tests.conftest import make_sprint
 
 pytestmark = pytest.mark.unit
@@ -70,7 +71,7 @@ def test_get_board_id_from_config(monkeypatch, mock_jira):
 
 def test_get_board_id_raises_when_not_configured(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_BOARD_ID", None)
-    with pytest.raises(ValueError, match="JIRA_BOARD_ID is not set"):
+    with pytest.raises(ConfigError, match="JIRA_BOARD_ID is not set"):
         jira_client.get_board_id(mock_jira)
     mock_jira.get_all_agile_boards.assert_not_called()
 

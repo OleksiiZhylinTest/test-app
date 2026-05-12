@@ -27,10 +27,10 @@
            /----------------\
           /    Component      \      205 tests  (28%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   381 tests  (53%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   400 tests  (54%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     724 tests total
+                                     743 tests total
 ```
 
 ## Coverage Matrix
@@ -91,7 +91,7 @@ tests\run_e2e_tests.bat
 |-----------------------------------|-------------|-------|-------------------------------------|
 | `unit/test_config.py`             | Unit        |   52  | Config loading, validation          |
 | `unit/test_cert_validation.py`    | Unit        |    5  | Certificate validation helpers      |
-| `unit/test_cli.py`                | Unit        |    4  | `app.cli.main()` orchestration      |
+| `unit/test_cli.py`                | Unit        |    6  | `app.cli.main()` orchestration      |
 | `unit/test_metrics.py`            | Unit        |   95  | All metrics functions incl. AI      |
 | `unit/test_main_helpers.py`       | Unit        |    5  | `_timestamp_folder_name()`          |
 | `unit/test_jira_client.py`        | Unit        |   42  | All jira_client functions (mocked)  |
