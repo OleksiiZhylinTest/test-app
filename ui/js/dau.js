@@ -1,12 +1,5 @@
 import { getFilters } from './api.js';
 
-const USAGE_OPTIONS = [
-  'Every day (5 days)',
-  'Most days (3\u20134 days)',
-  'Rarely (1\u20132 days)',
-  'Not used',
-];
-
 let _currentSlug = '';
 let _records = [];
 let _roster = {}; // {username: role}
