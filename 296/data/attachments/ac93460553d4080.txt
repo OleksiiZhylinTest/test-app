@@ -1,4 +1,0 @@
-INFO     app.cli:cli.py:71 Report generation started (project_type=SCRUM, estimation_type=StoryPoints)
-DEBUG    app.core.schema:schema.py:126 Active schema: 'Default_Jira_Cloud' (17 fields)
-INFO     app.cli:cli.py:101 Metrics assembled: velocity=0 sprint(s), cycle_time_mean=0.0 days (n=0), AI trend=0 sprint(s), DAU response_count=0
-SUCCESS  app.cli:cli.py:150 Reports written in 0.0 s: /tmp/pytest-of-runner/pytest-0/test_main_keeps_running_when_f0/generated/reports/ai_adoption_metrics_report/ai_adoption_metrics_report_2026-03-26T10-00-00.html, /tmp/pytest-of-runner/pytest-0/test_main_keeps_running_when_f0/generated/reports/ai_adoption_metrics_report/ai_adoption_metrics_report_2026-03-26T10-00-00.md

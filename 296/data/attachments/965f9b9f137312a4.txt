@@ -1,2 +1,0 @@
-INFO     app.cli:cli.py:71 Report generation started (project_type=SCRUM, estimation_type=StoryPoints)
-ERROR    app.cli:cli.py:85 Failed to fetch Jira data: ssl fail
