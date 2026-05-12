@@ -104,6 +104,39 @@ function _populateRecordWeekDropdown(selectedWeek) {
   }
 }
 
+// ── role selects ──────────────────────────────────────────────────────────────
+
+async function _fetchDauRoles() {
+  try {
+    const res = await fetch('/api/dau/config');
+    const data = await res.json();
+    return data.ok ? (data.roles || []) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function _populateRoleSelects(roles) {
+  const configs = [
+    { id: 'dau-roster-role', placeholder: '— Select role —' },
+    { id: 'dau-filter-role', placeholder: '— All roles —' },
+    { id: 'dau-rec-role',    placeholder: '— Not specified —' },
+  ];
+  for (const { id, placeholder } of configs) {
+    const sel = document.getElementById(id);
+    if (!sel) continue;
+    const current = sel.value;
+    sel.innerHTML = `<option value="">${placeholder}</option>`;
+    for (const role of roles) {
+      const opt = document.createElement('option');
+      opt.value = role;
+      opt.textContent = role;
+      sel.appendChild(opt);
+    }
+    if (current) sel.value = current;
+  }
+}
+
 // ── filter selector ───────────────────────────────────────────────────────────
 
 async function _populateFilterSelect() {
@@ -488,6 +521,7 @@ export function initDau() {
       _populateFilterSelect();
       _populateImportWeekDropdown();
       _populateRecordWeekDropdown();
+      _fetchDauRoles().then(_populateRoleSelects);
     });
   }
 

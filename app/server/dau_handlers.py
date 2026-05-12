@@ -21,8 +21,16 @@ _SCORE_MAP: dict[str, float] = {
     "Not used": 0.0,
 }
 
-_VALID_ROLES = {"Developer", "QA / Test Engineer", "Business Analyst", "Delivery Manager / Lead", "Other", ""}
 _VALID_USAGES = set(_SCORE_MAP.keys())
+
+
+def _load_dau_config() -> dict:
+    path = _root() / "config" / "dau_config.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        logger.warning("Could not read dau_config.json: %s", exc)
+        return {}
 
 
 class DauHandlerMixin:
@@ -79,6 +87,12 @@ class DauHandlerMixin:
         qs = parse_qs(urlparse(self.path).query)
         return urlunquote((qs.get("filter") or [""])[0]).strip()
 
+    # ── GET /api/dau/config ──────────────────────────────────────────────────
+
+    def _handle_dau_config_get(self) -> None:
+        cfg = _load_dau_config()
+        self._send_json(200, {"ok": True, "roles": cfg.get("roles", [])})
+
     # ── GET /api/dau/records ─────────────────────────────────────────────────
 
     def _handle_dau_records_get(self) -> None:
@@ -125,7 +139,8 @@ class DauHandlerMixin:
             return
 
         role = (body.get("role") or "").strip()
-        if role and role not in _VALID_ROLES:
+        valid_roles = set(_load_dau_config().get("roles", []))
+        if role and valid_roles and role not in valid_roles:
             self._send_json(400, {"ok": False, "error": f"Invalid role value: {role!r}"})
             return
 
@@ -290,7 +305,8 @@ class DauHandlerMixin:
         if not username:
             self._send_json(400, {"ok": False, "error": "username is required"})
             return
-        if role and role not in _VALID_ROLES:
+        valid_roles = set(_load_dau_config().get("roles", []))
+        if role and valid_roles and role not in valid_roles:
             self._send_json(400, {"ok": False, "error": f"Invalid role: {role!r}"})
             return
         roster = self._load_roster(dau_path)

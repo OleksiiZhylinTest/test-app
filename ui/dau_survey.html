@@ -895,6 +895,21 @@
 
       btnNewSurvey.addEventListener('click', resetSurvey);
 
+      // ── Populate role select from server config (falls back to hardcoded options) ──
+      fetch('/api/dau/config')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.ok || !Array.isArray(data.roles) || !data.roles.length) return;
+          selectRole.innerHTML = '<option value="">Select your role…</option>';
+          data.roles.forEach(function (role) {
+            var opt = document.createElement('option');
+            opt.value = role;
+            opt.textContent = role;
+            selectRole.appendChild(opt);
+          });
+        })
+        .catch(function () {});
+
       // ── Submit handler ──
       btnSubmit.addEventListener('click', async function () {
         if (btnSubmit.disabled) return;
