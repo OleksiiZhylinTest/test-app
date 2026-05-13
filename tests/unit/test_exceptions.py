@@ -48,4 +48,4 @@ def test_schema_error_preserves_cause():
     cause = OSError("disk full")
     with pytest.raises(SchemaError) as exc_info:
         raise SchemaError("write failed") from cause
-    assert exc_info.value.__cause__ is cause
+    assert exc_info.value.__cause__ is cause  # type: ignore
