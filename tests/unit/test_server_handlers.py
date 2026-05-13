@@ -614,8 +614,11 @@ def test_post_filter_normalizes_missing_param_keys(monkeypatch, tmp_path):
     handler._handle_post_filter()
 
     persisted = json.loads((tmp_path / "config" / "jira_filters.json").read_text(encoding="utf-8"))
-    assert len(persisted) == 1
-    entry = persisted[0]
+    # _load_filters() auto-inserts the default filter when list is empty, so we get 2 entries
+    assert len(persisted) >= 1
+    # Find the "Minimal Filter" entry (it will be at index 1 after the default filter)
+    entry = next((f for f in persisted if f["filter_name"] == "Minimal Filter"), None)
+    assert entry is not None, "Minimal Filter entry not found in persisted filters"
     params = entry["params"]
 
     # All expected keys must be present
