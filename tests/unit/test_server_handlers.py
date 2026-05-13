@@ -531,6 +531,116 @@ def test_generate_uses_stored_report_name_when_no_param(monkeypatch, tmp_path):
     assert env.get("REPORT_NAME") == "Stored Report Name"
 
 
+def test_generate_empty_sprint_name_filter_overrides_defaults(monkeypatch, tmp_path):
+    """Per-filter isolation: empty JIRA_SPRINT_NAME_FILTER in filter params overrides defaults.env.
+
+    Verifies that when a filter has JIRA_SPRINT_NAME_FILTER: "", it is injected into the subprocess
+    env (explicitly clearing any value from defaults.env), not skipped and allowed to fall through.
+    """
+    srv, handler = _make_handler(monkeypatch, tmp_path)
+    handler.path = "/api/generate?filter=no_sprint_filter"
+
+    (tmp_path / "config").mkdir()
+    # defaults.env has a sprint filter set
+    (tmp_path / "config" / "defaults.env").write_text("JIRA_SPRINT_NAME_FILTER=Team1\n", encoding="utf-8")
+    # filter explicitly has empty sprint name filter
+    (tmp_path / "config" / "jira_filters.json").write_text(
+        json.dumps(
+            [
+                {
+                    "filter_name": "No Sprint Filter",
+                    "slug": "no_sprint_filter",
+                    "is_default": False,
+                    "jql": "",
+                    "params": {
+                        "JIRA_PROJECT": "TEST",
+                        "JIRA_SPRINT_NAME_FILTER": "",
+                    },
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    captured: dict = {}
+
+    class _FakeProc:
+        def __init__(self):
+            self.stdout = iter([])
+            self.returncode = 0
+
+        def wait(self):
+            return None
+
+    def _fake_popen(*args, **kwargs):
+        captured["env"] = kwargs.get("env") or {}
+        return _FakeProc()
+
+    monkeypatch.setattr(srv.subprocess, "Popen", _fake_popen)
+
+    handler._handle_generate()
+
+    env = captured.get("env") or {}
+    assert env.get("JIRA_SPRINT_NAME_FILTER") == "", (
+        f"Expected empty string from filter to override defaults.env; got {env.get('JIRA_SPRINT_NAME_FILTER')!r}"
+    )
+
+
+def test_post_filter_normalizes_missing_param_keys(monkeypatch, tmp_path):
+    """Filter save normalizes: all FILTER_PARAM_KEYS are present in saved filter, missing ones default to "".
+
+    Verifies that when a filter is saved via POST /api/filters with missing param keys,
+    the normalized entry in jira_filters.json has all keys present with at least "".
+    This prevents future env-bleed when generate handler iterates params.
+    """
+    srv, handler = _make_handler(
+        monkeypatch,
+        tmp_path,
+        body={
+            "name": "Minimal Filter",
+            "report_name": "",
+            "params": {
+                "JIRA_PROJECT": "TEST",
+                "JIRA_BOARD_ID": "1",
+                "JIRA_SPRINT_COUNT": "5",
+                # deliberately omit JIRA_SPRINT_NAME_FILTER and others
+            },
+        },
+    )
+
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "jira_filters.json").write_text("[]", encoding="utf-8")
+
+    handler._handle_post_filter()
+
+    persisted = json.loads((tmp_path / "config" / "jira_filters.json").read_text(encoding="utf-8"))
+    assert len(persisted) == 1
+    entry = persisted[0]
+    params = entry["params"]
+
+    # All expected keys must be present
+    expected_keys = [
+        "JIRA_PROJECT",
+        "JIRA_TEAM_ID",
+        "JIRA_ISSUE_TYPES",
+        "JIRA_CLOSED_SPRINTS_ONLY",
+        "JIRA_FILTER_PAGE_SIZE",
+        "JIRA_BOARD_ID",
+        "JIRA_SPRINT_COUNT",
+        "JIRA_SPRINT_NAME_FILTER",
+        "JIRA_FILTER_ID",
+        "PROJECT_TYPE",
+        "ESTIMATION_TYPE",
+        "AI_ASSISTED_LABEL",
+        "AI_EXCLUDE_LABELS",
+        "AI_TOOL_LABELS",
+        "AI_ACTION_LABELS",
+        "DAU_PATH",
+    ]
+    for key in expected_keys:
+        assert key in params, f"Expected key {key!r} missing from saved filter params"
+
+
 def test_handle_test_connection_returns_user_details_on_success(monkeypatch, tmp_path):
     srv, handler = _make_handler(
         monkeypatch,
