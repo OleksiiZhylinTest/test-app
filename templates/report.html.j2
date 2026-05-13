@@ -36,6 +36,7 @@
     {%- if metrics.filter_name %} &nbsp;·&nbsp; Filter: <strong>{{ metrics.filter_name }}</strong>{% if metrics.filter_id %} <span style="opacity:0.6">(#{{ metrics.filter_id }})</span>{% endif %}{% endif %}
     {%- if metrics.project_key %} &nbsp;·&nbsp; Project: <strong>{{ metrics.project_key }}</strong>{% endif %}
     {%- if metrics.filter_jql %} &nbsp;·&nbsp; JQL: <code style="font-size:0.8em;opacity:0.85">{{ metrics.filter_jql }}</code>{% endif %}
+    {%- if metrics.sprint_name_filter %} &nbsp;·&nbsp; Sprint Filter: <strong>{{ metrics.sprint_name_filter }}</strong>{% endif %}
   </p>
 
   {% if section_visibility.velocity_trend %}

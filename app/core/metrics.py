@@ -817,6 +817,7 @@ def build_metrics_dict(
         "filter_id": None,
         "filter_jql": None,
         "project_key": None,
+        "sprint_name_filter": None,
         "report_name": None,
         "generated_at": datetime.now(UTC).isoformat(),
     }

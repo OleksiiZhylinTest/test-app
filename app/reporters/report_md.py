@@ -265,6 +265,7 @@ def generate_md(
             ["filter_name", metrics.get("filter_name") or "—"],
             ["filter_id", str(metrics.get("filter_id")) if metrics.get("filter_id") is not None else "—"],
             ["filter_jql", metrics.get("filter_jql") or "—"],
+            ["sprint_name_filter", metrics.get("sprint_name_filter") or "—"],
             ["project_key", metrics.get("project_key") or "—"],
         ]
         parts.append(_md_table(["Parameter", "Value"], jira_rows))

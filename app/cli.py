@@ -121,6 +121,8 @@ def main() -> int:
             pass  # filter name is non-critical metadata; failure is safe to ignore
     if config.JIRA_PROJECT:
         metrics_dict["project_key"] = config.JIRA_PROJECT
+    if config.JIRA_SPRINT_NAME_FILTER:
+        metrics_dict["sprint_name_filter"] = config.JIRA_SPRINT_NAME_FILTER
 
     metrics_dict["report_name"] = config.REPORT_NAME or metrics_dict.get("filter_name") or "AI Adoption Metrics Report"
 
