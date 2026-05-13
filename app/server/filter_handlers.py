@@ -183,6 +183,30 @@ class FilterHandlerMixin:
             dau_path = f"data/dau/{slug}"
         params["DAU_PATH"] = dau_path
 
+        # Ensure all known param keys are present; missing ones default to "".
+        # This prevents future filters from suffering env-bleed due to missing keys.
+        _FILTER_PARAM_KEYS = [
+            "JIRA_PROJECT",
+            "JIRA_TEAM_ID",
+            "JIRA_ISSUE_TYPES",
+            "JIRA_CLOSED_SPRINTS_ONLY",
+            "JIRA_FILTER_PAGE_SIZE",
+            "JIRA_BOARD_ID",
+            "JIRA_SPRINT_COUNT",
+            "JIRA_SPRINT_NAME_FILTER",
+            "JIRA_FILTER_ID",
+            "PROJECT_TYPE",
+            "ESTIMATION_TYPE",
+            "AI_ASSISTED_LABEL",
+            "AI_EXCLUDE_LABELS",
+            "AI_TOOL_LABELS",
+            "AI_ACTION_LABELS",
+            "DAU_PATH",
+        ]
+        for _k in _FILTER_PARAM_KEYS:
+            if _k not in params:
+                params[_k] = ""
+
         filters = self._load_filters()
         idx = next((i for i, f in enumerate(filters) if f.get("filter_name", "").lower() == name.lower()), None)
         updated = idx is not None and not filters[idx].get("is_default")

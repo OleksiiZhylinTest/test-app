@@ -68,9 +68,8 @@ class GenerateHandlerMixin:
                     if _entry.get("slug") == filter_slug:
                         _params = _entry.get("params") or {}
                         for _key in _FILTER_PARAM_KEYS:
-                            _val = (_params.get(_key) or "").strip()
-                            if _val:
-                                fresh_env[_key] = _val
+                            if _key in _params:
+                                fresh_env[_key] = (_params[_key] or "").strip()
                         _filter_jql = (_entry.get("jql") or "").strip()
                         if _filter_jql:
                             fresh_env["JIRA_FILTER_JQL"] = _filter_jql
