@@ -53,11 +53,3 @@ During `/implement`, `/fix`, or `/sync`:
 4. Update `Status` to `✓ Met` (if now satisfied), `✗ Not met` (if partially implemented), or `⬜ N/T` (if unverified)
 5. After all code/tests/docs are complete, re-check to confirm final status
 
----
-
-## Related
-
-- `/implement` — orchestrates the full workflow (step 1 is to read requirements)
-- `/fix` — bug-fix loop (step 6 updates requirement status)
-- `/sync` — alignment audit (audits requirement Status accuracy)
-- `docs/product/requirements/README.md` — authoritative reference

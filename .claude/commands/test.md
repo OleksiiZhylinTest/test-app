@@ -36,7 +36,3 @@ Delegates to `python tests/runners/run_all_checks.py` with optional skip flags. 
 
 **Coverage stats** in `tests/coverage/test_coverage.md` are auto-generated — never hand-edit. Run `/coverage` to refresh.
 
-## Related
-
-- `/coverage` — Update test coverage stats
-- `/lint` — Run lint + type checking only (faster feedback during development)

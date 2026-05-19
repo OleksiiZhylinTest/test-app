@@ -37,8 +37,3 @@ Start the dev server on localhost.
 - Refresh browser or restart server to see changes
 - Server runs in foreground; watch stdout for request logs
 
-## Related
-
-- `docs/development/architecture.md` — Module responsibilities
-- `CLAUDE.md` — Extension Patterns → Extending the dev server
-- `app/server/_base.py` — Routing and handler base class

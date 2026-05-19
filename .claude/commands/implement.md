@@ -79,14 +79,3 @@ Update docs **only if behavior changed** (not for internal refactors):
 2. Run `/commit` with type `feat:` (new feature) or `fix:` (if this was a bug fix)
 3. Optionally: run `/sync` to verify alignment across all 5 layers (requirements, code, tests, architecture.md, feature docs)
 
----
-
-## Related
-
-- `/requirements` — find and understand the requirement to implement
-- `/test` — run full CI test suite
-- `/coverage` — update test coverage stats
-- `/commit` — commit with proper message format
-- `/sync` — audit alignment across layers
-- `CLAUDE.md` — Development Workflow (this command operationalizes that 6-step workflow)
-- `/extend` — recipes for common patterns (new metric, new config var, new server handler)

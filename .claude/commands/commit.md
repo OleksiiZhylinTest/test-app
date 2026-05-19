@@ -43,7 +43,3 @@ Claude Code will:
 - Validate format before committing
 - Add co-author trailer automatically
 
-## Related
-
-- `CLAUDE.md` — Commit message format rules and examples
-- `docs/development/pipeline.md` — CI expectations for commit content
