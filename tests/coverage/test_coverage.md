@@ -25,12 +25,12 @@
              /----------\
             / Integration \           19 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
-          /    Component      \      205 tests  (28%)  (filesystem, HTTP, data shapes)        → tests/component/
+          /    Component      \      205 tests  (27%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   400 tests  (54%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   405 tests  (54%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     743 tests total
+                                     748 tests total
 ```
 
 ## Coverage Matrix
@@ -94,8 +94,8 @@ tests\run_e2e_tests.bat
 | `unit/test_cli.py`                | Unit        |    6  | `app.cli.main()` orchestration      |
 | `unit/test_metrics.py`            | Unit        |   95  | All metrics functions incl. AI      |
 | `unit/test_main_helpers.py`       | Unit        |    5  | `_timestamp_folder_name()`          |
-| `unit/test_jira_client.py`        | Unit        |   42  | All jira_client functions (mocked)  |
-| `unit/test_server_handlers.py`    | Unit        |   32  | Internal `app.server` handler logic |
+| `unit/test_jira_client.py`        | Unit        |   45  | All jira_client functions (mocked)  |
+| `unit/test_server_handlers.py`    | Unit        |   34  | Internal `app.server` handler logic |
 | `unit/test_imports.py`            | Unit        |    8  | Module imports (smoke)              |
 | `unit/test_logging_setup.py`      | Unit        |   22  | Logging setup, SUCCESS level, file creation, format |
 | `component/test_report_html.py`   | Component   |   31  | HTML template rendering, visibility |
