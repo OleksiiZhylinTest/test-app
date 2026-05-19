@@ -116,7 +116,7 @@ def deduplicate_sprint_issues(
 
        - If the owner is among the input ``sprints``, place the issue there.
        - If the owner is **not** among the input ``sprints`` (typical case:
-         the active sprint is excluded by ``JIRA_CLOSED_SPRINTS_ONLY=True``
+         the active sprint is excluded by ``JIRA_INCLUDE_ACTIVE_SPRINT=True``
          while the issue is still carried in a closed sprint's API
          response), drop the issue from velocity. It belongs to a sprint
          not yet being reported on; it will surface there once that sprint
@@ -177,7 +177,7 @@ def deduplicate_sprint_issues(
             issue_target[key] = latest
         else:
             # Owner is a sprint we did not fetch (e.g. an active sprint
-            # excluded by JIRA_CLOSED_SPRINTS_ONLY). Drop the issue from
+            # excluded by JIRA_INCLUDE_ACTIVE_SPRINT). Drop the issue from
             # velocity to avoid wrong attribution to an older closed sprint.
             issue_target[key] = None
 

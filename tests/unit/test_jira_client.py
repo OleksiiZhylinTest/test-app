@@ -140,7 +140,7 @@ def test_get_sprints_returns_newest_when_paginated(monkeypatch, mock_jira):
 
 def test_get_sprints_excludes_active_when_closed_only(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     mock_jira.get_all_sprints_from_board.side_effect = [
         {"values": [{"id": 1, "name": "ClosedS", "startDate": "2026-01-01"}]},
         {"values": []},  # pagination end
@@ -154,7 +154,7 @@ def test_get_sprints_excludes_active_when_closed_only(monkeypatch, mock_jira):
 
 def test_get_sprints_includes_active_when_closed_only_false(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", False)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", True)
     # One partial closed page (stops pagination), then active sprint
     mock_jira.get_all_sprints_from_board.side_effect = [
         {"values": [{"id": 1, "name": "ClosedS", "startDate": "2026-01-01"}]},  # closed (partial → stop)
@@ -169,7 +169,7 @@ def test_get_sprints_includes_active_when_closed_only_false(monkeypatch, mock_ji
 def test_get_sprints_active_sprint_comes_first(monkeypatch, mock_jira):
     """Active sprint must be index 0 so the template's .reverse() places it rightmost in charts."""
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", False)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", True)
     mock_jira.get_all_sprints_from_board.side_effect = [
         {
             "values": [
@@ -187,7 +187,7 @@ def test_get_sprints_active_sprint_comes_first(monkeypatch, mock_jira):
 
 def test_get_sprints_filtered_by_name_substring(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Team 2")
     sprints = [
         {"id": 1, "name": "Sprint 1 for Team 1", "startDate": "2026-01-01"},
@@ -212,7 +212,7 @@ def test_get_sprints_filtered_by_name_substring(monkeypatch, mock_jira):
 
 def test_get_sprints_name_filter_case_insensitive(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "team 2")
     mock_jira.get_all_sprints_from_board.side_effect = [
         {
@@ -230,7 +230,7 @@ def test_get_sprints_name_filter_case_insensitive(monkeypatch, mock_jira):
 
 def test_get_sprints_empty_name_filter_returns_all(monkeypatch, mock_jira):
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 10)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "")
     mock_jira.get_all_sprints_from_board.side_effect = [
         {
@@ -249,7 +249,7 @@ def test_get_sprints_name_filter_and_count_cap_combined(monkeypatch, mock_jira):
     """Name filter excludes non-matching sprints; count cap then limits to newest N matching."""
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 3)
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Sprint Test")
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     sprints = [
         {"id": 1, "name": "Sprint Test 17", "startDate": "2026-01-17"},
         {"id": 2, "name": "Sprint Alex 18", "startDate": "2026-01-18"},
@@ -280,7 +280,7 @@ def test_get_sprints_count_cap_is_applied_after_name_filter(monkeypatch, mock_ji
     """
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 3)
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Sprint Test")
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     non_matching = [{"id": 10 + i, "name": f"Sprint Other {i}", "startDate": f"2026-{i:02d}-01"} for i in range(1, 11)]
     matching = [{"id": i, "name": f"Sprint Test {i}", "startDate": f"2025-{i:02d}-01"} for i in range(1, 6)]
     mock_jira.get_all_sprints_from_board.side_effect = [
@@ -299,7 +299,7 @@ def test_get_sprints_name_filter_with_count_returns_newest_not_oldest(monkeypatc
     """When more matching sprints exist than the count cap, the NEWEST are returned."""
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 3)
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Sprint Test")
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     sprints = [
         {"id": 1, "name": "Sprint Test 1", "startDate": "2026-01-01"},
         {"id": 2, "name": "Sprint Test 2", "startDate": "2026-02-01"},
@@ -317,6 +317,43 @@ def test_get_sprints_name_filter_with_count_returns_newest_not_oldest(monkeypatc
     assert result[1]["name"] == "Sprint Test 4"
     assert result[2]["name"] == "Sprint Test 3"
     assert not any(s["name"] in {"Sprint Test 1", "Sprint Test 2"} for s in result)
+
+
+def test_get_sprints_name_filter_active_sprint_and_count_cap(monkeypatch, mock_jira):
+    """Name filter + active sprint included + count cap of 2 — all three interact correctly.
+
+    Active sprints: "Test Sprint 4" (matches), "Alex Sprint 3", "Test 1"
+    Closed sprints: "Test Sprint 0–3" (all match), "Alex Sprint 0–2", "Test 0"
+    Expected: ["Test Sprint 4", "Test Sprint 3"] — active first, then newest matching closed.
+    """
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", True)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 2)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Test Sprint")
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {
+            "values": [
+                {"id": 3, "name": "Test Sprint 3", "startDate": "2025-01-20"},
+                {"id": 2, "name": "Test Sprint 2", "startDate": "2025-01-13"},
+                {"id": 1, "name": "Test Sprint 1", "startDate": "2025-01-06"},
+                {"id": 0, "name": "Test Sprint 0", "startDate": "2024-12-30"},
+                {"id": 12, "name": "Alex Sprint 2", "startDate": "2025-01-13"},
+                {"id": 11, "name": "Alex Sprint 1", "startDate": "2025-01-06"},
+                {"id": 10, "name": "Alex Sprint 0", "startDate": "2024-12-30"},
+                {"id": 20, "name": "Test 0", "startDate": "2024-12-23"},
+            ]
+        },  # partial page (8 < 50) → pagination ends
+        {
+            "values": [
+                {"id": 4, "name": "Test Sprint 4"},
+                {"id": 13, "name": "Alex Sprint 3"},
+                {"id": 21, "name": "Test 1"},
+            ]
+        },  # active sprints
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    assert len(result) == 2
+    assert result[0]["name"] == "Test Sprint 4"  # active sprint, matched filter, comes first
+    assert result[1]["name"] == "Test Sprint 3"  # newest matching closed sprint
 
 
 # ---------------------------------------------------------------------------
@@ -404,7 +441,7 @@ def test_fetch_kanban_data_jql_uses_updated_not_resolutiondate(mock_jira, monkey
     from datetime import date
 
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 1)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "")
@@ -439,7 +476,7 @@ def test_fetch_kanban_data_groups_issues_by_updated_date(mock_jira, monkeypatch)
     last_monday = current_monday - timedelta(weeks=1)
 
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 2)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "")
@@ -477,7 +514,7 @@ def test_fetch_kanban_data_prefers_resolutiondate_over_updated(mock_jira, monkey
     two_mondays_ago = current_monday - timedelta(weeks=2)
 
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 2)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "")
@@ -501,11 +538,11 @@ def test_fetch_kanban_data_prefers_resolutiondate_over_updated(mock_jira, monkey
 
 
 def test_fetch_kanban_data_closed_sprints_only_excludes_current_week(mock_jira, monkeypatch):
-    """When JIRA_CLOSED_SPRINTS_ONLY=True period 0 starts on last Monday, not current Monday."""
+    """When JIRA_INCLUDE_ACTIVE_SPRINT=True period 0 starts on last Monday, not current Monday."""
     from datetime import date, timedelta
 
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 1)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "")
@@ -523,11 +560,11 @@ def test_fetch_kanban_data_closed_sprints_only_excludes_current_week(mock_jira, 
 
 
 def test_fetch_kanban_data_open_sprints_includes_current_week(mock_jira, monkeypatch):
-    """When JIRA_CLOSED_SPRINTS_ONLY=False period 0 is the current partial week (active state)."""
+    """When JIRA_INCLUDE_ACTIVE_SPRINT=False period 0 is the current partial week (active state)."""
     from datetime import date, timedelta
 
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 2)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", False)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", True)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "")
@@ -547,7 +584,7 @@ def test_fetch_kanban_data_open_sprints_includes_current_week(mock_jira, monkeyp
 def test_fetch_kanban_data_uses_config_filter_jql_as_fallback(mock_jira, monkeypatch):
     """fetch_kanban_data() combines JIRA_FILTER_JQL with updated constraint when JIRA_FILTER_ID absent."""
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 1)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "project = SCRUM AND status = Done")
@@ -563,7 +600,7 @@ def test_fetch_kanban_data_uses_config_filter_jql_as_fallback(mock_jira, monkeyp
 def test_fetch_kanban_data_strips_order_by_from_local_filter_jql(mock_jira, monkeypatch):
     """A local JIRA_FILTER_JQL with ORDER BY is normalised before being wrapped in parens."""
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 1)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "status = Done ORDER BY created DESC")
@@ -580,7 +617,7 @@ def test_fetch_kanban_data_strips_order_by_from_local_filter_jql(mock_jira, monk
 def test_fetch_kanban_data_filter_id_jql_takes_precedence_over_config_jql(mock_jira, monkeypatch):
     """When get_filter_jql() returns a JQL, config.JIRA_FILTER_JQL is not used."""
     monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 1)
-    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", False)
     monkeypatch.setattr(jira_client, "get_board_id", lambda jira: 1)
     monkeypatch.setattr(jira_client, "get_filter_jql", lambda jira: "project = OTHER")
     monkeypatch.setattr("app.core.config.JIRA_FILTER_JQL", "project = FALLBACK")

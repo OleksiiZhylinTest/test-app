@@ -97,7 +97,7 @@ def test_default_filter_entry_is_present_and_correct(monkeypatch, tmp_path):
     assert d["slug"] == "default_jira_filter"
     # JFM-D-002: sensible parameter defaults
     params = d.get("params", {})
-    assert params.get("JIRA_CLOSED_SPRINTS_ONLY") == "true"
+    assert params.get("JIRA_INCLUDE_ACTIVE_SPRINT") == "false"
     assert params.get("schema_name") == "Default_Jira_Cloud"
 
 
@@ -293,7 +293,7 @@ def test_post_filter_updates_existing_entry(monkeypatch, tmp_path):
         ({"JIRA_PROJECT": "A,B"}, "project IN (A, B)", None),
         ({"JIRA_PROJECT": "PROJ", "JIRA_TEAM_ID": "T1"}, '"Team[Team]" = T1', None),
         (
-            {"JIRA_PROJECT": "PROJ", "JIRA_CLOSED_SPRINTS_ONLY": "false"},
+            {"JIRA_PROJECT": "PROJ", "JIRA_INCLUDE_ACTIVE_SPRINT": "true"},
             "project = PROJ",
             "sprint in closedSprints()",
         ),

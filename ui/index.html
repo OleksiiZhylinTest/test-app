@@ -386,16 +386,16 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="jira-closed-sprints-only">Closed Sprints Only</label>
+                <label class="form-label" for="jira-include-active-sprint">Include Active Sprint</label>
                 <select
                   class="form-input"
-                  id="jira-closed-sprints-only"
-                  name="JIRA_CLOSED_SPRINTS_ONLY"
+                  id="jira-include-active-sprint"
+                  name="JIRA_INCLUDE_ACTIVE_SPRINT"
                 >
-                  <option value="true">true &mdash; include issues from closed sprints only (default)</option>
-                  <option value="false">false &mdash; include issues from all sprints</option>
+                  <option value="true">true &mdash; include active sprint</option>
+                  <option value="false">false &mdash; exclude active sprint (default)</option>
                 </select>
-                <p class="form-helper">When <strong>true</strong>, only issues from closed sprints are counted. Default: <strong>true</strong>.</p>
+                <p class="form-helper">When <strong>true</strong>, the active sprint is included in the report. Default: <strong>false</strong>.</p>
               </div>
 
             </div>

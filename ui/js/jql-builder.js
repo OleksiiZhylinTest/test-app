@@ -32,8 +32,8 @@ export function buildJqlLocally(params) {
   const types    = rawTypes.split(',').map((t) => t.trim()).filter(Boolean);
   if (types.length) clauses.push(`type IN (${types.map(jqlQuote).join(', ')})`);
 
-  const closedOnly = (params.JIRA_CLOSED_SPRINTS_ONLY || 'true').trim().toLowerCase();
-  if (['1', 'true', 'yes', 'on'].includes(closedOnly)) clauses.push('sprint in closedSprints()');
+  const includeActive = (params.JIRA_INCLUDE_ACTIVE_SPRINT || 'false').trim().toLowerCase();
+  if (!['1', 'true', 'yes', 'on'].includes(includeActive)) clauses.push('sprint in closedSprints()');
 
   return clauses.join(' AND ');
 }

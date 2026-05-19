@@ -10,7 +10,7 @@ export const STORE_KEYS = {
   JIRA_PROJECT:              'jira_project',
   JIRA_TEAM_ID:              'jira_team_id',
   JIRA_ISSUE_TYPES:          'jira_issue_types',
-  JIRA_CLOSED_SPRINTS_ONLY:  'jira_closed_sprints_only',
+  JIRA_INCLUDE_ACTIVE_SPRINT: 'jira_include_active_sprint',
   JIRA_FILTER_PAGE_SIZE:     'jira_filter_page_size',
   REPORTS:                   'jira_reports_list',
   FILTERS:                   'jira_saved_filters',
@@ -19,7 +19,7 @@ export const STORE_KEYS = {
 
 export const FIELD_DEFAULTS = {
   JIRA_SPRINT_COUNT:        '10',
-  JIRA_CLOSED_SPRINTS_ONLY: 'true',
+  JIRA_INCLUDE_ACTIVE_SPRINT: 'false',
   JIRA_FILTER_PAGE_SIZE:    '100',
 };
 

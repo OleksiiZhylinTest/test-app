@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from tests.conftest import make_issue, make_sprint
+from tests.conftest import make_issue, make_issue_with_labels, make_sprint
 
 pytestmark = pytest.mark.integration
 
@@ -176,3 +176,150 @@ def test_server_generate_sse_format(server_url):
     body = resp.read().decode()
     # Should contain at least the close event
     assert "event: close" in body
+
+
+# ---------------------------------------------------------------------------
+# Sprint name filter + active sprint + count cap — full pipeline
+# ---------------------------------------------------------------------------
+
+
+def test_main_pipeline_sprint_name_filter_with_active_and_count_cap(monkeypatch, tmp_path):
+    """Full pipeline: name filter + active sprint included + count cap — only 2 sprints in report."""
+    monkeypatch.setattr("app.core.config.JIRA_URL", "https://test.atlassian.net")
+    monkeypatch.setattr("app.core.config.JIRA_EMAIL", "u@t.com")
+    monkeypatch.setattr("app.core.config.JIRA_API_TOKEN", "tok")
+    monkeypatch.setattr("app.core.config.JIRA_BOARD_ID", 1)
+    monkeypatch.setattr("app.core.config.JIRA_FILTER_ID", None)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", True)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 2)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Test Sprint")
+
+    mock_jira = MagicMock()
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {
+            "values": [
+                {"id": 3, "name": "Test Sprint 3", "startDate": "2025-01-20"},
+                {"id": 2, "name": "Test Sprint 2", "startDate": "2025-01-13"},
+                {"id": 1, "name": "Test Sprint 1", "startDate": "2025-01-06"},
+                {"id": 0, "name": "Test Sprint 0", "startDate": "2024-12-30"},
+                {"id": 12, "name": "Alex Sprint 2", "startDate": "2025-01-13"},
+                {"id": 11, "name": "Alex Sprint 1", "startDate": "2025-01-06"},
+                {"id": 10, "name": "Alex Sprint 0", "startDate": "2024-12-30"},
+                {"id": 20, "name": "Test 0", "startDate": "2024-12-23"},
+            ]
+        },
+        {
+            "values": [
+                {"id": 4, "name": "Test Sprint 4"},
+                {"id": 13, "name": "Alex Sprint 3"},
+                {"id": 21, "name": "Test 1"},
+            ]
+        },
+    ]
+    mock_jira.get_all_issues_for_sprint_in_board.side_effect = [
+        {"issues": [make_issue("T-4", "Done", 5.0)], "total": 1},
+        {"issues": [make_issue("T-3", "Done", 3.0)], "total": 1},
+    ]
+    monkeypatch.setattr("app.core.jira_client.create_client", lambda: mock_jira)
+    monkeypatch.setattr("app.cli.REPORTS_DIR", tmp_path / "generated" / "reports")
+    monkeypatch.setattr("sys.argv", ["main.py"])
+
+    from main import main
+
+    rc = main()
+    assert rc == 0
+
+    reports_dir = tmp_path / "generated" / "reports"
+    subdirs = list(reports_dir.iterdir())
+    html = list(subdirs[0].glob("*.html"))[0].read_text(encoding="utf-8")
+    assert "Test Sprint 4" in html
+    assert "Test Sprint 3" in html
+    assert "Test Sprint 2" not in html
+    assert "Alex Sprint" not in html
+    assert "Test 1" not in html
+    assert "Test 0" not in html
+
+
+# ---------------------------------------------------------------------------
+# Sprint filter + velocity + AI Assisted metric — full pipeline
+# ---------------------------------------------------------------------------
+
+
+def test_main_pipeline_sprint_filter_with_velocity_and_ai_metrics(monkeypatch, tmp_path):
+    """Sprint filter + active sprint + count cap: velocity and AI% values appear in the HTML report."""
+    monkeypatch.setattr("app.core.config.JIRA_URL", "https://test.atlassian.net")
+    monkeypatch.setattr("app.core.config.JIRA_EMAIL", "u@t.com")
+    monkeypatch.setattr("app.core.config.JIRA_API_TOKEN", "tok")
+    monkeypatch.setattr("app.core.config.JIRA_BOARD_ID", 1)
+    monkeypatch.setattr("app.core.config.JIRA_FILTER_ID", None)
+    monkeypatch.setattr("app.core.config.JIRA_INCLUDE_ACTIVE_SPRINT", True)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 2)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Test Sprint")
+    monkeypatch.setattr("app.core.config.AI_ASSISTED_LABEL", "AI_assistance")
+    monkeypatch.setattr("app.core.config.AI_EXCLUDE_LABELS", [])
+    monkeypatch.setattr("app.core.config.AI_TOOL_LABELS", [])
+    monkeypatch.setattr("app.core.config.AI_ACTION_LABELS", [])
+    monkeypatch.setattr("app.core.config.ESTIMATION_TYPE", "StoryPoints")
+
+    mock_jira = MagicMock()
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {
+            "values": [
+                {"id": 3, "name": "Test Sprint 3", "startDate": "2025-01-20"},
+                {"id": 2, "name": "Test Sprint 2", "startDate": "2025-01-13"},
+                {"id": 1, "name": "Test Sprint 1", "startDate": "2025-01-06"},
+                {"id": 0, "name": "Test Sprint 0", "startDate": "2024-12-30"},
+                {"id": 12, "name": "Alex Sprint 2", "startDate": "2025-01-13"},
+                {"id": 11, "name": "Alex Sprint 1", "startDate": "2025-01-06"},
+                {"id": 10, "name": "Alex Sprint 0", "startDate": "2024-12-30"},
+                {"id": 20, "name": "Test 0", "startDate": "2024-12-23"},
+            ]
+        },
+        {
+            "values": [
+                {"id": 4, "name": "Test Sprint 4"},
+                {"id": 13, "name": "Alex Sprint 3"},
+                {"id": 21, "name": "Test 1"},
+            ]
+        },
+    ]
+    # Test Sprint 4: 5.0 AI + 3.0 non-AI → velocity=8.0, ai_pct=62.5%
+    # Test Sprint 3: 3.0 AI              → velocity=3.0, ai_pct=100.0%
+    mock_jira.get_all_issues_for_sprint_in_board.side_effect = [
+        {
+            "issues": [
+                make_issue_with_labels("T-4a", "Done", 5.0, ["AI_assistance"]),
+                make_issue_with_labels("T-4b", "Done", 3.0, []),
+            ],
+            "total": 2,
+        },
+        {
+            "issues": [make_issue_with_labels("T-3a", "Done", 3.0, ["AI_assistance"])],
+            "total": 1,
+        },
+    ]
+    monkeypatch.setattr("app.core.jira_client.create_client", lambda: mock_jira)
+    monkeypatch.setattr("app.cli.REPORTS_DIR", tmp_path / "generated" / "reports")
+    monkeypatch.setattr("sys.argv", ["main.py"])
+
+    from main import main
+
+    rc = main()
+    assert rc == 0
+
+    reports_dir = tmp_path / "generated" / "reports"
+    subdirs = list(reports_dir.iterdir())
+    html = list(subdirs[0].glob("*.html"))[0].read_text(encoding="utf-8")
+
+    # Sprint filter correctness
+    assert "Test Sprint 4" in html
+    assert "Test Sprint 3" in html
+    assert "Test Sprint 2" not in html
+    assert "Alex Sprint" not in html
+
+    # Velocity values
+    assert "8.0" in html  # Test Sprint 4: 5.0 + 3.0
+
+    # AI Assisted metric values
+    assert "62.5%" in html  # Test Sprint 4: 5.0 / 8.0 * 100
+    assert "100.0%" in html  # Test Sprint 3: 3.0 / 3.0 * 100

@@ -44,7 +44,7 @@ def get_board_id(jira: Jira) -> int:
 
 def get_sprints(jira: Jira, board_id: int) -> list[dict[str, Any]]:
     """Return recent sprints for the board, limited by JIRA_SPRINT_COUNT.
-    When JIRA_CLOSED_SPRINTS_ONLY is True (default), only closed sprints are returned.
+    When JIRA_INCLUDE_ACTIVE_SPRINT is False (default), only closed sprints are returned.
     """
     logger.debug("Fetching sprints for board %s (limit=%s)", board_id, config.JIRA_SPRINT_COUNT)
     # Paginate through ALL closed sprints so we can sort and take the NEWEST ones.
@@ -68,7 +68,7 @@ def get_sprints(jira: Jira, board_id: int) -> list[dict[str, Any]]:
         all_closed = [s for s in all_closed if _nf in (s.get("name") or "").lower()]
         active = [s for s in active if _nf in (s.get("name") or "").lower()]
     ordered = sorted(all_closed, key=lambda s: s.get("startDate") or "", reverse=True)
-    if not config.JIRA_CLOSED_SPRINTS_ONLY:
+    if config.JIRA_INCLUDE_ACTIVE_SPRINT:
         ordered = (active + ordered)[: config.JIRA_SPRINT_COUNT]
     else:
         ordered = ordered[: config.JIRA_SPRINT_COUNT]
@@ -169,7 +169,7 @@ def fetch_kanban_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
     Fetch KANBAN board data grouped by ISO calendar weeks instead of sprints.
 
     KANBAN strategy (differs from SCRUM):
-    - Builds N ISO week periods based on JIRA_SPRINT_COUNT and JIRA_CLOSED_SPRINTS_ONLY.
+    - Builds N ISO week periods based on JIRA_SPRINT_COUNT and JIRA_INCLUDE_ACTIVE_SPRINT.
     - Issues a SINGLE JQL query using `updated >= oldest_period_start` — does not rely on
       `resolutiondate`, which many Jira workflows leave unset on Done issues.
     - Groups each issue into its week by completion date: `resolutiondate` if set, else `updated`.
@@ -181,13 +181,13 @@ def fetch_kanban_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
     logger.debug("Fetching KANBAN data for board %s (as ISO week periods)", board_id)
 
     # Align to ISO week boundaries (Monday = weekday 0).
-    # JIRA_CLOSED_SPRINTS_ONLY controls whether the current partial week is included.
+    # JIRA_INCLUDE_ACTIVE_SPRINT controls whether the current partial week is included.
     today = datetime.utcnow().date()
     current_monday = today - timedelta(days=today.weekday())
     periods: list[dict[str, Any]] = []
 
     for i in range(config.JIRA_SPRINT_COUNT):
-        if config.JIRA_CLOSED_SPRINTS_ONLY:
+        if not config.JIRA_INCLUDE_ACTIVE_SPRINT:
             # Skip current week; use the N most recently completed ISO weeks.
             week_start = current_monday - timedelta(weeks=i + 1)
             week_end = week_start + timedelta(days=6)
