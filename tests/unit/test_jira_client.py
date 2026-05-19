@@ -245,6 +245,80 @@ def test_get_sprints_empty_name_filter_returns_all(monkeypatch, mock_jira):
     assert len(result) == 2
 
 
+def test_get_sprints_name_filter_and_count_cap_combined(monkeypatch, mock_jira):
+    """Name filter excludes non-matching sprints; count cap then limits to newest N matching."""
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 3)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Sprint Test")
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    sprints = [
+        {"id": 1, "name": "Sprint Test 17", "startDate": "2026-01-17"},
+        {"id": 2, "name": "Sprint Alex 18", "startDate": "2026-01-18"},
+        {"id": 3, "name": "Sprint Test 18", "startDate": "2026-01-18"},
+        {"id": 4, "name": "Sprint Other 19", "startDate": "2026-01-19"},
+        {"id": 5, "name": "Sprint Test 19", "startDate": "2026-01-19"},
+        {"id": 6, "name": "Sprint 0", "startDate": "2026-01-10"},
+        {"id": 7, "name": "Sprint Dev 20", "startDate": "2026-01-20"},
+        {"id": 8, "name": "Sprint Test 20", "startDate": "2026-01-20"},
+    ]
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {"values": sprints},
+        {"values": []},
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    names = [s["name"] for s in result]
+    assert len(result) == 3
+    assert names == ["Sprint Test 20", "Sprint Test 19", "Sprint Test 18"]
+    assert "Sprint Test 17" not in names
+    assert not any(n in names for n in ["Sprint Alex 18", "Sprint Other 19", "Sprint 0", "Sprint Dev 20"])
+
+
+def test_get_sprints_count_cap_is_applied_after_name_filter(monkeypatch, mock_jira):
+    """Count cap must apply to the already-filtered list, not the raw board list.
+
+    If cap applied first (wrong): 3 newest = all non-matching → name filter → 0 results.
+    If filter applied first (correct): 5 matching → cap at 3 → 3 results.
+    """
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 3)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Sprint Test")
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    non_matching = [{"id": 10 + i, "name": f"Sprint Other {i}", "startDate": f"2026-{i:02d}-01"} for i in range(1, 11)]
+    matching = [{"id": i, "name": f"Sprint Test {i}", "startDate": f"2025-{i:02d}-01"} for i in range(1, 6)]
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {"values": non_matching + matching},
+        {"values": []},
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    assert len(result) == 3
+    assert all("Sprint Test" in s["name"] for s in result)
+    assert result[0]["name"] == "Sprint Test 5"
+    assert result[1]["name"] == "Sprint Test 4"
+    assert result[2]["name"] == "Sprint Test 3"
+
+
+def test_get_sprints_name_filter_with_count_returns_newest_not_oldest(monkeypatch, mock_jira):
+    """When more matching sprints exist than the count cap, the NEWEST are returned."""
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_COUNT", 3)
+    monkeypatch.setattr("app.core.config.JIRA_SPRINT_NAME_FILTER", "Sprint Test")
+    monkeypatch.setattr("app.core.config.JIRA_CLOSED_SPRINTS_ONLY", True)
+    sprints = [
+        {"id": 1, "name": "Sprint Test 1", "startDate": "2026-01-01"},
+        {"id": 2, "name": "Sprint Test 2", "startDate": "2026-02-01"},
+        {"id": 3, "name": "Sprint Test 3", "startDate": "2026-03-01"},
+        {"id": 4, "name": "Sprint Test 4", "startDate": "2026-04-01"},
+        {"id": 5, "name": "Sprint Test 5", "startDate": "2026-05-01"},
+    ]
+    mock_jira.get_all_sprints_from_board.side_effect = [
+        {"values": sprints},
+        {"values": []},
+    ]
+    result = jira_client.get_sprints(mock_jira, 1)
+    assert len(result) == 3
+    assert result[0]["name"] == "Sprint Test 5"
+    assert result[1]["name"] == "Sprint Test 4"
+    assert result[2]["name"] == "Sprint Test 3"
+    assert not any(s["name"] in {"Sprint Test 1", "Sprint Test 2"} for s in result)
+
+
 # ---------------------------------------------------------------------------
 # get_filter_jql
 # ---------------------------------------------------------------------------
