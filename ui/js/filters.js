@@ -201,8 +201,8 @@ function clearFormFields() {
     'dau-path',
   ];
   textIds.forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; });
-  const closed = document.getElementById('jira-closed-sprints-only');
-  if (closed) closed.value = FIELD_DEFAULTS.JIRA_CLOSED_SPRINTS_ONLY || 'true';
+  const closed = document.getElementById('jira-include-active-sprint');
+  if (closed) closed.value = FIELD_DEFAULTS.JIRA_INCLUDE_ACTIVE_SPRINT || 'false';
   setRadio('filter-project-type',    'SCRUM');
   setRadio('filter-estimation-type', 'StoryPoints');
 }
@@ -215,7 +215,7 @@ function loadFilterIntoForm(entry) {
   setVal('jira-project',           params.JIRA_PROJECT);
   setVal('jira-team-id',           params.JIRA_TEAM_ID);
   setVal('jira-issue-types',       params.JIRA_ISSUE_TYPES);
-  setVal('jira-closed-sprints-only', params.JIRA_CLOSED_SPRINTS_ONLY || FIELD_DEFAULTS.JIRA_CLOSED_SPRINTS_ONLY || 'true');
+  setVal('jira-include-active-sprint', params.JIRA_INCLUDE_ACTIVE_SPRINT || FIELD_DEFAULTS.JIRA_INCLUDE_ACTIVE_SPRINT || 'false');
   setVal('jira-board-id',          params.JIRA_BOARD_ID);
   setVal('sprint-count',           params.JIRA_SPRINT_COUNT);
   setVal('sprint-name-filter',     params.JIRA_SPRINT_NAME_FILTER);
@@ -391,7 +391,7 @@ export function initFilters(filterLog) {
     const project        = document.getElementById('jira-project').value.trim();
     const teamId         = document.getElementById('jira-team-id').value.trim();
     const issueTypes     = document.getElementById('jira-issue-types').value.trim();
-    const closedSprints  = document.getElementById('jira-closed-sprints-only').value;
+    const includeActiveSprint = document.getElementById('jira-include-active-sprint').value;
     const projectType    = document.querySelector('input[name="filter-project-type"]:checked')?.value || 'SCRUM';
     const estimationType = document.querySelector('input[name="filter-estimation-type"]:checked')?.value || 'StoryPoints';
     const schemaName     = document.getElementById('filter-schema-select')?.value || DEFAULT_SCHEMA_NAME;
@@ -437,7 +437,7 @@ export function initFilters(filterLog) {
       JIRA_PROJECT:             project,
       JIRA_TEAM_ID:             teamId,
       JIRA_ISSUE_TYPES:         issueTypes,
-      JIRA_CLOSED_SPRINTS_ONLY: closedSprints,
+      JIRA_INCLUDE_ACTIVE_SPRINT: includeActiveSprint,
       PROJECT_TYPE:             projectType,
       ESTIMATION_TYPE:          estimationType,
       schema_name:              schemaName,

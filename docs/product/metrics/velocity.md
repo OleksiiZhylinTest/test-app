@@ -64,7 +64,7 @@ Story points and other field IDs always come from the active schema (file or bui
       the "owner" sprint — the most recent sprint the ticket has been part of in Jira.
       - If the owner is among the fetched sprints, place the ticket there.
       - If the owner is **not** among the fetched sprints (typical case: the active sprint
-        is excluded by `JIRA_CLOSED_SPRINTS_ONLY=True` while the ticket is still returned
+        is excluded by `JIRA_INCLUDE_ACTIVE_SPRINT=False` while the ticket is still returned
         under a closed sprint's API response), drop the ticket from velocity. It will
         surface in the owner sprint's velocity once that sprint enters the fetch window.
    2. **Fallback (sprint field absent / unparseable)** — attribute the ticket to the most

@@ -128,9 +128,9 @@ def _env_bool(key: str, default: bool = True) -> bool:
     return val in ("1", "true", "yes")
 
 
-# Sprint scope: when True (default), only closed sprints are included in reports.
-# Set to False to also include the active sprint.
-JIRA_CLOSED_SPRINTS_ONLY: bool = _env_bool("JIRA_CLOSED_SPRINTS_ONLY", default=True)
+# Sprint scope: when True, the active sprint is included in reports.
+# Default False — active sprint is excluded.
+JIRA_INCLUDE_ACTIVE_SPRINT: bool = _env_bool("JIRA_INCLUDE_ACTIVE_SPRINT", default=False)
 
 REPORT_NAME: str = os.getenv("REPORT_NAME", "").strip()
 

@@ -398,7 +398,7 @@ At startup, `config/defaults.env` is loaded first, then `.env` overrides it. Val
 | `JIRA_FILTER_ID` | `int` | `None` | Saved filter ID; when set, only matching issues are included |
 | `JIRA_PROJECT` | `str` | _(empty)_ | Jira project key (e.g. `MYPROJ`); used to scope queries and shown in reports |
 | `JIRA_FILTER_JQL` | `str` | _(empty)_ | Local filter JQL forwarded by the generate handler; fallback for KANBAN queries when `JIRA_FILTER_ID` is unset |
-| `JIRA_CLOSED_SPRINTS_ONLY` | `bool` | `true` | When `true`, only closed sprints/weeks are included; `false` also includes the active sprint/current week |
+| `JIRA_INCLUDE_ACTIVE_SPRINT` | `bool` | `false` | When `true`, the active sprint/current week is included in reports; `false` (default) excludes the active sprint/current week |
 | `PROJECT_TYPE` | `str` | `SCRUM` | `SCRUM` or `KANBAN`; controls which fetch function is used |
 | `ESTIMATION_TYPE` | `str` | `StoryPoints` | `StoryPoints` (sum story points) or `JiraTickets` (count done issues) |
 | `PORT` | `int` | `8080` | Dev server port |

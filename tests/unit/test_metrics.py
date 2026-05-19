@@ -729,7 +729,7 @@ def test_dedup_newest_first_input_still_keeps_issue_in_most_recent():
 
 
 def test_dedup_drops_issue_owned_by_active_sprint_outside_fetch():
-    """Bug fix: when JIRA_CLOSED_SPRINTS_ONLY=True, the active sprint is not
+    """Bug fix: when JIRA_INCLUDE_ACTIVE_SPRINT=True, the active sprint is not
     fetched. A ticket carried into the active sprint must NOT be attributed
     to the most-recent closed sprint — it should be dropped until the active
     sprint enters the fetch window. Reproduces the user-reported case where
@@ -748,7 +748,7 @@ def test_dedup_drops_issue_owned_by_active_sprint_outside_fetch():
 
 def test_dedup_keeps_issue_in_active_sprint_when_fetched():
     """Mirror of the bug fix: when the active sprint IS in the fetch
-    (JIRA_CLOSED_SPRINTS_ONLY=False), the ticket lands in the active sprint."""
+    (JIRA_INCLUDE_ACTIVE_SPRINT=False), the ticket lands in the active sprint."""
     s5 = make_sprint(5, start="2026-03-23", end="2026-04-05")
     s6 = make_sprint(6, start="2026-04-06", end="2026-04-19")
     s7 = make_sprint(7, start="2026-04-20", end="2026-05-03")

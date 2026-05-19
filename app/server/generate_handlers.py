@@ -49,7 +49,7 @@ class GenerateHandlerMixin:
                     "JIRA_PROJECT",
                     "JIRA_TEAM_ID",
                     "JIRA_ISSUE_TYPES",
-                    "JIRA_CLOSED_SPRINTS_ONLY",
+                    "JIRA_INCLUDE_ACTIVE_SPRINT",
                     "JIRA_FILTER_PAGE_SIZE",
                     "JIRA_BOARD_ID",
                     "JIRA_SPRINT_COUNT",

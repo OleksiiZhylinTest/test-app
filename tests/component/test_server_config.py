@@ -607,7 +607,7 @@ class TestPostConfig:
             "JIRA_PROJECT": "PROJ",
             "JIRA_TEAM_ID": "abc-123",
             "JIRA_ISSUE_TYPES": "Bug,Story",
-            "JIRA_CLOSED_SPRINTS_ONLY": "false",
+            "JIRA_INCLUDE_ACTIVE_SPRINT": "true",
             "JIRA_FILTER_PAGE_SIZE": "50",
         }
         _post(f"{server_url}/api/config", payload)
@@ -623,7 +623,7 @@ class TestPostConfig:
         assert cfg["JIRA_PROJECT"] == "PROJ"
         assert cfg["JIRA_TEAM_ID"] == "abc-123"
         assert cfg["JIRA_ISSUE_TYPES"] == "Bug,Story"
-        assert cfg["JIRA_CLOSED_SPRINTS_ONLY"] == "false"
+        assert cfg["JIRA_INCLUDE_ACTIVE_SPRINT"] == "true"
         assert cfg["JIRA_FILTER_PAGE_SIZE"] == "50"
 
     def test_post_config_ignores_unknown_keys(self, server_url, temp_root):

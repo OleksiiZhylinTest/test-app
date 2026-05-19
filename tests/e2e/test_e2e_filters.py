@@ -50,13 +50,30 @@ _USER_FILTER_RICH = {
         "JIRA_PROJECT": "ALPHA",
         "JIRA_TEAM_ID": "uuid-alpha",
         "JIRA_ISSUE_TYPES": "Bug, Story",
-        "JIRA_CLOSED_SPRINTS_ONLY": "true",
+        "JIRA_INCLUDE_ACTIVE_SPRINT": "false",
         "PROJECT_TYPE": "SCRUM",
         "ESTIMATION_TYPE": "StoryPoints",
         "JIRA_BOARD_ID": "42",
         "JIRA_SPRINT_COUNT": "8",
         "JIRA_FILTER_PAGE_SIZE": "100",
         "schema_name": "Custom_Schema",
+    },
+}
+
+_FILTER_SPRINT_CONFIG = {
+    "filter_name": "Sprint Config Test",
+    "slug": "sprint_config_test",
+    "is_default": False,
+    "jql": "project = TEST AND status = Done",
+    "created_at": "2026-05-19T10:00:00",
+    "params": {
+        "JIRA_PROJECT": "TEST",
+        "JIRA_INCLUDE_ACTIVE_SPRINT": "true",
+        "PROJECT_TYPE": "SCRUM",
+        "ESTIMATION_TYPE": "StoryPoints",
+        "JIRA_SPRINT_COUNT": "2",
+        "JIRA_SPRINT_NAME_FILTER": "Test Sprint",
+        "schema_name": "Default_Jira_Cloud",
     },
 }
 
@@ -398,7 +415,7 @@ def test_selecting_existing_filter_loads_form(page: Page, live_server_url: str):
         expect(page.locator("#jira-project")).to_have_value("ALPHA")
         expect(page.locator("#jira-team-id")).to_have_value("uuid-alpha")
         expect(page.locator("#jira-issue-types")).to_have_value("Bug, Story")
-        expect(page.locator("#jira-closed-sprints-only")).to_have_value("true")
+        expect(page.locator("#jira-include-active-sprint")).to_have_value("false")
         expect(page.locator("#jira-board-id")).to_have_value("42")
         expect(page.locator("#sprint-count")).to_have_value("8")
         expect(page.locator("#filter-schema-select")).to_have_value("Custom_Schema")
@@ -577,4 +594,20 @@ def test_loading_filter_with_project_opens_jql_builder(page: Page, live_server_u
         expect(page.locator("#jira-project")).to_be_visible()
         expect(page.locator("#jira-team-id")).to_be_visible()
         expect(page.locator("#jira-issue-types")).to_be_visible()
-        expect(page.locator("#jira-closed-sprints-only")).to_be_visible()
+        expect(page.locator("#jira-include-active-sprint")).to_be_visible()
+
+
+def test_selecting_filter_loads_sprint_name_filter_active_sprint_and_count_cap(page: Page, live_server_url: str):
+    """Loading a filter with sprint config params populates all three sprint-related fields."""
+    with allure.step("Navigate with sprint-config filter"):
+        _route_schemas_get(page, ["Default_Jira_Cloud"])
+        _goto(page, live_server_url, filters=[_DEFAULT_FILTER, _FILTER_SPRINT_CONFIG])
+        _open_filter_tab(page)
+
+    with allure.step("Select the sprint-config filter"):
+        page.locator("#filter-name-select").select_option("Sprint Config Test")
+
+    with allure.step("Sprint-related fields reflect the filter's params"):
+        expect(page.locator("#jira-include-active-sprint")).to_have_value("true")
+        expect(page.locator("#sprint-count")).to_have_value("2")
+        expect(page.locator("#sprint-name-filter")).to_have_value("Test Sprint")

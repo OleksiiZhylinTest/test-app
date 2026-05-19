@@ -23,7 +23,7 @@ export async function restoreValues(activateTab) {
   document.getElementById('jira-project').value              = store.get(STORE_KEYS.JIRA_PROJECT);
   document.getElementById('jira-team-id').value              = store.get(STORE_KEYS.JIRA_TEAM_ID);
   document.getElementById('jira-issue-types').value          = store.get(STORE_KEYS.JIRA_ISSUE_TYPES);
-  document.getElementById('jira-closed-sprints-only').value  = store.get(STORE_KEYS.JIRA_CLOSED_SPRINTS_ONLY);
+  document.getElementById('jira-include-active-sprint').value  = store.get(STORE_KEYS.JIRA_INCLUDE_ACTIVE_SPRINT);
   document.getElementById('jira-filter-page-size').value     = store.get(STORE_KEYS.JIRA_FILTER_PAGE_SIZE);
   updateBadgeFromSaved();
 
@@ -49,7 +49,7 @@ export async function restoreValues(activateTab) {
     if (cfg.JIRA_PROJECT)             { document.getElementById('jira-project').value              = cfg.JIRA_PROJECT;             store.set(STORE_KEYS.JIRA_PROJECT,             cfg.JIRA_PROJECT); }
     if (cfg.JIRA_TEAM_ID)             { document.getElementById('jira-team-id').value              = cfg.JIRA_TEAM_ID;             store.set(STORE_KEYS.JIRA_TEAM_ID,             cfg.JIRA_TEAM_ID); }
     if (cfg.JIRA_ISSUE_TYPES)         { document.getElementById('jira-issue-types').value          = cfg.JIRA_ISSUE_TYPES;         store.set(STORE_KEYS.JIRA_ISSUE_TYPES,         cfg.JIRA_ISSUE_TYPES); }
-    if (cfg.JIRA_CLOSED_SPRINTS_ONLY) { document.getElementById('jira-closed-sprints-only').value  = cfg.JIRA_CLOSED_SPRINTS_ONLY; store.set(STORE_KEYS.JIRA_CLOSED_SPRINTS_ONLY, cfg.JIRA_CLOSED_SPRINTS_ONLY); }
+    if (cfg.JIRA_INCLUDE_ACTIVE_SPRINT) { document.getElementById('jira-include-active-sprint').value  = cfg.JIRA_INCLUDE_ACTIVE_SPRINT; store.set(STORE_KEYS.JIRA_INCLUDE_ACTIVE_SPRINT, cfg.JIRA_INCLUDE_ACTIVE_SPRINT); }
     if (cfg.JIRA_FILTER_PAGE_SIZE)    { document.getElementById('jira-filter-page-size').value     = cfg.JIRA_FILTER_PAGE_SIZE;    store.set(STORE_KEYS.JIRA_FILTER_PAGE_SIZE,    cfg.JIRA_FILTER_PAGE_SIZE); }
 
     updateBadgeFromSaved();
@@ -65,7 +65,7 @@ export async function restoreValues(activateTab) {
   // 3. Apply defaults for fields that are still empty
   const fieldIds = {
     JIRA_SPRINT_COUNT:        'sprint-count',
-    JIRA_CLOSED_SPRINTS_ONLY: 'jira-closed-sprints-only',
+    JIRA_INCLUDE_ACTIVE_SPRINT: 'jira-include-active-sprint',
     JIRA_FILTER_PAGE_SIZE:    'jira-filter-page-size',
   };
   for (const [key, elId] of Object.entries(fieldIds)) {

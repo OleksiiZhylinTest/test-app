@@ -23,7 +23,7 @@ class FilterHandlerMixin:
             "JIRA_PROJECT": "",
             "JIRA_TEAM_ID": "",
             "JIRA_ISSUE_TYPES": "",
-            "JIRA_CLOSED_SPRINTS_ONLY": "true",
+            "JIRA_INCLUDE_ACTIVE_SPRINT": "false",
             "JIRA_BOARD_ID": "",
             "JIRA_SPRINT_COUNT": "10",
             "JIRA_SPRINT_NAME_FILTER": "",
@@ -118,8 +118,8 @@ class FilterHandlerMixin:
         if types:
             clauses.append(f"type IN ({', '.join(jql_quote(t) for t in types)})")
 
-        closed_only = (params.get("JIRA_CLOSED_SPRINTS_ONLY") or "true").strip().lower()
-        if closed_only in ("1", "true", "yes", "on"):
+        include_active = (params.get("JIRA_INCLUDE_ACTIVE_SPRINT") or "false").strip().lower()
+        if include_active not in ("1", "true", "yes", "on"):
             clauses.append("sprint in closedSprints()")
 
         return " AND ".join(clauses)
@@ -169,7 +169,7 @@ class FilterHandlerMixin:
                 pass
 
         if has_filter_id:
-            for _k in ("JIRA_PROJECT", "JIRA_TEAM_ID", "JIRA_ISSUE_TYPES", "JIRA_CLOSED_SPRINTS_ONLY"):
+            for _k in ("JIRA_PROJECT", "JIRA_TEAM_ID", "JIRA_ISSUE_TYPES", "JIRA_INCLUDE_ACTIVE_SPRINT"):
                 params[_k] = ""
             jql = ""
         else:
@@ -189,7 +189,7 @@ class FilterHandlerMixin:
             "JIRA_PROJECT",
             "JIRA_TEAM_ID",
             "JIRA_ISSUE_TYPES",
-            "JIRA_CLOSED_SPRINTS_ONLY",
+            "JIRA_INCLUDE_ACTIVE_SPRINT",
             "JIRA_FILTER_PAGE_SIZE",
             "JIRA_BOARD_ID",
             "JIRA_SPRINT_COUNT",
