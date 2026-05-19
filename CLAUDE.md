@@ -26,13 +26,9 @@ For any non-trivial code change (new feature, behavioral fix, refactor), follow 
 
 ## Interaction Style
 
-**Provide recommendations proactively:**
-- While working: flag related issues or improvement opportunities — describe them, don't implement them.
-- Before implementing: propose design alternatives with trade-off explanations before starting.
-- After finishing: suggest logical follow-up tasks (e.g. "the metric doc may also need updating").
+**Provide recommendations proactively:** before implementing, propose design alternatives with trade-off explanations; after finishing, suggest logical follow-up tasks (e.g. "the metric doc may also need updating").
 
 **Ask clarifying questions before acting when:**
-- The task scope, edge cases, or expected behavior are ambiguous.
 - A change touches multiple areas (core + reporters + tests + docs) — ask about priorities or constraints.
 - A change might break existing metrics contracts, API shapes, or test expectations.
 
@@ -48,17 +44,9 @@ For any non-trivial code change (new feature, behavioral fix, refactor), follow 
 | **KISS** | Prefer stdlib and plain `dict` over frameworks and custom classes. `HTTPServer` not Flask; `dict` contracts not dataclasses unless type safety is critical. |
 | **YAGNI** | Implement what the task requires; flag (don't build) future needs. No speculative parameters or generalization. |
 
-### Logging Conventions (extends `app/utils/logging_setup.py`)
+### Logging Conventions
 
-- Acquire logger per module: `logger = logging.getLogger(__name__)` — never use root logger directly or `print()`.
-- Level guidance:
-  - `DEBUG` — internal state and raw data dumps
-  - `INFO` — flow milestones (started, fetched N items)
-  - `SUCCESS` (level 25) — user-visible positive outcomes (report written, server ready)
-  - `WARNING` — recoverable problems (missing optional field, fallback used)
-  - `ERROR` — failures that stop the current operation
-- Never log credential values (Jira tokens, passwords). Log keys and URLs only.
-- Log at the call site, not deep inside helpers — keep helper functions side-effect-free.
+Extends global `CLAUDE.md` logging rules. Project adds `SUCCESS` (level 25, between INFO and WARNING) for user-visible positive outcomes (report written, server ready). Log at the call site; never log credential values.
 
 ### UI Design Conventions (for `templates/report.html.j2` and `ui/index.html`)
 
@@ -69,11 +57,7 @@ For any non-trivial code change (new feature, behavioral fix, refactor), follow 
 
 ## Generated and Temporary Files
 
-- Place temporary, scratch, diagnostic, and AI-generated working files under `generated/`.
-- Do not create ad hoc files in the repository root or alongside source files unless explicitly asked.
-- Prefer `generated/tmp/` for one-off temporary files, `generated/debug/` for diagnostics, and `generated/reports/` for report artifacts.
-- Delete disposable generated files before finishing when they are no longer needed.
-- Do not move or duplicate real source files into `generated/`; this applies only to disposable/generated artifacts.
+Extends global `CLAUDE.md` file placement rules. Subdirectory convention: `generated/tmp/` for scratch, `generated/debug/` for diagnostics, `generated/reports/` for report artifacts. Never move source files into `generated/`.
 
 ## Commands
 
@@ -106,12 +90,6 @@ pytest tests/ -v
 python tests/tools/test_coverage.py
 python tests/tools/test_coverage.py --dry-run   # preview only
 ```
-
-## Quick Reference Commands
-
-- Commit message format → `/commit`
-- Test factories, fixtures, and conventions → `/test`
-- Extension recipes and data structures → `/extend`
 
 ## Key Files Quick Reference
 

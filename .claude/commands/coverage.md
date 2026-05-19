@@ -70,11 +70,3 @@ def test_compute_velocity_uses_detected_story_points_field():
     assert result[0]["velocity"] == 5.0
 ```
 
----
-
-## Related
-
-- `CLAUDE.md` — Development Workflow step 5: "Maintain test coverage"
-- `/fix` — bug-fix loop includes decision criteria for fixing vs. removing tests
-- `/implement` — step 5 in workflow is to run `/coverage` after adding/removing tests
-- `tests/conftest.py` — Test factories and fixtures

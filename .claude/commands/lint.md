@@ -21,7 +21,3 @@ Individual checks:
 
 All three run in sequence. Exit on first failure.
 
-## Related
-
-- `/test` — Run lint + all tests
-- POST-EDIT HOOK — Auto-fixes formatting after every file edit

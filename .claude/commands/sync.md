@@ -122,29 +122,3 @@ Do NOT auto-fix gaps. Instead:
 3. For each gap user approves: use `/implement`, `/fix`, or direct code changes to address
 4. After fixes: re-run `/sync <layer>` to verify the gap is closed
 
----
-
-## Typical Use Cases
-
-**After a feature is implemented:**
-- Run `/sync` (full audit) to find any documentation that wasn't updated
-
-**After a major refactor:**
-- Run `/sync docs` to verify architecture.md reflects the new structure
-- Run `/sync requirements` to verify all requirement statuses still accurate
-
-**Periodic maintenance (weekly or monthly):**
-- Run `/sync` to keep everything aligned
-- Address gaps before they accumulate
-
-**Before a release:**
-- Run `/sync` (full audit) to ensure nothing slipped through
-
----
-
-## Related
-
-- `/requirements` — understand requirement Status values and update rules
-- `/implement` — implements features (step 7 updates docs to keep them aligned)
-- `/test` — runs full test suite (Layer 2 baseline)
-- `docs/development/architecture.md` — the authoritative architecture reference

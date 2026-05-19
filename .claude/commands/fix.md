@@ -97,11 +97,3 @@ Bug-fix loop — identify failing tests, fix code, verify, and update requiremen
 - Old test: tests parsing of Jira 7 custom field IDs
 - Decision: **REMOVE** — the requirement was dropped, test is now orphaned
 
----
-
-## Related
-
-- `/test` — run full CI test suite to find failures
-- `/requirements` — look up the requirement the bug fix resolves
-- `/commit` — commit with type `fix:`
-- `CLAUDE.md` — Development Workflow steps 3–4 (tests, verification)

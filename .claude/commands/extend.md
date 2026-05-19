@@ -64,7 +64,3 @@ Full Sprint and Issue dict shapes: `docs/development/architecture.md`.
 
 Add a method `_handle_<name>(self)` to the `Handler` class in `app/server/_base.py`, then route it from `do_GET` or `do_POST`. Cover it in `tests/component/test_server.py` using the `server_url` fixture.
 
-## Related
-
-- `/test` — run tests and see factory/fixture reference
-- `docs/development/architecture.md` — full data-flow diagrams

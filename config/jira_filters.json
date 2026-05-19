@@ -45,7 +45,7 @@
       "schema_name": "Alex Schema",
       "JIRA_BOARD_ID": "1",
       "JIRA_SPRINT_COUNT": "10",
-      "JIRA_SPRINT_NAME_FILTER": "SCRUN",
+      "JIRA_SPRINT_NAME_FILTER": "SCRUM",
       "JIRA_FILTER_ID": "",
       "JIRA_FILTER_PAGE_SIZE": "",
       "AI_ASSISTED_LABEL": "",
