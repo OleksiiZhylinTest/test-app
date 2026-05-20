@@ -10,11 +10,9 @@ Covers JFM-D-003/004, JFM-P-001, JFM-P-003/004, JFM-P-008/009/010.
 from __future__ import annotations
 
 import json
-import shutil
 import threading
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 import pytest
 

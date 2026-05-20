@@ -45,19 +45,10 @@ def live_server_url():
     issue where concurrent browser requests (JS fetch to /api/*) stall
     the page load.
     """
-    import importlib
     from http.server import HTTPServer
     from socketserver import ThreadingMixIn
 
-    orig_argv = sys.argv
-    sys.argv = ["server.py"]
-    sys.modules.pop("server", None)
-    try:
-        import server as srv_mod
-
-        importlib.reload(srv_mod)
-    finally:
-        sys.argv = orig_argv
+    from app.server import Handler
 
     class ThreadedServer(ThreadingMixIn, HTTPServer):
         daemon_threads = True
@@ -68,7 +59,7 @@ def live_server_url():
                 return
             super().handle_error(request, client_address)
 
-    server = ThreadedServer(("127.0.0.1", 0), srv_mod.Handler)
+    server = ThreadedServer(("127.0.0.1", 0), Handler)
     port = server.server_address[1]
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
