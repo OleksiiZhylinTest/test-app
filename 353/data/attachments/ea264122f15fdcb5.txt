@@ -1,1 +1,0 @@
-SUCCESS  test.success_output:logging_setup.py:36 pipeline complete

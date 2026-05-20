@@ -1,2 +1,0 @@
-INFO     app.cli:cli.py:72 Report generation started (project_type=SCRUM, estimation_type=StoryPoints)
-ERROR    app.cli:cli.py:86 Failed to fetch Jira data: boom
