@@ -45,6 +45,7 @@ def _make_handler(
 ):
     srv = _import_app_server_safe()
     monkeypatch.setattr(srv, "ROOT", tmp_path)
+    monkeypatch.setattr(srv, "USER_DATA_DIR", tmp_path)
 
     payload = raw if raw is not None else json.dumps(body or {}).encode()
     handler = object.__new__(srv.Handler)
@@ -392,17 +393,18 @@ def test_filter_data_persists_across_loads(monkeypatch, tmp_path):
 
 
 def test_default_filter_carries_dau_path(monkeypatch, tmp_path):
-    """The default filter exposes params.DAU_PATH = data/dau/default."""
+    """The default filter exposes params.DAU_PATH ending with data/dau/default."""
     srv, handler = _make_handler(monkeypatch, tmp_path)
     _ensure_config_dir(tmp_path)
 
     filters = handler._load_filters()
     default = next(f for f in filters if f.get("is_default"))
-    assert default["params"].get("DAU_PATH") == "data/dau/default"
+    dau_path = default["params"].get("DAU_PATH", "")
+    assert dau_path.replace("\\", "/").endswith("data/dau/default")
 
 
 def test_post_filter_defaults_dau_path_from_slug(monkeypatch, tmp_path):
-    """Saving a filter without DAU_PATH populates it as data/dau/<slug>."""
+    """Saving a filter without DAU_PATH populates it as <user_data_dir>/data/dau/<slug>."""
     srv, handler = _make_handler(
         monkeypatch,
         tmp_path,
@@ -416,7 +418,8 @@ def test_post_filter_defaults_dau_path_from_slug(monkeypatch, tmp_path):
 
     on_disk = json.loads((tmp_path / "config" / "jira_filters.json").read_text(encoding="utf-8"))
     user = next(f for f in on_disk if f.get("slug") == "my_team")
-    assert user["params"]["DAU_PATH"] == "data/dau/my_team"
+    dau_path = user["params"]["DAU_PATH"]
+    assert dau_path.replace("\\", "/").endswith("data/dau/my_team")
 
 
 def test_post_filter_creates_dau_original_folder_with_gitkeep(monkeypatch, tmp_path):

@@ -24,25 +24,19 @@ pytestmark = pytest.mark.component
 # Fixture: backup and restore config/jira_filters.json
 # ---------------------------------------------------------------------------
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-_FILTERS_PATH = _PROJECT_ROOT / "config" / "jira_filters.json"
-_DAU_ROOT = _PROJECT_ROOT / "data" / "dau"
-
 
 @pytest.fixture
-def restore_filters():
-    """Backup config/jira_filters.json and prune per-test data/dau/<slug>/ folders."""
-    backup: bytes | None = _FILTERS_PATH.read_bytes() if _FILTERS_PATH.exists() else None
-    pre_dau_dirs = {p.name for p in _DAU_ROOT.iterdir() if p.is_dir()} if _DAU_ROOT.is_dir() else set()
-    yield _FILTERS_PATH
-    if backup is not None:
-        _FILTERS_PATH.write_bytes(backup)
-    elif _FILTERS_PATH.exists():
-        _FILTERS_PATH.unlink()
-    if _DAU_ROOT.is_dir():
-        for p in _DAU_ROOT.iterdir():
-            if p.is_dir() and p.name not in pre_dau_dirs:
-                shutil.rmtree(p, ignore_errors=True)
+def restore_filters(tmp_path, monkeypatch):
+    """Redirect USER_DATA_DIR to tmp_path for filter test isolation."""
+    import app.server as srv
+
+    config_dir = tmp_path / "config"
+    config_dir.mkdir(parents=True)
+    filters_path = config_dir / "jira_filters.json"
+
+    monkeypatch.setattr(srv, "USER_DATA_DIR", tmp_path)
+
+    yield filters_path
 
 
 # ---------------------------------------------------------------------------
@@ -228,8 +222,9 @@ def test_filter_persists_across_server_restart(server_url, restore_filters):
     slug = post_data["slug"]
 
     # Verify the entry is on disk (independent of in-memory state)
-    assert _FILTERS_PATH.exists()
-    on_disk = json.loads(_FILTERS_PATH.read_text(encoding="utf-8"))
+    filters_path = restore_filters
+    assert filters_path.exists()
+    on_disk = json.loads(filters_path.read_text(encoding="utf-8"))
     assert any(f.get("slug") == slug for f in on_disk)
 
     # Start a fresh server instance pointing to the same real project root
