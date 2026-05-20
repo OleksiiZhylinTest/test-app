@@ -73,6 +73,7 @@ _DEFAULT_SCHEMA: dict[str, Any] = {
     "status_mapping": {
         "done_statuses": ["Done", "Closed", "Resolved", "Complete"],
         "in_progress_statuses": ["In Progress"],
+        "excluded_statuses": ["Cancelled"],
     },
 }
 
@@ -109,6 +110,9 @@ def get_schema(name: str, path: Path | None = None) -> dict[str, Any] | None:
     """Find a schema by name. Returns None if not found."""
     for s in load_schemas(path):
         if s.get("schema_name") == name:
+            sm = s.get("status_mapping")
+            if isinstance(sm, dict) and "excluded_statuses" not in sm:
+                s = {**s, "status_mapping": {**sm, "excluded_statuses": ["Cancelled"]}}
             return s
     return None
 
