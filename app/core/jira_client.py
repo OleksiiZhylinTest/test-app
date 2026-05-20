@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from atlassian import Jira
@@ -182,7 +182,7 @@ def fetch_kanban_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
 
     # Align to ISO week boundaries (Monday = weekday 0).
     # JIRA_INCLUDE_ACTIVE_SPRINT controls whether the current partial week is included.
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     current_monday = today - timedelta(days=today.weekday())
     periods: list[dict[str, Any]] = []
 

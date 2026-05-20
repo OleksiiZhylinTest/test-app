@@ -31,6 +31,7 @@ def _import_app_server_safe():
 def _make_handler(monkeypatch, tmp_path: Path, body: dict | None = None, raw: bytes | None = None):
     srv = _import_app_server_safe()
     monkeypatch.setattr(srv, "ROOT", tmp_path)
+    monkeypatch.setattr(srv, "USER_DATA_DIR", tmp_path)
 
     payload = raw if raw is not None else json.dumps(body or {}).encode()
     handler = object.__new__(srv.Handler)
@@ -84,7 +85,7 @@ def test_read_env_credentials_reads_values_from_env_file(monkeypatch, tmp_path):
 
 def test_get_schema_detail_returns_saved_schema_json(monkeypatch, tmp_path):
     (_, handler) = _make_handler(monkeypatch, tmp_path)
-    schemas_dir = tmp_path / "generated" / "schemas"
+    schemas_dir = tmp_path / "config" / "schemas"
     schemas_dir.mkdir(parents=True)
     (schemas_dir / "team_schema.json").write_text(
         json.dumps({"name": "Team Schema", "projects": ["TEAM"]}),
@@ -111,7 +112,7 @@ def test_get_schema_detail_rejects_path_traversal(monkeypatch, tmp_path):
 
 def test_resolve_report_path_allows_files_under_reports(monkeypatch, tmp_path):
     (_, handler) = _make_handler(monkeypatch, tmp_path)
-    target = tmp_path / "generated" / "reports" / "run-1" / "report.html"
+    target = tmp_path / "reports" / "run-1" / "report.html"
     target.parent.mkdir(parents=True)
     target.write_text("<html></html>", encoding="utf-8")
 
@@ -264,7 +265,7 @@ def test_post_schema_updates_existing_entry(monkeypatch, tmp_path):
 
 def test_delete_schema_removes_existing_file(monkeypatch, tmp_path):
     (_, handler) = _make_handler(monkeypatch, tmp_path)
-    schemas_dir = tmp_path / "generated" / "schemas"
+    schemas_dir = tmp_path / "config" / "schemas"
     schemas_dir.mkdir(parents=True)
     target = schemas_dir / "team_schema.json"
     target.write_text("{}", encoding="utf-8")

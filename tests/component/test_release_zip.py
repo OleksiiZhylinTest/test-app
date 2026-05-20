@@ -18,6 +18,7 @@ pytestmark = [
     pytest.mark.component,
     pytest.mark.windows_only,
     pytest.mark.skipif(sys.platform != "win32", reason="create_app_zip.bat is Windows-only"),
+    pytest.mark.xdist_group("release_zip"),
 ]
 
 ROOT = Path(__file__).parent.parent.parent
