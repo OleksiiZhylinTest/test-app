@@ -26,10 +26,10 @@
 #   Manual one-off run:     Actions tab → "CI" → "Run workflow"
 #                           Toggle the corresponding boolean input.
 #
-# RESTRICT TO MASTER ONLY:
+# RESTRICT TO MASTER / DEVELOP ONLY:
 #   GitHub → Settings → Variables → Actions
 #   Set  RESTRICT_TO_MASTER = true
-#   All automatic (push/PR) runs on non-master branches will be skipped.
+#   All automatic (push/PR) runs on branches other than master and develop will be skipped.
 #   workflow_dispatch (manual) runs are never restricted by this flag.
 #
 # JIRA SECRETS (required by integration + e2e stages):
@@ -43,7 +43,7 @@ name: CI
 
 on:
   push:
-    branches: ["master"]
+    branches: ["master", "develop"]
   pull_request:
     branches: ["**"]
   workflow_dispatch:
@@ -94,7 +94,7 @@ env:
 #   a) Triggered manually (workflow_dispatch) AND the matching input is true, OR
 #   b) Triggered automatically (push/PR) AND:
 #        - the matching ENABLE_* repo variable is set to 'true', AND
-#        - RESTRICT_TO_MASTER is not 'true', OR we are on the master branch.
+#        - RESTRICT_TO_MASTER is not 'true', OR we are on master or develop.
 # ─────────────────────────────────────────────────────────────────────────────
 
 jobs:
@@ -121,7 +121,10 @@ jobs:
   smoke-tests:
     name: Smoke Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && inputs.run_smoke
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.run_smoke) ||
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push'
     steps:
       - uses: actions/checkout@v6
 
@@ -182,10 +185,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.run_sanity) ||
       (github.event_name == 'pull_request' &&
        vars.ENABLE_SANITY == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) ||
       (github.event_name == 'push' &&
        vars.ENABLE_SANITY == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v6
 
@@ -245,7 +248,7 @@ jobs:
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' &&
        vars.ENABLE_UNIT == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v6
 
@@ -290,7 +293,7 @@ jobs:
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' &&
        vars.ENABLE_COMPONENT == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v6
 
@@ -334,10 +337,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.run_integration) ||
       (github.event_name == 'pull_request' &&
        vars.ENABLE_INTEGRATION == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) ||
       (github.event_name == 'push' &&
        vars.ENABLE_INTEGRATION == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     env:
       JIRA_URL: ${{ secrets.JIRA_URL }}
       JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
@@ -385,10 +388,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.run_e2e) ||
       (github.event_name == 'pull_request' &&
        vars.ENABLE_E2E == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) ||
       (github.event_name == 'push' &&
        vars.ENABLE_E2E == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     env:
       JIRA_URL: ${{ secrets.JIRA_URL }}
       JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
@@ -456,10 +459,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.run_windows) ||
       (github.event_name == 'pull_request' &&
        vars.ENABLE_WINDOWS_TESTS == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) ||
       (github.event_name == 'push' &&
        vars.ENABLE_WINDOWS_TESTS == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v6
 
@@ -496,10 +499,10 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.run_security) ||
       (github.event_name == 'pull_request' &&
        vars.ENABLE_SECURITY_SCAN == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master')) ||
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) ||
       (github.event_name == 'push' &&
        vars.ENABLE_SECURITY_SCAN == 'true' &&
-       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master'))
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v6
 
