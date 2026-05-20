@@ -449,3 +449,92 @@ contracts this behaviour and is automatically skipped on Linux/macOS via:
 
 The ubuntu-based CI jobs pass `-m "... and not windows_only"` so the test is
 excluded even if someone forgets the `skipif` decorator.
+
+---
+
+## Release Process
+
+Releases are automated via [`.github/workflows/release.yml`](../../.github/workflows/release.yml).
+The workflow is triggered by pushing a `vX.Y.Z` tag to GitHub.
+
+### Version source of truth
+
+The canonical version lives in `pyproject.toml` under `[project]`:
+
+```toml
+[project]
+name = "ai-adoption-manager"
+version = "1.2.3"
+```
+
+`app/__init__.py` exposes it as `app.__version__` via `importlib.metadata` — no
+duplication, no second file to keep in sync.
+
+### Release workflow stages
+
+```
+push vX.Y.Z tag
+      │
+      ▼
+┌─────────────────────────────────┐
+│  validate                       │
+│  lint → unit tests → component  │  Gate — release is blocked if any fail
+└─────────────────────────────────┘
+      │ (on success)
+      ▼
+┌─────────────────────────────────┐
+│  build                          │
+│  Read version from pyproject    │
+│  Assert tag == pyproject version│  Fails if tag and file are out of sync
+│  Build release ZIP              │
+└─────────────────────────────────┘
+      │
+      ▼
+┌─────────────────────────────────┐
+│  release                        │
+│  Create GitHub Release          │  Auto-generates release notes from commits
+│  Upload ZIP as release asset    │
+└─────────────────────────────────┘
+```
+
+### Step-by-step: cutting a release
+
+1. **Bump the version** in `pyproject.toml`:
+   ```toml
+   version = "1.2.3"
+   ```
+
+2. **Commit the bump:**
+   ```bash
+   git add pyproject.toml
+   git commit -m "Bump version to 1.2.3"
+   git push origin master
+   ```
+
+3. **Push the tag** (must match `pyproject.toml` exactly):
+   ```bash
+   git tag v1.2.3
+   git push origin v1.2.3
+   ```
+
+4. **Monitor the workflow** under **Actions → Release** — the `validate` gate runs
+   first; if lint or tests fail the release is aborted.
+
+5. **Verify the release** under **Releases** — GitHub auto-generates notes from
+   commits since the previous tag and attaches `ai_adoption_manager_v1.2.3.zip`.
+
+### Local packaging (Windows)
+
+`create_app_zip.bat` reads the version from `pyproject.toml` and names the ZIP
+`ai_adoption_manager_v<version>.zip`. Run it before tagging to test the package
+locally.
+
+### Tag protection (recommended)
+
+To prevent tags being pushed from non-master branches:
+
+**GitHub → Settings → Rules → New ruleset → Tag**  
+- Target: tag name pattern `v*`  
+- Rule: *Restrict creations* — add the protected branch as bypass target
+
+This ensures every `v*` tag always points to a commit on `master`.
