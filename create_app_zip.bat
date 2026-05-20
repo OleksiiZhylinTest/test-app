@@ -102,7 +102,7 @@ for %%F in (main.py server.py requirements.txt .env.example start_app.bat projec
 echo  Creating zip archive...
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "Compress-Archive -Path '%STAGING_DIR%' -DestinationPath '%ZIP_PATH%' -Force"
+    "Add-Type -Assembly System.IO.Compression.FileSystem; if (Test-Path '%ZIP_PATH%') { Remove-Item '%ZIP_PATH%' }; [IO.Compression.ZipFile]::CreateFromDirectory([IO.Path]::GetFullPath('%STAGING_DIR%'), [IO.Path]::GetFullPath('%ZIP_PATH%'))"
 
 if errorlevel 1 (
     echo [ERROR] Failed to create zip archive.
