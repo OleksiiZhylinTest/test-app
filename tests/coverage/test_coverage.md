@@ -7,7 +7,7 @@
 | Source | Total | ✅ Covered | 🔶 Partial | ❌ Gap | ⬜ N/T | Functional % | Detail |
 |--------|-------|-----------|------------|-------|--------|--------------|--------|
 | Technical Requirements | 47 | 25 | 0 | 0 | 22 | 100% | [→ detail](requirements/technical_requirements_coverage.md) |
-| Installation Requirements | 37 | 5 | 0 | 0 | 32 | 100% | [→ detail](requirements/installation_requirements_coverage.md) |
+| Installation Requirements | 40 | 24 | 0 | 0 | 16 | 100% | [→ detail](requirements/installation_requirements_coverage.md) |
 | App Non Functional Requirements | 32 | 22 | 0 | 0 | 10 | 100% | [→ detail](requirements/app_non_functional_requirements_coverage.md) |
 | Dau Survey Requirements | 31 | 26 | 0 | 3 | 2 | 90% | [→ detail](requirements/dau_survey_requirements_coverage.md) |
 | Jira Connection Requirements | 33 | 23 | 0 | 6 | 4 | 79% | [→ detail](requirements/jira_connection_requirements_coverage.md) |
@@ -16,21 +16,21 @@
 | Jira Filter Management Requirements | 23 | 21 | 0 | 0 | 2 | 100% | [→ detail](requirements/jira_filter_management_requirements_coverage.md) |
 | Logging Requirements | 18 | 16 | 0 | 0 | 2 | 100% | [→ detail](requirements/logging_requirements_coverage.md) |
 | Report Generation Requirements | 33 | 30 | 0 | 0 | 3 | 100% | [→ detail](requirements/report_generation_requirements_coverage.md) |
-| **All** | **302** | **205** | **1** | **12** | **84** | **94%** |  |
+| **All** | **305** | **224** | **1** | **12** | **68** | **95%** |  |
 
 ## Test Pyramid
 
 ```text
-              /  E2E  \              119 tests  (16%)  (Playwright browser UI)  → tests/e2e/
+              /  E2E  \              121 tests  (16%)  (Playwright browser UI)  → tests/e2e/
              /----------\
-            / Integration \           19 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
+            / Integration \           21 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
-          /    Component      \      205 tests  (27%)  (filesystem, HTTP, data shapes)        → tests/component/
+          /    Component      \      228 tests  (29%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   405 tests  (54%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   406 tests  (52%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     748 tests total
+                                     776 tests total
 ```
 
 ## Coverage Matrix
@@ -94,7 +94,7 @@ tests\run_e2e_tests.bat
 | `unit/test_cli.py`                | Unit        |    6  | `app.cli.main()` orchestration      |
 | `unit/test_metrics.py`            | Unit        |   95  | All metrics functions incl. AI      |
 | `unit/test_main_helpers.py`       | Unit        |    5  | `_timestamp_folder_name()`          |
-| `unit/test_jira_client.py`        | Unit        |   45  | All jira_client functions (mocked)  |
+| `unit/test_jira_client.py`        | Unit        |   46  | All jira_client functions (mocked)  |
 | `unit/test_server_handlers.py`    | Unit        |   34  | Internal `app.server` handler logic |
 | `unit/test_imports.py`            | Unit        |    8  | Module imports (smoke)              |
 | `unit/test_logging_setup.py`      | Unit        |   22  | Logging setup, SUCCESS level, file creation, format |
@@ -102,7 +102,7 @@ tests\run_e2e_tests.bat
 | `component/test_report_md.py`     | Component   |   37  | Markdown generation                 |
 | `component/test_server.py`        | Component   |   41  | HTTP routes, CORS, SSE              |
 | `component/test_contracts.py`     | Component   |   11  | Data shapes across boundaries       |
-| `integration/test_integration.py` | Integration |    6  | Full pipeline, filter flow, server  |
+| `integration/test_integration.py` | Integration |    8  | Full pipeline, filter flow, server  |
 | `integration/test_fetch_ssl_cert.py` | Integration |   10  | fetch_ssl_cert function + CLI smoke |
 | `e2e/test_e2e.py`                 | E2E         |    3  | CLI subprocess, server health       |
 | `e2e/test_e2e_ui.py`              | E2E         |   32  | Playwright browser UI tests         || `e2e/test_dau_survey_ui.py`      | E2E         |   25  | DAU survey form Playwright tests    |

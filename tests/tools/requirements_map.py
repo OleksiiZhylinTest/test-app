@@ -464,118 +464,179 @@ TECHNICAL_REQUIREMENTS: list[dict] = [
 # ── Installation Requirements ───────────────────────────────────────────────
 
 INSTALLATION_REQUIREMENTS: list[dict] = [
-    # --- 1. Zip Contents (all informational) ---
+    # --- 1. Zip Contents ---
     {
         "id": "IR-01",
         "description": "app/ source code included in release zip",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[app/]",
+        ],
     },
     {
         "id": "IR-02",
         "description": "templates/ Jinja2 HTML report template included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[templates/]",
+        ],
     },
     {
         "id": "IR-03",
         "description": "ui/ browser UI files included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[ui/]",
+        ],
+    },
+    {
+        "id": "IR-04",
+        "description": "config/ Jira schema and filter presets included",
+        "type": FUNCTIONAL,
+        "section": "Zip Contents",
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[config/]",
+        ],
     },
     {
         "id": "IR-05",
         "description": "certs/ placeholder folder with README.txt included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[certs/]",
+            "component/test_release_zip.py::test_zip_contains_certs_readme",
+        ],
     },
     {
         "id": "IR-06",
         "description": "main.py CLI entry point included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[main.py]",
+        ],
     },
     {
         "id": "IR-07",
         "description": "server.py browser UI server entry point included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[server.py]",
+        ],
     },
     {
         "id": "IR-08",
         "description": "requirements.txt included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[requirements.txt]",
+        ],
     },
     {
         "id": "IR-09",
         "description": ".env.example configuration template included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[.env.example]",
+        ],
     },
     {
         "id": "IR-10",
         "description": "project_setup.bat one-time setup script included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[project_setup.bat]",
+        ],
     },
     {
         "id": "IR-11",
         "description": "start_app.bat Windows launcher included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[start_app.bat]",
+        ],
     },
     {
         "id": "IR-12",
         "description": "README.md quickstart guide included",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_root_file[README.md]",
+        ],
     },
     {
         "id": "IR-13",
         "description": ".venv/ NOT included in release zip",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_excludes_venv",
+        ],
     },
     {
         "id": "IR-14",
         "description": "generated/ NOT included in release zip",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_excludes_generated",
+        ],
     },
     {
         "id": "IR-15",
         "description": "requirements-dev.txt NOT included in release zip",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_excludes_dev_requirements",
+        ],
     },
     {
         "id": "IR-16",
         "description": "Test files NOT included in release zip",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_excludes_tests",
+        ],
     },
     {
         "id": "IR-17",
         "description": ".env NOT distributed in release zip",
-        "type": INFORMATIONAL,
+        "type": FUNCTIONAL,
         "section": "Zip Contents",
-        "tests": [],
+        "tests": [
+            "component/test_release_zip.py::test_zip_excludes_dotenv",
+        ],
+    },
+    {
+        "id": "IR-39",
+        "description": "data/ DAU survey data files included",
+        "type": FUNCTIONAL,
+        "section": "Zip Contents",
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[data/]",
+        ],
+    },
+    {
+        "id": "IR-40",
+        "description": "tools/ utility scripts (fetch_ssl_cert.py) included",
+        "type": FUNCTIONAL,
+        "section": "Zip Contents",
+        "tests": [
+            "component/test_release_zip.py::test_zip_contains_required_folder[tools/]",
+            "component/test_release_zip.py::test_zip_contains_fetch_ssl_cert",
+        ],
     },
     # --- 2. Installation — Windows ---
     {
