@@ -14,7 +14,8 @@ set ROBOCOPY_FILE_EXCLUDES=*.pyc *.pyo .DS_Store Thumbs.db *.log dau_report.json
 :: ============================================================
 :: READ VERSION FROM pyproject.toml
 :: ============================================================
-for /f "usebackq delims=" %%V in (`python -c "import re,sys; m=re.search(r'version\s*=\s*\"([^\"]+)\"', open('pyproject.toml').read()); sys.stdout.write(m.group(1) if m else '0.0.0')"`) do set APP_VERSION=%%V
+for /f "tokens=3 delims= " %%V in ('findstr /rc:"^version = " pyproject.toml') do set APP_VERSION_RAW=%%V
+set APP_VERSION=%APP_VERSION_RAW:"=%
 if "%APP_VERSION%"=="" set APP_VERSION=0.0.0
 
 set ZIP_NAME=%APP_NAME%_v%APP_VERSION%
