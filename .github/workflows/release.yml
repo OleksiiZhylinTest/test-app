@@ -117,7 +117,6 @@ jobs:
 
           mkdir -p "$STAGING/tools"
           cp tools/fetch_ssl_cert.py "$STAGING/tools/"
-          mkdir -p "$STAGING/docs/product/schemas"
           mkdir -p "$STAGING/certs"
           echo "Place jira_ca_bundle.pem here if your Jira instance uses a custom CA." \
             > "$STAGING/certs/README.txt"

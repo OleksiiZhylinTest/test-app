@@ -16,14 +16,17 @@ This document describes how to obtain, install, and launch the AI Adoption Metri
 
 ## 1. Zip Contents
 
-The release package is named `ai_adoption_manager_<YYYY-MM-DD_HH-mm-ss>.zip`. Below is what the archive contains and what is intentionally excluded.
+The release package is named `ai_adoption_manager_v<version>.zip` (e.g. `ai_adoption_manager_v1.2.0.zip`). Below is what the archive contains and what is intentionally excluded.
 
 ### Included
 
 | Path | Description |
 |------|-------------|
 | `app/` | Application source code |
+| `config/` | Jira field schema and named JQL filter presets (`jira_schema.json`, `jira_filters.json`, etc.) |
+| `data/` | DAU survey data files |
 | `templates/` | Jinja2 HTML report template |
+| `tools/` | Utility scripts for end users (`fetch_ssl_cert.py`) |
 | `ui/` | Browser UI files |
 | `certs/` | Placeholder folder for optional SSL certificate; contains `README.txt` |
 | `main.py` | CLI entry point |
@@ -50,7 +53,7 @@ The release package is named `ai_adoption_manager_<YYYY-MM-DD_HH-mm-ss>.zip`. Be
 
 ### Step 1 — Extract the zip
 
-1. Download the release zip (e.g. `ai_adoption_manager_2026-03-27_10-00-00.zip`).
+1. Download the release zip (e.g. `ai_adoption_manager_v1.2.0.zip`).
 2. Right-click the file → **Extract All…**
 3. Choose a destination folder, for example `C:\Tools\ai_adoption_manager`.
 
