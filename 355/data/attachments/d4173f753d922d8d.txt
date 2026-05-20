@@ -1,0 +1,3 @@
+DEBUG    app.core.jira_client:jira_client.py:49 Fetching sprints for board 1 (limit=10)
+INFO     app.core.jira_client:jira_client.py:75 Fetched 3 sprint(s) (3 closed fetched, 0 active)
+DEBUG    app.core.jira_client:jira_client.py:76   Sprint names: ['Sprint 3 for Team 2', 'Sprint 2 for Team 2', 'Sprint 1 for Team 2']
