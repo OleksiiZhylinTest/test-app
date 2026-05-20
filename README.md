@@ -91,3 +91,26 @@ python server.py 9000
    ```
 
 3. Restart the server normally.
+
+## Release process
+
+This project uses semantic version tags and a GitHub release workflow.
+
+1. Update the version in `pyproject.toml`:
+   ```toml
+   version = "1.0.0"
+   ```
+2. Commit the bump:
+   ```bash
+   git add pyproject.toml
+   git commit -m "Bump version to 1.0.0"
+   git push origin master
+   ```
+3. Push the matching release tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+The release workflow validates the code, builds `ai_adoption_manager_v1.0.0.zip`,
+and creates a GitHub Release with the ZIP attached.
