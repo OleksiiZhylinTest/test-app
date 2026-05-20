@@ -20,10 +20,12 @@ from dotenv import dotenv_values
 
 import app as _app
 from app.core import config
+from app.core.user_data import user_data_dir as _udd
 
 logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent.parent.parent
+USER_DATA_DIR = _udd()
 HOST = os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1"
 try:
     PORT = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("PORT", 8080))
@@ -56,6 +58,14 @@ def _root() -> Path:
     """Return project ROOT from app.server, supporting test-time patching via srv.ROOT."""
     _m = _sys.modules.get("app.server")
     return _m.ROOT if _m is not None else ROOT
+
+
+def _user_data_dir() -> Path:
+    """Return USER_DATA_DIR from app.server, supporting test-time patching via srv.USER_DATA_DIR."""
+    _m = _sys.modules.get("app.server")
+    if _m is not None and hasattr(_m, "USER_DATA_DIR"):
+        return _m.USER_DATA_DIR
+    return _udd()
 
 
 def _dotenv_values(path: Path) -> dict:
@@ -112,7 +122,7 @@ class HandlerBase(BaseHTTPRequestHandler):
 
     @staticmethod
     def _reports_dir() -> Path:
-        return (_root() / "generated" / "reports").resolve()
+        return (_user_data_dir() / "reports").resolve()
 
     @staticmethod
     def _sanitise_exc(exc: BaseException, *secrets: str) -> str:
@@ -152,7 +162,8 @@ class HandlerBase(BaseHTTPRequestHandler):
             return None
 
     def _read_env_credentials(self) -> tuple[str, str, str]:
-        values = dotenv_values(_root() / ".env")
+        # Prefer user_data_dir .env; fall back to legacy app-root .env (pre-migration)
+        values = {**dotenv_values(_root() / ".env"), **dotenv_values(_user_data_dir() / ".env")}
         return (
             str(values.get("JIRA_URL", "")).rstrip("/"),
             str(values.get("JIRA_EMAIL", "")),

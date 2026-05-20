@@ -7,11 +7,12 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from app.core.user_data import user_data_dir as _udd
 from app.exceptions import SchemaError
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "jira_schema.json"
+SCHEMA_PATH = _udd() / "config" / "jira_schema.json"
 
 DEFAULT_SCHEMA_NAME = "Default_Jira_Cloud"
 

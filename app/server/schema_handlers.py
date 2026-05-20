@@ -7,7 +7,7 @@ import logging
 import re
 from urllib.parse import unquote as urlunquote
 
-from ._base import _root
+from ._base import _user_data_dir
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class SchemaHandlerMixin:
     @staticmethod
     def _schemas_dir():
-        return _root() / "generated" / "schemas"
+        return _user_data_dir() / "config" / "schemas"
 
     @staticmethod
     def _slugify(name: str) -> str:

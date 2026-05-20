@@ -5,8 +5,11 @@ from __future__ import annotations
 import json
 import logging
 from datetime import UTC, datetime
+from pathlib import Path
 
-from ._base import _root
+from app.core.user_data import user_data_dir as _udd_fn
+
+from ._base import _user_data_dir
 
 logger = logging.getLogger(__name__)
 
@@ -36,21 +39,25 @@ class FilterHandlerMixin:
             "AI_EXCLUDE_LABELS": "ai_not_applicable",
             "AI_TOOL_LABELS": "gemini,github_copilot,rovo",
             "AI_ACTION_LABELS": "ai_automation,ai_dev,ai_test,ai_test_cases",
-            "DAU_PATH": "data/dau/default",
+            "DAU_PATH": str(_udd_fn() / "data" / "dau" / "default"),
         },
     }
 
     @staticmethod
     def _filters_config_path():
-        return _root() / "config" / "jira_filters.json"
+        return _user_data_dir() / "config" / "jira_filters.json"
 
     @staticmethod
     def _ensure_dau_dir(dau_path: str) -> None:
-        """Create <root>/<dau_path>/original/ with a .gitkeep so survey responses have a home."""
+        """Create <dau_path>/original/ with a .gitkeep so survey responses have a home."""
         if not dau_path:
             return
         try:
-            target = (_root() / dau_path / "original").resolve()
+            p = Path(dau_path)
+            # Absolute paths are used directly; relative paths resolved against user_data_dir
+            if not p.is_absolute():
+                p = _user_data_dir() / p
+            target = (p / "original").resolve()
             target.mkdir(parents=True, exist_ok=True)
             gitkeep = target / ".gitkeep"
             if not gitkeep.exists():
@@ -180,7 +187,7 @@ class FilterHandlerMixin:
 
         dau_path = (params.get("DAU_PATH") or "").strip().replace("\\", "/")
         if not dau_path:
-            dau_path = f"data/dau/{slug}"
+            dau_path = str(_user_data_dir() / "data" / "dau" / slug)
         params["DAU_PATH"] = dau_path
 
         # Ensure all known param keys are present; missing ones default to "".
