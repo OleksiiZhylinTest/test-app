@@ -66,10 +66,10 @@ def test_is_done_no_resolutiondate_custom_status():
         ("cancelled", frozenset({"cancelled"}), True),  # case-insensitive
         ("CANCELLED", frozenset({"cancelled"}), True),
         ("Withdrawn", frozenset({"cancelled", "withdrawn"}), True),
-        ("Done", frozenset({"cancelled"}), False),       # not in excluded set
+        ("Done", frozenset({"cancelled"}), False),  # not in excluded set
         ("In Progress", frozenset({"cancelled"}), False),
-        ("Cancelled", frozenset(), False),               # empty set → nothing excluded
-        ("Cancelled", None, False),                      # None → nothing excluded
+        ("Cancelled", frozenset(), False),  # empty set → nothing excluded
+        ("Cancelled", None, False),  # None → nothing excluded
     ],
 )
 def test_is_excluded(status, excluded_set, expected):
@@ -216,7 +216,7 @@ def test_compute_velocity_excluded_statuses():
     sprint = make_sprint(1)
     issues = [
         make_issue("X-1", "Done", 5.0),
-        make_issue("X-2", "Cancelled", 8.0),   # should be excluded
+        make_issue("X-2", "Cancelled", 8.0),  # should be excluded
         make_issue("X-3", "In Progress", 3.0),
     ]
     # Give the Cancelled issue a resolutiondate to confirm excluded check wins
@@ -453,8 +453,8 @@ def test_ai_trend_excluded_statuses():
     """Excluded-status issues are removed from both numerator and denominator of AI metric."""
     sprint = make_sprint(1, "S1")
     issues = [
-        make_issue_with_labels("X-1", "Done", 5.0, ["AI_assistance"]),      # counts
-        make_issue_with_labels("X-2", "Done", 3.0, []),                      # counts (non-AI)
+        make_issue_with_labels("X-1", "Done", 5.0, ["AI_assistance"]),  # counts
+        make_issue_with_labels("X-2", "Done", 3.0, []),  # counts (non-AI)
         make_issue_with_labels("X-3", "Cancelled", 8.0, ["AI_assistance"]),  # excluded entirely
     ]
     # Give Cancelled issue a resolutiondate to confirm excluded check wins over resolutiondate fallback
@@ -467,8 +467,8 @@ def test_ai_trend_excluded_statuses():
         ai_exclude_labels=[],
         excluded_statuses=excluded,
     )
-    assert result[0]["total_sp"] == 8.0,  "Only 2 non-excluded done issues (5+3)"
-    assert result[0]["ai_sp"] == 5.0,     "Only the non-excluded AI issue counts"
+    assert result[0]["total_sp"] == 8.0, "Only 2 non-excluded done issues (5+3)"
+    assert result[0]["ai_sp"] == 5.0, "Only the non-excluded AI issue counts"
     assert result[0]["ai_pct"] == 62.5
 
 
