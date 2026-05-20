@@ -81,16 +81,21 @@ class SchemaHandlerMixin:
             return
 
         status_mapping = schema.get("status_mapping")
+        excluded = (status_mapping or {}).get("excluded_statuses")
         if (
             not isinstance(status_mapping, dict)
             or not isinstance(status_mapping.get("done_statuses"), list)
             or not isinstance(status_mapping.get("in_progress_statuses"), list)
+            or (excluded is not None and not isinstance(excluded, list))
         ):
             self._send_json(
                 400,
                 {
                     "ok": False,
-                    "error": ("status_mapping.done_statuses and status_mapping.in_progress_statuses must be lists"),
+                    "error": (
+                        "status_mapping.done_statuses and status_mapping.in_progress_statuses must be lists; "
+                        "status_mapping.excluded_statuses is optional but must be a list if present"
+                    ),
                 },
             )
             return

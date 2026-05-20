@@ -198,6 +198,17 @@ def get_in_progress_statuses(schema: dict[str, Any]) -> list[str]:
     return list(mapping.get("in_progress_statuses") or ["In Progress"])
 
 
+def get_excluded_statuses(schema: dict[str, Any]) -> list[str]:
+    """Return statuses excluded from all metric calculations (e.g. Cancelled, Withdrawn).
+
+    Issues with these statuses are silently dropped before any done-status check,
+    so a resolutiondate on an excluded issue does not make it count as done.
+    Returns an empty list when the key is absent (backward-compatible default).
+    """
+    mapping = schema.get("status_mapping") or {}
+    return list(mapping.get("excluded_statuses") or [])
+
+
 # Well-known Jira custom field schema identifiers used for auto-detection
 KNOWN_FIELD_SCHEMAS: dict[str, str] = {
     "com.pyxis.greenhopper.jira:gh-sprint": "sprint",

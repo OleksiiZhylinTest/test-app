@@ -101,7 +101,8 @@
         ],
         "in_progress_statuses": [
           "In Progress"
-        ]
+        ],
+        "excluded_statuses": []
       }
     },
     {
@@ -205,7 +206,8 @@
         ],
         "in_progress_statuses": [
           "In Progress"
-        ]
+        ],
+        "excluded_statuses": []
       }
     },
     {
@@ -309,7 +311,8 @@
         ],
         "in_progress_statuses": [
           "In Progress"
-        ]
+        ],
+        "excluded_statuses": []
       }
     }
   ]

@@ -739,6 +739,64 @@ def test_post_schema_rejects_invalid_status_mapping(server_url):
     assert "status_mapping" in data["error"]
 
 
+def test_post_schema_rejects_non_list_excluded_statuses(server_url):
+    """POST with excluded_statuses set to a non-list value returns 400."""
+    status, data = _post_schema(
+        server_url,
+        {
+            "schema": {
+                "schema_name": "X",
+                "fields": {},
+                "status_mapping": {
+                    "done_statuses": ["Done"],
+                    "in_progress_statuses": ["In Progress"],
+                    "excluded_statuses": "Cancelled",  # must be list, not string
+                },
+            },
+        },
+    )
+    assert status == 400
+    assert "excluded_statuses" in data["error"]
+
+
+def test_post_schema_accepts_excluded_statuses_list(server_url, isolated_schema_file):
+    """POST with a valid excluded_statuses list succeeds (optional field accepted)."""
+    payload = {
+        "schema": {
+            "schema_name": "E2E_ExcludedStatuses",
+            "fields": {},
+            "status_mapping": {
+                "done_statuses": ["Done"],
+                "in_progress_statuses": ["In Progress"],
+                "excluded_statuses": ["Cancelled", "Withdrawn"],
+            },
+        },
+    }
+    status, data = _post_schema(server_url, payload)
+    assert status == 200
+    assert data["ok"] is True
+    saved = data["schema"]["status_mapping"]["excluded_statuses"]
+    assert saved == ["Cancelled", "Withdrawn"]
+
+
+def test_post_schema_accepts_absent_excluded_statuses(server_url, isolated_schema_file):
+    """POST without excluded_statuses key is backward-compatible and succeeds."""
+    payload = {
+        "schema": {
+            "schema_name": "E2E_NoExcluded",
+            "fields": {},
+            "status_mapping": {
+                "done_statuses": ["Done"],
+                "in_progress_statuses": ["In Progress"],
+                # excluded_statuses intentionally absent
+            },
+        },
+    }
+    status, data = _post_schema(server_url, payload)
+    assert status == 200
+    assert data["ok"] is True
+
+
 def test_post_schema_creates_new_entry(server_url, isolated_schema_file):
     """POST with a fresh schema_name inserts and returns updated:false."""
     payload = {
