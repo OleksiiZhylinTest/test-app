@@ -10,6 +10,10 @@
 #   patch  1.2.3 → 1.2.4   (bug fix / hotfix)
 #
 # For hotfixes: set branch to hotfix/v1.2.4 and bump_type to patch.
+#
+# Because develop is a protected branch (requires PR + status checks), this
+# workflow pushes the change to a temporary branch and opens a PR automatically.
+# Merge the PR once CI passes — no manual file edits needed.
 # ──────────────────────────────────────────────────────────────────────────────
 
 name: Bump Version
@@ -30,6 +34,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
 
@@ -61,12 +66,30 @@ jobs:
           sed -i "s/^version = \"${CURRENT}\"/version = \"${NEW}\"/" pyproject.toml
           echo "old=$CURRENT" >> "$GITHUB_OUTPUT"
           echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          PR_BRANCH="chore/bump-version-${NEW}"
+          echo "pr_branch=${PR_BRANCH}" >> "$GITHUB_OUTPUT"
 
-      - name: Commit and push
+      - name: Push to temporary branch
         run: |
+          git checkout -b ${{ steps.bump.outputs.pr_branch }}
           git add pyproject.toml
           git commit -m "chore: bump version ${{ steps.bump.outputs.old }} → ${{ steps.bump.outputs.new }} [${{ inputs.bump_type }}]"
-          git push origin ${{ inputs.branch || 'develop' }}
+          git push origin ${{ steps.bump.outputs.pr_branch }}
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "chore: bump version ${{ steps.bump.outputs.old }} → ${{ steps.bump.outputs.new }} [${{ inputs.bump_type }}]",
+              head: "${{ steps.bump.outputs.pr_branch }}",
+              base: "${{ inputs.branch || 'develop' }}",
+              body: "Automated version bump triggered by `Bump Version` workflow.\n\n| | Version |\n|---|---|\n| Before | `${{ steps.bump.outputs.old }}` |\n| After | `${{ steps.bump.outputs.new }}` |\n| Type | ${{ inputs.bump_type }} |"
+            });
+            core.summary.addRaw(`### Version Bump PR created\n\n[${pr.title}](${pr.html_url})\n\nMerge it once CI passes to complete the version bump.`);
+            await core.summary.write();
 
       - name: Write summary
         run: |
@@ -78,3 +101,4 @@ jobs:
           echo "| After  | \`${{ steps.bump.outputs.new }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Type   | ${{ inputs.bump_type }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Branch | ${{ inputs.branch || 'develop' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PR branch | \`${{ steps.bump.outputs.pr_branch }}\` |" >> $GITHUB_STEP_SUMMARY
