@@ -15,14 +15,15 @@ from pathlib import Path
 from app.core import config, jira_client, metrics
 from app.core import schema as schema_mod
 from app.core.dau_normalizer import normalize_dau_responses
+from app.core.user_data import user_data_dir as _udd
 from app.reporters import report_html, report_md
 from app.utils.logging_setup import SUCCESS_LEVEL
 
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-REPORTS_DIR = PROJECT_ROOT / "generated" / "reports"
-LOGS_DIR = PROJECT_ROOT / "generated" / "logs"
+REPORTS_DIR = _udd() / "reports"
+LOGS_DIR = _udd() / "logs"
 
 
 def _parse_args() -> argparse.Namespace:

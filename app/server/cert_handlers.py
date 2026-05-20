@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 import certifi
 
-from ._base import _root
+from ._base import _user_data_dir
 
 
 def _get_windows_ca_certs() -> list[str]:
@@ -79,7 +79,7 @@ class CertHandlerMixin:
         """Return whether certs/jira_ca_bundle.pem exists, plus validity metadata."""
         from app.utils.cert_utils import validate_cert
 
-        cert_path = _root() / "certs" / "jira_ca_bundle.pem"
+        cert_path = _user_data_dir() / "certs" / "jira_ca_bundle.pem"
         if not cert_path.is_file():
             self._send_json(200, {"exists": False, "path": "certs/jira_ca_bundle.pem"})
             return
@@ -123,7 +123,7 @@ class CertHandlerMixin:
             self._send_json(200, {"ok": False, "error": f"Could not connect to {host}:{port}: {exc}"})
             return
 
-        certs_dir = _root() / "certs"
+        certs_dir = _user_data_dir() / "certs"
         certs_dir.mkdir(exist_ok=True)
         cert_file = certs_dir / "jira_ca_bundle.pem"
 
