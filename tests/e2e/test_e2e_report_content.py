@@ -92,6 +92,10 @@ def sprint_metrics_report_url(live_server_url: str, monkeypatch) -> str:
 
     _REPORT_SUBDIR.mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr("app.cli.REPORTS_DIR", _REPORT_SUBDIR)
+    monkeypatch.setattr(
+        "app.server._base.HandlerBase._reports_dir",
+        staticmethod(lambda: Path("generated/reports").resolve()),
+    )
     monkeypatch.setattr("sys.argv", ["main.py"])
 
     from main import main
