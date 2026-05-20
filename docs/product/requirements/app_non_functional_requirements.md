@@ -50,6 +50,7 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 | NFR-U-003 | Generated reports are usable without the app running | Each HTML report is a fully self-contained file (inline CSS, Chart.js, and data); it opens correctly in a browser with no server or internet connection | ✓ Met |
 | NFR-U-004 | Past reports are discoverable from the UI | The Last Generated Reports list on the Generate Report tab shows all previously created reports sorted newest first, each with a direct link to open the HTML report | ✓ Met |
 | NFR-U-005 | Error states are communicated clearly to the user | Connection failures, missing credentials, and report generation errors each display a human-readable message in the relevant output panel or status badge; no raw stack trace is shown to the user | ✓ Met |
+| NFR-U-006 | The application displays the running release version in both UI headers | `GET /api/version` returns `{"ok": true, "version": "<semver>"}` whose value matches the `version` field in `pyproject.toml`; a `v<version>` pill badge is visible in the header of both `index.html` and `dau_survey.html`; the badge is populated dynamically on page load and is silently absent when the server is unavailable (e.g. `file://` mode) | ✓ Met |
 
 ---
 
