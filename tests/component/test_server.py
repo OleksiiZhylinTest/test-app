@@ -258,16 +258,19 @@ def test_get_reports_returns_empty_list_when_no_reports(server_url, tmp_path):
     """GET /api/reports with an empty directory returns {"reports": []}."""
     import app.server as srv
 
-    reports_dir = tmp_path / "generated" / "reports"
+    reports_dir = tmp_path / "reports"
     reports_dir.mkdir(parents=True)
 
-    orig = srv.ROOT
+    orig_root = srv.ROOT
+    orig_udd = srv.USER_DATA_DIR
     srv.ROOT = tmp_path
+    srv.USER_DATA_DIR = tmp_path
     try:
         resp = urllib.request.urlopen(f"{server_url}/api/reports")
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
     assert data == {"reports": []}
 
@@ -276,7 +279,7 @@ def test_get_reports_returns_sorted_list(server_url, tmp_path):
     """GET /api/reports returns one entry per HTML file, folders sorted newest-first."""
     import app.server as srv
 
-    reports_dir = tmp_path / "generated" / "reports"
+    reports_dir = tmp_path / "reports"
     reports_dir.mkdir(parents=True)
     # Two filter folders, each with HTML+MD files
     filter_a = reports_dir / "filter_a"
@@ -290,13 +293,16 @@ def test_get_reports_returns_sorted_list(server_url, tmp_path):
     (filter_b / "filter_b_2025-12-01T08-00-00.html").touch()
     (filter_b / "filter_b_2025-12-01T08-00-00.md").touch()
 
-    orig = srv.ROOT
+    orig_root = srv.ROOT
+    orig_udd = srv.USER_DATA_DIR
     srv.ROOT = tmp_path
+    srv.USER_DATA_DIR = tmp_path
     try:
         resp = urllib.request.urlopen(f"{server_url}/api/reports")
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
     reports = data["reports"]
     assert len(reports) == 3
@@ -320,7 +326,7 @@ def test_delete_report_removes_files_and_folder(server_url, tmp_path):
     """DELETE /api/reports removes HTML+MD and the folder when it becomes empty."""
     import app.server as srv
 
-    reports_dir = tmp_path / "generated" / "reports"
+    reports_dir = tmp_path / "reports"
     folder = reports_dir / "alex_report"
     folder.mkdir(parents=True)
     html_file = folder / "alex_report_2026-05-11T10-30-00.html"
@@ -328,8 +334,10 @@ def test_delete_report_removes_files_and_folder(server_url, tmp_path):
     html_file.touch()
     md_file.touch()
 
-    orig = srv.ROOT
+    orig_root = srv.ROOT
+    orig_udd = srv.USER_DATA_DIR
     srv.ROOT = tmp_path
+    srv.USER_DATA_DIR = tmp_path
     try:
         req = urllib.request.Request(
             f"{server_url}/api/reports?ts=alex_report&file=alex_report_2026-05-11T10-30-00.html",
@@ -338,7 +346,8 @@ def test_delete_report_removes_files_and_folder(server_url, tmp_path):
         resp = urllib.request.urlopen(req)
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
     assert data == {"ok": True}
     assert not html_file.exists()
@@ -350,15 +359,17 @@ def test_delete_report_keeps_folder_when_other_files_remain(server_url, tmp_path
     """DELETE /api/reports keeps the folder when other HTML files still exist."""
     import app.server as srv
 
-    reports_dir = tmp_path / "generated" / "reports"
+    reports_dir = tmp_path / "reports"
     folder = reports_dir / "my_report"
     folder.mkdir(parents=True)
     (folder / "my_report_2026-05-11T10-00-00.html").touch()
     (folder / "my_report_2026-05-11T10-00-00.md").touch()
     (folder / "my_report_2026-05-10T09-00-00.html").touch()
 
-    orig = srv.ROOT
+    orig_root = srv.ROOT
+    orig_udd = srv.USER_DATA_DIR
     srv.ROOT = tmp_path
+    srv.USER_DATA_DIR = tmp_path
     try:
         req = urllib.request.Request(
             f"{server_url}/api/reports?ts=my_report&file=my_report_2026-05-11T10-00-00.html",
@@ -367,7 +378,8 @@ def test_delete_report_keeps_folder_when_other_files_remain(server_url, tmp_path
         resp = urllib.request.urlopen(req)
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
     assert data == {"ok": True}
     assert not (folder / "my_report_2026-05-11T10-00-00.html").exists()
@@ -380,11 +392,13 @@ def test_delete_report_returns_404_for_missing(server_url, tmp_path):
     """DELETE /api/reports returns 404 when the file does not exist."""
     import app.server as srv
 
-    reports_dir = tmp_path / "generated" / "reports"
+    reports_dir = tmp_path / "reports"
     reports_dir.mkdir(parents=True)
 
-    orig = srv.ROOT
+    orig_root = srv.ROOT
+    orig_udd = srv.USER_DATA_DIR
     srv.ROOT = tmp_path
+    srv.USER_DATA_DIR = tmp_path
     try:
         with pytest.raises(urllib.error.HTTPError) as exc_info:
             req = urllib.request.Request(
@@ -393,7 +407,8 @@ def test_delete_report_returns_404_for_missing(server_url, tmp_path):
             )
             urllib.request.urlopen(req)
     finally:
-        srv.ROOT = orig
+        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
     assert exc_info.value.code == 404
 
@@ -402,8 +417,10 @@ def test_delete_report_rejects_invalid_params(server_url, tmp_path):
     """DELETE /api/reports returns 400 for empty or path-traversal params."""
     import app.server as srv
 
-    orig = srv.ROOT
+    orig_root = srv.ROOT
+    orig_udd = srv.USER_DATA_DIR
     srv.ROOT = tmp_path
+    srv.USER_DATA_DIR = tmp_path
     try:
         for qs in ["ts=&file=report.html", "ts=../etc&file=report.html", "ts=ok&file=../../etc"]:
             with pytest.raises(urllib.error.HTTPError) as exc_info:
@@ -414,7 +431,8 @@ def test_delete_report_rejects_invalid_params(server_url, tmp_path):
                 urllib.request.urlopen(req)
             assert exc_info.value.code == 400, f"expected 400 for ?{qs}"
     finally:
-        srv.ROOT = orig
+        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
 
 # ---------------------------------------------------------------------------
@@ -450,13 +468,13 @@ def test_cert_status_no_cert_returns_exists_false(server_url, tmp_path):
     """GET /api/cert-status when no cert file exists returns exists=False with path key."""
     import app.server as srv
 
-    orig = srv.ROOT
-    srv.ROOT = tmp_path  # temp dir has no certs/ subdirectory
+    orig_udd = srv.USER_DATA_DIR
+    srv.USER_DATA_DIR = tmp_path  # temp dir has no certs/ subdirectory
     try:
         resp = urllib.request.urlopen(f"{server_url}/api/cert-status")
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.USER_DATA_DIR = orig_udd
 
     assert data["exists"] is False
     assert data["path"] == "certs/jira_ca_bundle.pem"
@@ -470,13 +488,13 @@ def test_cert_status_with_valid_cert_returns_enriched_fields(server_url, tmp_pat
     certs_dir.mkdir()
     (certs_dir / "jira_ca_bundle.pem").write_bytes(_make_test_pem(90))
 
-    orig = srv.ROOT
-    srv.ROOT = tmp_path
+    orig_udd = srv.USER_DATA_DIR
+    srv.USER_DATA_DIR = tmp_path
     try:
         resp = urllib.request.urlopen(f"{server_url}/api/cert-status")
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.USER_DATA_DIR = orig_udd
 
     assert data["exists"] is True
     assert data["path"] == "certs/jira_ca_bundle.pem"
@@ -496,13 +514,13 @@ def test_cert_status_with_corrupt_cert_returns_error(server_url, tmp_path):
     certs_dir.mkdir()
     (certs_dir / "jira_ca_bundle.pem").write_bytes(b"this is not a PEM certificate")
 
-    orig = srv.ROOT
-    srv.ROOT = tmp_path
+    orig_udd = srv.USER_DATA_DIR
+    srv.USER_DATA_DIR = tmp_path
     try:
         resp = urllib.request.urlopen(f"{server_url}/api/cert-status")
         data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.USER_DATA_DIR = orig_udd
 
     assert data["exists"] is True
     assert data["path"] == "certs/jira_ca_bundle.pem"
@@ -569,8 +587,8 @@ def test_fetch_cert_saves_full_ca_bundle(server_url, tmp_path):
 
     fake_pem = "-----BEGIN CERTIFICATE-----\nMIIBfake\n-----END CERTIFICATE-----\n"
 
-    orig = srv.ROOT
-    srv.ROOT = tmp_path
+    orig_udd = srv.USER_DATA_DIR
+    srv.USER_DATA_DIR = tmp_path
     try:
         with patch("app.server.cert_handlers._fetch_cert_chain", return_value=fake_pem):
             body = json.dumps({"url": "https://example.atlassian.net"}).encode()
@@ -583,7 +601,7 @@ def test_fetch_cert_saves_full_ca_bundle(server_url, tmp_path):
             resp = urllib.request.urlopen(req)
             data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig
+        srv.USER_DATA_DIR = orig_udd
 
     assert data["ok"] is True
 
@@ -864,8 +882,8 @@ def test_fetch_cert_saves_pem_without_crlf_line_endings(server_url, tmp_path):
     sample_pem = _make_test_pem(90).decode("ascii")
 
     certs_dir = tmp_path / "certs"
-    orig_root = srv.ROOT
-    srv.ROOT = tmp_path
+    orig_udd = srv.USER_DATA_DIR
+    srv.USER_DATA_DIR = tmp_path
     try:
         with patch("app.server.cert_handlers._fetch_cert_chain", return_value=sample_pem):
             body = json.dumps({"url": "https://test.atlassian.net"}).encode()
@@ -878,7 +896,7 @@ def test_fetch_cert_saves_pem_without_crlf_line_endings(server_url, tmp_path):
             resp = urllib.request.urlopen(req)
             data = json.loads(resp.read())
     finally:
-        srv.ROOT = orig_root
+        srv.USER_DATA_DIR = orig_udd
 
     assert data["ok"] is True
     saved = (certs_dir / "jira_ca_bundle.pem").read_bytes()
