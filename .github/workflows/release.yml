@@ -2,37 +2,70 @@
 # Release Pipeline — AI Adoption Metrics Report
 # ──────────────────────────────────────────────────────────────────────────────
 #
-# Triggered by pushing a version tag: git tag v1.2.3 && git push origin v1.2.3
+# Git Flow: feature/* → develop → [PR rebase] → master → Release
+#
+# TRIGGER: Any push to master (including PR merge from develop).
+#   The `check` job reads the version from pyproject.toml and skips all
+#   downstream jobs if a tag for that version already exists — making the
+#   pipeline idempotent (hotfix commits without a version bump are safe).
 #
 # STAGES:
-#   validate   → lint + unit + component tests (gate before publishing)
-#   build      → create the release ZIP using create_app_zip.bat logic
-#   release    → create GitHub Release and upload ZIP as asset
+#   check      → detect new version; gate for all downstream jobs
+#   validate   → lint + unit + component tests
+#   build      → create the release ZIP
+#   release    → create GitHub Release and attach ZIP
 #
-# PREREQUISITES:
-#   - pyproject.toml [project] version must match the pushed tag (e.g. v1.2.3)
-#   - Tag must be pushed to the master branch (enforce via GitHub tag protection)
+# TO TRIGGER A RELEASE:
+#   1. Run bump-version.yml (workflow_dispatch) on develop to set the new version
+#   2. Merge develop → master via PR (rebase merge)
+#   3. This workflow fires automatically; creates tag v{version} and GitHub Release
 # ──────────────────────────────────────────────────────────────────────────────
 
 name: Release
 
 on:
   push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+    branches: ["master"]
 
 permissions:
-  contents: write   # required to create GitHub Releases
+  contents: write   # required to create GitHub Releases and tags
 
 env:
   PYTHON_VERSION: "3.12"
 
 jobs:
 
+  # ── Check: is this a new version? ────────────────────────────────────────────
+  check:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+      should_release: ${{ steps.read.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # need full tag history
+
+      - name: Read version and check if tag exists
+        id: read
+        run: |
+          VERSION=$(grep -Po '(?<=^version = ")[^"]+' pyproject.toml)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Tag v${VERSION} already exists — skipping release."
+          else
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "New version v${VERSION} detected — proceeding with release."
+          fi
+
   # ── Gate: Lint + Unit + Component ────────────────────────────────────────────
   validate:
     name: Validate (lint + unit + component)
     runs-on: ubuntu-latest
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
     steps:
       - uses: actions/checkout@v6
 
@@ -61,41 +94,18 @@ jobs:
   build:
     name: Build ZIP
     runs-on: ubuntu-latest
-    needs: validate
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
-      zip_name: ${{ steps.get_version.outputs.zip_name }}
+    needs: [check, validate]
+    if: needs.check.outputs.should_release == 'true'
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Read version from pyproject.toml
-        id: get_version
-        run: |
-          VERSION=$(python -c "import re; m=re.search(r'version\s*=\s*\"([^\"]+)\"', open('pyproject.toml').read()); print(m.group(1))")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "zip_name=ai_adoption_manager_v${VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Verify tag matches pyproject.toml version
-        run: |
-          TAG="${{ github.ref_name }}"          # e.g. v1.2.3
-          EXPECTED="v${{ steps.get_version.outputs.version }}"
-          if [ "$TAG" != "$EXPECTED" ]; then
-            echo "ERROR: Tag '$TAG' does not match pyproject.toml version '$EXPECTED'"
-            exit 1
-          fi
-
       - name: Build release ZIP
         run: |
-          VERSION=${{ steps.get_version.outputs.version }}
-          ZIP_NAME=${{ steps.get_version.outputs.zip_name }}
+          VERSION=${{ needs.check.outputs.version }}
+          ZIP_NAME=ai_adoption_manager_v${VERSION}
           STAGING="generated/releases/${ZIP_NAME}"
           mkdir -p "$STAGING"
 
-          # Copy application sources
           rsync -a --exclude='__pycache__' --exclude='*.pyc' --exclude='*.pyo' \
             --exclude='.pytest_cache' --exclude='.mypy_cache' --exclude='.ruff_cache' \
             --exclude='*.log' --exclude='dau_report.json' \
@@ -107,18 +117,14 @@ jobs:
 
           mkdir -p "$STAGING/tools"
           cp tools/fetch_ssl_cert.py "$STAGING/tools/"
-
           mkdir -p "$STAGING/docs/product/schemas"
-
           mkdir -p "$STAGING/certs"
           echo "Place jira_ca_bundle.pem here if your Jira instance uses a custom CA." \
             > "$STAGING/certs/README.txt"
 
-          # Copy root files
           for f in main.py server.py requirements.txt start_app.bat project_setup.bat README.md; do
             cp "$f" "$STAGING/"
           done
-          # .env.example needs explicit copy (leading dot may be missed by shell globs)
           cp .env.example "$STAGING/"
 
           cd generated/releases
@@ -135,7 +141,8 @@ jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: build
+    needs: [check, build]
+    if: needs.check.outputs.should_release == 'true'
     steps:
       - uses: actions/checkout@v6
 
@@ -148,7 +155,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: "Release ${{ github.ref_name }}"
+          tag_name: "v${{ needs.check.outputs.version }}"
+          name: "Release v${{ needs.check.outputs.version }}"
           generate_release_notes: true
           files: dist/*.zip

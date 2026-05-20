@@ -1,0 +1,96 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Snapshot Pipeline — AI Adoption Metrics Report
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# Triggered automatically after the CI workflow passes on the develop branch.
+# Publishes a pre-release snapshot ZIP to GitHub Releases so testers can
+# download the latest develop build without waiting for a full release.
+#
+# Tag format:  v{version}-snapshot  (e.g. v1.0.0-snapshot)
+# Deletes and recreates the tag on every run to keep the pre-release current.
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Snapshot
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: ["develop"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+
+  snapshot:
+    name: Publish snapshot pre-release
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(grep -Po '(?<=^version = ")[^"]+' pyproject.toml)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "snap_tag=v${VERSION}-snapshot" >> "$GITHUB_OUTPUT"
+          echo "zip_name=ai_adoption_manager_v${VERSION}-snapshot" >> "$GITHUB_OUTPUT"
+
+      - name: Build snapshot ZIP
+        run: |
+          ZIP_NAME=${{ steps.ver.outputs.zip_name }}
+          STAGING="generated/releases/${ZIP_NAME}"
+          mkdir -p "$STAGING"
+
+          rsync -a --exclude='__pycache__' --exclude='*.pyc' --exclude='*.pyo' \
+            --exclude='.pytest_cache' --exclude='.mypy_cache' --exclude='.ruff_cache' \
+            --exclude='*.log' --exclude='dau_report.json' \
+            app/ "$STAGING/app/"
+          rsync -a templates/ "$STAGING/templates/"
+          rsync -a ui/ "$STAGING/ui/"
+          rsync -a config/ "$STAGING/config/"
+          rsync -a data/ "$STAGING/data/"
+
+          mkdir -p "$STAGING/tools"
+          cp tools/fetch_ssl_cert.py "$STAGING/tools/"
+          mkdir -p "$STAGING/docs/product/schemas"
+          mkdir -p "$STAGING/certs"
+          echo "Place jira_ca_bundle.pem here if your Jira instance uses a custom CA." \
+            > "$STAGING/certs/README.txt"
+
+          for f in main.py server.py requirements.txt start_app.bat project_setup.bat README.md; do
+            cp "$f" "$STAGING/"
+          done
+          cp .env.example "$STAGING/"
+
+          cd generated/releases
+          zip -r "${ZIP_NAME}.zip" "${ZIP_NAME}/"
+          rm -rf "${ZIP_NAME}/"
+
+      - name: Delete existing snapshot release and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SNAP_TAG="${{ steps.ver.outputs.snap_tag }}"
+          gh release delete "$SNAP_TAG" --yes 2>/dev/null || true
+          git push origin ":refs/tags/${SNAP_TAG}" 2>/dev/null || true
+
+      - name: Create snapshot pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.snap_tag }}
+          name: "${{ steps.ver.outputs.snap_tag }}"
+          prerelease: true
+          generate_release_notes: false
+          body: |
+            **Snapshot build** from the `develop` branch. Not for production use.
+
+            Built from commit: ${{ github.event.workflow_run.head_sha }}
+          files: generated/releases/*.zip
