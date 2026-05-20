@@ -32,6 +32,15 @@ try {
   initCert(certLog);
   initFilters(filterLog);
   const syncJqlBuilderVisibility = initJqlBuilderVisibility();
+
+  fetch('/api/version')
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.ok && data.version) {
+        document.getElementById('app-version').textContent = 'v' + data.version;
+      }
+    })
+    .catch(() => {});
   initSchema();
   initGenerate(mainLog);
   initFilterOptions();

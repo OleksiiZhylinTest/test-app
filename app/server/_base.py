@@ -18,6 +18,7 @@ from urllib.parse import unquote as urlunquote
 
 from dotenv import dotenv_values
 
+import app as _app
 from app.core import config
 
 logger = logging.getLogger(__name__)
@@ -186,6 +187,8 @@ class HandlerBase(BaseHTTPRequestHandler):
 
         if path in ("/", "/index.html"):
             self._serve_file(_root() / "ui" / "index.html")
+        elif path == "/api/version":
+            self._send_json(200, {"ok": True, "version": _app.__version__})
         elif path == "/api/generate":
             self._handle_generate()
         elif path == "/api/cert-status":
