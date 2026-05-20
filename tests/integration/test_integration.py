@@ -260,6 +260,8 @@ def test_main_pipeline_sprint_filter_with_velocity_and_ai_metrics(monkeypatch, t
     monkeypatch.setattr("app.core.config.AI_TOOL_LABELS", [])
     monkeypatch.setattr("app.core.config.AI_ACTION_LABELS", [])
     monkeypatch.setattr("app.core.config.ESTIMATION_TYPE", "StoryPoints")
+    monkeypatch.setattr("app.core.config.METRIC_VELOCITY", True)
+    monkeypatch.setattr("app.core.config.METRIC_AI_ASSISTANCE_TREND", True)
 
     mock_jira = MagicMock()
     mock_jira.get_all_sprints_from_board.side_effect = [
