@@ -41,6 +41,26 @@ def test_get_unknown_returns_404(server_url):
 
 
 # ---------------------------------------------------------------------------
+# GET /api/version
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.smoke
+def test_get_version_returns_ok_and_version(server_url):
+    """GET /api/version returns {"ok": true, "version": "<semver>"} matching pyproject.toml."""
+    import re
+
+    import app as _app
+
+    resp = urllib.request.urlopen(f"{server_url}/api/version")
+    assert resp.status == 200
+    data = json.loads(resp.read().decode())
+    assert data["ok"] is True
+    assert data["version"] == _app.__version__
+    assert re.match(r"^\d+\.\d+\.\d+", data["version"])
+
+
+# ---------------------------------------------------------------------------
 # OPTIONS (CORS)
 # ---------------------------------------------------------------------------
 

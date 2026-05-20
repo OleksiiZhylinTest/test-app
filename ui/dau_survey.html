@@ -74,6 +74,19 @@
       color: var(--text-muted);
       margin-top: 2px;
     }
+    .app-header-version {
+      margin-left: auto;
+      align-self: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 2px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
     /* ── Main body ── */
     .app-body {
@@ -471,6 +484,7 @@
       <h1>AI Tool Usage Survey</h1>
       <p>AI Adoption Metrics &mdash; weekly check-in</p>
     </div>
+    <span class="app-header-version" id="app-version" aria-label="Application version"></span>
   </header>
 
   <main class="app-body" role="main">
@@ -894,6 +908,16 @@
       }
 
       btnNewSurvey.addEventListener('click', resetSurvey);
+
+      // ── Display application version ──
+      fetch('/api/version')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.ok && data.version) {
+            document.getElementById('app-version').textContent = 'v' + data.version;
+          }
+        })
+        .catch(function () {});
 
       // ── Populate role select from server config (falls back to hardcoded options) ──
       fetch('/api/dau/config')
