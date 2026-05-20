@@ -623,9 +623,9 @@ def test_fetch_cert_saves_full_ca_bundle(server_url, tmp_path):
 )
 def test_handle_error_swallows_connection_aborted_error():
     """Server.handle_error must swallow ConnectionAbortedError on Windows."""
-    import server as srv
+    from app.server import Handler, Server
 
-    server_instance = srv.Server(("127.0.0.1", 0), srv.Handler)
+    server_instance = Server(("127.0.0.1", 0), Handler)
     try:
         mock_request = MagicMock()
         propagated = []
