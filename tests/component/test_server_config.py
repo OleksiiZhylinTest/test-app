@@ -71,11 +71,12 @@ def _post_expect_error(url: str, payload: dict | None = None, raw: bytes | None 
 
 @pytest.fixture
 def temp_root(tmp_path, monkeypatch):
-    """Redirect app.server.ROOT to a fresh tmp_path so real .env is never touched."""
+    """Redirect app.server.ROOT and USER_DATA_DIR to a fresh tmp_path so real .env is never touched."""
     import app.server as srv
 
     (tmp_path / "config").mkdir()
     monkeypatch.setattr(srv, "ROOT", tmp_path)
+    monkeypatch.setattr(srv, "USER_DATA_DIR", tmp_path)
     return tmp_path
 
 
