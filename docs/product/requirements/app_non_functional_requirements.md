@@ -46,7 +46,7 @@ This document defines the quality attributes the AI Adoption Metrics Report tool
 | ID | Requirement | Acceptance Criterion | Status |
 |----|-------------|----------------------|--------|
 | NFR-U-001 | Report generation progress is visible in real time | The output panel on the Generate Report tab displays each line from the generation subprocess as it is produced, with no buffering delay visible to the user | ✓ Met |
-| NFR-U-002 | Jira credentials are remembered between sessions | After clicking Save on the Jira Connection tab, credentials pre-fill on the next browser session without any re-entry | ⬜ N/T |
+| NFR-U-002 | Jira credentials are remembered between sessions | After clicking Save on the Jira Connection tab, credentials pre-fill on the next browser session without any re-entry | ✓ Met |
 | NFR-U-003 | Generated reports are usable without the app running | Each HTML report is a fully self-contained file (inline CSS, Chart.js, and data); it opens correctly in a browser with no server or internet connection | ✓ Met |
 | NFR-U-004 | Past reports are discoverable from the UI | The Last Generated Reports list on the Generate Report tab shows all previously created reports sorted newest first, each with a direct link to open the HTML report | ✓ Met |
 | NFR-U-005 | Error states are communicated clearly to the user | Connection failures, missing credentials, and report generation errors each display a human-readable message in the relevant output panel or status badge; no raw stack trace is shown to the user | ✓ Met |

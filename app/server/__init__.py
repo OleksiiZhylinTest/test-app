@@ -19,13 +19,15 @@ from pathlib import Path
 from dotenv import dotenv_values as _dotenv_values
 from dotenv import dotenv_values as dotenv_values
 
-# Merge defaults (committed) and secrets (.env): .env wins over defaults.env,
-# but both yield to values already present in os.environ (tests / CI).
+# Merge defaults (committed) → legacy app-root .env → user_data_dir .env (wins).
 # MUST run before importing ._base so HOST/PORT are populated when _base reads os.environ.
+from app.core.user_data import user_data_dir as _udd_fn
+
 _srv_root = Path(__file__).resolve().parent.parent.parent
 for _k, _v in {
     **_dotenv_values(_srv_root / "config" / "defaults.env"),
     **_dotenv_values(_srv_root / ".env"),
+    **_dotenv_values(_udd_fn() / ".env"),
 }.items():
     if _k not in _os.environ and _v is not None:
         _os.environ[_k] = _v
@@ -44,6 +46,7 @@ from ._base import (  # noqa: E402
     MIME as MIME,
     PORT,
     ROOT as ROOT,
+    USER_DATA_DIR as USER_DATA_DIR,
     Server,
 )
 from .cert_handlers import CertHandlerMixin  # noqa: E402

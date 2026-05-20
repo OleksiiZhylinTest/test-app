@@ -21,6 +21,8 @@ from pathlib import Path
 
 from dotenv import dotenv_values as _dotenv_values
 
+from app.core.user_data import user_data_dir as _udd
+
 # ---------------------------------------------------------------------------
 # Custom SUCCESS level
 # ---------------------------------------------------------------------------
@@ -42,14 +44,18 @@ logging.Logger.success = _success  # type: ignore[attr-defined]
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 _DEFAULTS_PATH = _PROJECT_ROOT / "config" / "defaults.env"
-_ENV_PATH = _PROJECT_ROOT / ".env"
+_LEGACY_ENV_PATH = _PROJECT_ROOT / ".env"
 
 # When running under the test profile, default to DEBUG before defaults.env injects INFO.
 # An explicit LOG_LEVEL in the caller's environment (e.g. CI) still takes precedence.
 if os.environ.get("APP_PROFILE", "").strip().lower() == "test" and "LOG_LEVEL" not in os.environ:
     os.environ["LOG_LEVEL"] = "DEBUG"
 
-for _k, _v in {**_dotenv_values(_DEFAULTS_PATH), **_dotenv_values(_ENV_PATH)}.items():
+for _k, _v in {
+    **_dotenv_values(_DEFAULTS_PATH),
+    **_dotenv_values(_LEGACY_ENV_PATH),
+    **_dotenv_values(_udd() / ".env"),
+}.items():
     if _k not in os.environ and _v is not None:
         os.environ[_k] = _v
 
@@ -57,7 +63,7 @@ for _k, _v in {**_dotenv_values(_DEFAULTS_PATH), **_dotenv_values(_ENV_PATH)}.it
 # Public API
 # ---------------------------------------------------------------------------
 
-_LOG_DIR = _PROJECT_ROOT / "generated" / "logs"
+_LOG_DIR = _udd() / "logs"
 
 _LEVELS: dict[str, int] = {
     "DEBUG": logging.DEBUG,

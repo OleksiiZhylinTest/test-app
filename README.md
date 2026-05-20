@@ -4,6 +4,23 @@ Fetches data from Jira Cloud and generates AI adoption and velocity trend report
 
 ## Setup
 
+### Before you begin — where to extract the application
+
+Extract the ZIP to a **permanent folder that you own**, for example:
+
+- `C:\Users\<your-username>\Apps\AIMetrics`
+- `C:\Apps\AIMetrics`
+
+**Avoid** these locations:
+
+| Location | Why |
+|---|---|
+| `Downloads\` | Often cleaned automatically; easy to delete by accident |
+| `Desktop\` | Synced by OneDrive/SharePoint on many corporate machines — large files slow sync |
+| `C:\Program Files\` | Requires administrator rights to write |
+
+> **Your data is safe across upgrades.** Credentials, reports, filters, DAU data, and certificates are stored in `%LOCALAPPDATA%\AIMetrics` — completely outside the application folder. Upgrading means unzipping a new version anywhere and running it; your data migrates automatically on first launch.
+
 ### Step 1 - Install Python, dependencies, and bootstrap config (run once)
 
 Double-click **`project_setup.bat`**.

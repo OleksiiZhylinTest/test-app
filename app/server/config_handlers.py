@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ._base import _root
+from ._base import _root, _user_data_dir
 
 _CONFIG_KEYS = [
     "JIRA_URL",
@@ -41,11 +41,11 @@ class ConfigHandlerMixin:
     def _handle_get_config(self) -> None:
         """Return current config values; JIRA_API_TOKEN is masked as '***'."""
         defaults_path = _root() / "config" / "defaults.env"
-        env_path = _root() / ".env"
 
-        # Merge: defaults first, then .env wins on collision
+        # Merge: defaults → legacy app-root .env → user_data_dir .env (wins)
         raw_config = _read_env_file(defaults_path)
-        raw_config.update(_read_env_file(env_path))
+        raw_config.update(_read_env_file(_root() / ".env"))
+        raw_config.update(_read_env_file(_user_data_dir() / ".env"))
 
         out: dict[str, str] = {}
         for k in _CONFIG_KEYS:
@@ -80,7 +80,7 @@ class ConfigHandlerMixin:
             secret_updates = {k: v for k, v in updates.items() if k in _SECRET_KEYS}
             defaults_updates = {k: v for k, v in updates.items() if k not in _SECRET_KEYS}
             if secret_updates:
-                self._write_env_fields(secret_updates, _root() / ".env", _root() / ".env.example")
+                self._write_env_fields(secret_updates, _user_data_dir() / ".env", _root() / ".env.example")
             if defaults_updates:
                 self._write_env_fields(defaults_updates, _root() / "config" / "defaults.env", None)
             self._send_json(200, {"ok": True})

@@ -8,7 +8,7 @@ import sys
 from urllib.parse import parse_qs, urlparse
 from urllib.parse import unquote as urlunquote
 
-from ._base import _dotenv_values, _root
+from ._base import _dotenv_values, _root, _user_data_dir
 
 
 class GenerateHandlerMixin:
@@ -38,7 +38,8 @@ class GenerateHandlerMixin:
             fresh_env = {
                 **os.environ,
                 **_dotenv_values(root / "config" / "defaults.env"),
-                **_dotenv_values(root / ".env"),  # .env secrets win over defaults
+                **_dotenv_values(root / ".env"),  # legacy app-root .env
+                **_dotenv_values(_user_data_dir() / ".env"),  # user_data_dir .env wins
             }
 
             qs = parse_qs(urlparse(self.path).query)
