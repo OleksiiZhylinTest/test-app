@@ -775,7 +775,8 @@ def compute_cycle_time(
 def _resolve_schema_params(
     schema: dict[str, Any] | None,
 ) -> tuple[str | None, str | None, frozenset[str] | None, frozenset[str] | None, frozenset[str] | None]:
-    """Extract story_points_field, sprint_field, done_statuses, in_progress_statuses, excluded_statuses from a schema dict."""
+    """Extract story_points_field, sprint_field, done_statuses, in_progress_statuses,
+    excluded_statuses from a schema dict."""
     if schema is None:
         return None, None, None, None, None
 
