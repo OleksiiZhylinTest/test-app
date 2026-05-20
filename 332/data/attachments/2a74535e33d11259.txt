@@ -1,0 +1,16 @@
+INFO     app.cli:cli.py:71 Report generation started (project_type=SCRUM, estimation_type=StoryPoints)
+DEBUG    app.core.jira_client:jira_client.py:40 Using configured board ID: 1
+DEBUG    app.core.jira_client:jira_client.py:132 Fetching sprint data for board 1
+DEBUG    app.core.jira_client:jira_client.py:49 Fetching sprints for board 1 (limit=2)
+INFO     app.core.jira_client:jira_client.py:75 Fetched 2 sprint(s) (4 closed fetched, 1 active)
+DEBUG    app.core.jira_client:jira_client.py:76   Sprint names: ['Test Sprint 4', 'Test Sprint 3']
+DEBUG    app.core.jira_client:jira_client.py:110 Fetching issues for sprint 4 (board 1, jql='')
+DEBUG    app.core.jira_client:jira_client.py:121 Sprint 4: fetched 2 issue(s)
+DEBUG    app.core.jira_client:jira_client.py:110 Fetching issues for sprint 3 (board 1, jql='')
+DEBUG    app.core.jira_client:jira_client.py:121 Sprint 3: fetched 1 issue(s)
+INFO     app.core.jira_client:jira_client.py:145 Sprint data ready: 2 sprint(s), 3 total issue(s)
+DEBUG    app.core.schema:schema.py:126 Active schema: 'Default_Jira_Cloud' (17 fields)
+INFO     app.core.metrics:metrics.py:767 Computing metrics: 2 sprint(s)
+DEBUG    app.core.metrics:metrics.py:775 Velocity computed for 2 sprint(s); totals: ['Test Sprint 4=8.0', 'Test Sprint 3=3.0'] (estimation_type=StoryPoints)
+INFO     app.cli:cli.py:101 Metrics assembled: velocity=2 sprint(s), cycle_time_mean=0.0 days (n=0), AI trend=2 sprint(s), DAU response_count=0
+SUCCESS  app.cli:cli.py:152 Reports written in 0.0 s: generated/reports/_test_sprint_metrics/ai_adoption_metrics_report/ai_adoption_metrics_report_2026-05-20T11-12-36.html, generated/reports/_test_sprint_metrics/ai_adoption_metrics_report/ai_adoption_metrics_report_2026-05-20T11-12-36.md
