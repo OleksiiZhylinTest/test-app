@@ -1,6 +1,0 @@
-INFO     app.cli:cli.py:72 Report generation started (project_type=SCRUM, estimation_type=StoryPoints)
-DEBUG    app.core.schema:schema.py:127 Active schema: 'Default_Jira_Cloud' (17 fields)
-INFO     app.core.metrics:metrics.py:805 Computing metrics: 1 sprint(s)
-DEBUG    app.core.metrics:metrics.py:813 Velocity computed for 1 sprint(s); totals: ['Sprint 1=5.0'] (estimation_type=StoryPoints)
-INFO     app.cli:cli.py:102 Metrics assembled: velocity=1 sprint(s), cycle_time_mean=0.0 days (n=0), AI trend=1 sprint(s), DAU response_count=0
-SUCCESS  app.cli:cli.py:153 Reports written in 0.0 s: /tmp/pytest-of-runner/pytest-0/test_filter_metadata_in_html0/generated/reports/my_test_filter/my_test_filter_2026-05-20T22-09-38.html, /tmp/pytest-of-runner/pytest-0/test_filter_metadata_in_html0/generated/reports/my_test_filter/my_test_filter_2026-05-20T22-09-38.md
