@@ -77,15 +77,6 @@ if errorlevel 1 ( echo [ERROR] Failed to create tools\ & goto :ABORT )
 copy /Y "tools\fetch_ssl_cert.py" "%STAGING_DIR%\tools\" >nul
 if errorlevel 1 ( echo [ERROR] Failed to copy tools\fetch_ssl_cert.py & goto :ABORT )
 
-echo  Copying schema storage...
-if exist "docs\product\schemas" (
-    robocopy "docs\product\schemas" "%STAGING_DIR%\docs\product\schemas" /E /XD %ROBOCOPY_DIR_EXCLUDES% /XF %ROBOCOPY_FILE_EXCLUDES% /NFL /NDL /NJH /NJS >nul
-    if errorlevel 8 ( echo [ERROR] Failed to copy docs\product\schemas\ & goto :ABORT )
-) else (
-    mkdir "%STAGING_DIR%\docs\product\schemas"
-    if errorlevel 1 ( echo [ERROR] Failed to create docs\product\schemas\ & goto :ABORT )
-)
-
 echo  Preparing certs folder...
 mkdir "%STAGING_DIR%\certs"
 if errorlevel 1 ( echo [ERROR] Failed to create certs\ & goto :ABORT )
