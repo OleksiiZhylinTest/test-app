@@ -884,8 +884,10 @@
           <p class="form-helper">
             Edit the schema JSON directly. Required keys: <code>schema_name</code> (string),
             <code>fields</code> (object), <code>status_mapping.done_statuses</code> and
-            <code>status_mapping.in_progress_statuses</code> (arrays). Renaming
-            <code>schema_name</code> to match another existing schema overwrites that entry.
+            <code>status_mapping.in_progress_statuses</code> (arrays). Optional:
+            <code>status_mapping.excluded_statuses</code> (array) — issues in these statuses
+            (e.g. <code>"Cancelled"</code>) are excluded from all metric calculations.
+            Renaming <code>schema_name</code> to match another existing schema overwrites that entry.
           </p>
         </div>
 
