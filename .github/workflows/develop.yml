@@ -70,9 +70,8 @@ jobs:
           done
           cp .env.example "$STAGING/"
 
-          cd generated/releases
-          zip -r "${ZIP_NAME}.zip" "${ZIP_NAME}/"
-          rm -rf "${ZIP_NAME}/"
+          (cd "generated/releases/${ZIP_NAME}" && zip -r "../${ZIP_NAME}.zip" .)
+          rm -rf "generated/releases/${ZIP_NAME}/"
 
       - name: Delete existing snapshot release and tag
         env:

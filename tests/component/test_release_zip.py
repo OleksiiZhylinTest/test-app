@@ -50,10 +50,9 @@ def release_zip() -> Path:
 
 @pytest.fixture(scope="session")
 def zip_entries(release_zip: Path) -> set[str]:
-    """All paths inside the ZIP, stripped of the top-level directory prefix."""
-    top_dir = release_zip.stem + "/"  # e.g. "ai_adoption_manager_v1.0.0/"
+    """All paths inside the ZIP."""
     with zipfile.ZipFile(release_zip) as zf:
-        return {n[len(top_dir) :] for n in zf.namelist() if n != top_dir}
+        return set(zf.namelist())
 
 
 # ── Name format ────────────────────────────────────────────────────────────────
