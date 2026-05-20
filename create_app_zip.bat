@@ -12,11 +12,12 @@ set ROBOCOPY_DIR_EXCLUDES=__pycache__ .pytest_cache .mypy_cache .ruff_cache
 set ROBOCOPY_FILE_EXCLUDES=*.pyc *.pyo .DS_Store Thumbs.db *.log dau_report.json
 
 :: ============================================================
-:: GENERATE TIMESTAMP
+:: READ VERSION FROM pyproject.toml
 :: ============================================================
-for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'"`) do set TIMESTAMP=%%T
+for /f "usebackq delims=" %%V in (`python -c "import re,sys; m=re.search(r'version\s*=\s*\"([^\"]+)\"', open('pyproject.toml').read()); sys.stdout.write(m.group(1) if m else '0.0.0')"`) do set APP_VERSION=%%V
+if "%APP_VERSION%"=="" set APP_VERSION=0.0.0
 
-set ZIP_NAME=%APP_NAME%_%TIMESTAMP%
+set ZIP_NAME=%APP_NAME%_v%APP_VERSION%
 set STAGING_DIR=%RELEASES_DIR%\%ZIP_NAME%
 set ZIP_PATH=%RELEASES_DIR%\%ZIP_NAME%.zip
 
