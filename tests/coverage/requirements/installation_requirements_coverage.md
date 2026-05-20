@@ -3,29 +3,32 @@
 > Source document: [docs/product/requirements/installation_requirements.md](../../../docs/product/requirements/installation_requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
-**Total:** 37 | **✅ Covered:** 5 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 32 | **Functional:** 100%
+**Total:** 40 | **✅ Covered:** 24 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 16 | **Functional:** 100%
 
 
 #### Zip Contents
 
 | ID | Requirement | Status | Tests |
 |----|-------------|--------|-------|
-| IR-01 | app/ source code included in release zip | ⬜ | — |
-| IR-02 | templates/ Jinja2 HTML report template included | ⬜ | — |
-| IR-03 | ui/ browser UI files included | ⬜ | — |
-| IR-05 | certs/ placeholder folder with README.txt included | ⬜ | — |
-| IR-06 | main.py CLI entry point included | ⬜ | — |
-| IR-07 | server.py browser UI server entry point included | ⬜ | — |
-| IR-08 | requirements.txt included | ⬜ | — |
-| IR-09 | .env.example configuration template included | ⬜ | — |
-| IR-10 | project_setup.bat one-time setup script included | ⬜ | — |
-| IR-11 | start_app.bat Windows launcher included | ⬜ | — |
-| IR-12 | README.md quickstart guide included | ⬜ | — |
-| IR-13 | .venv/ NOT included in release zip | ⬜ | — |
-| IR-14 | generated/ NOT included in release zip | ⬜ | — |
-| IR-15 | requirements-dev.txt NOT included in release zip | ⬜ | — |
-| IR-16 | Test files NOT included in release zip | ⬜ | — |
-| IR-17 | .env NOT distributed in release zip | ⬜ | — |
+| IR-01 | app/ source code included in release zip | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[app/]` |
+| IR-02 | templates/ Jinja2 HTML report template included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[templates/]` |
+| IR-03 | ui/ browser UI files included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[ui/]` |
+| IR-04 | config/ Jira schema and filter presets included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[config/]` |
+| IR-05 | certs/ placeholder folder with README.txt included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[certs/]`, `component/test_release_zip.py::test_zip_contains_certs_readme` |
+| IR-06 | main.py CLI entry point included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[main.py]` |
+| IR-07 | server.py browser UI server entry point included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[server.py]` |
+| IR-08 | requirements.txt included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[requirements.txt]` |
+| IR-09 | .env.example configuration template included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[.env.example]` |
+| IR-10 | project_setup.bat one-time setup script included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[project_setup.bat]` |
+| IR-11 | start_app.bat Windows launcher included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[start_app.bat]` |
+| IR-12 | README.md quickstart guide included | ✅ | `component/test_release_zip.py::test_zip_contains_required_root_file[README.md]` |
+| IR-13 | .venv/ NOT included in release zip | ✅ | `component/test_release_zip.py::test_zip_excludes_venv` |
+| IR-14 | generated/ NOT included in release zip | ✅ | `component/test_release_zip.py::test_zip_excludes_generated` |
+| IR-15 | requirements-dev.txt NOT included in release zip | ✅ | `component/test_release_zip.py::test_zip_excludes_dev_requirements` |
+| IR-16 | Test files NOT included in release zip | ✅ | `component/test_release_zip.py::test_zip_excludes_tests` |
+| IR-17 | .env NOT distributed in release zip | ✅ | `component/test_release_zip.py::test_zip_excludes_dotenv` |
+| IR-39 | data/ DAU survey data files included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[data/]` |
+| IR-40 | tools/ utility scripts (fetch_ssl_cert.py) included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[tools/]`, `component/test_release_zip.py::test_zip_contains_fetch_ssl_cert` |
 
 #### Windows Installation
 
