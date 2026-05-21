@@ -82,8 +82,10 @@ on:
         default: false
 
 # Cancel superseded runs on the same branch to save runner minutes.
+# event_name prefix prevents push and pull_request runs on the same branch
+# (both resolve to the same branch name) from cancelling each other.
 concurrency:
-  group: ci-${{ github.head_ref || github.ref_name }}
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
