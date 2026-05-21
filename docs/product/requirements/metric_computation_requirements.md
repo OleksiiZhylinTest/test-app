@@ -34,6 +34,17 @@ Controls which issues `_is_done()` considers complete. Applies to velocity and A
 | MC-V-DS-005 | Schema-configured done statuses override built-in defaults | When a `done_statuses` frozenset is passed explicitly, only those statuses (and the `resolutiondate` fallback) determine completeness | ✓ Met | `test_is_done_with_custom_statuses` |
 | MC-V-DS-006 | Issues with missing or malformed status fields are not done | `_is_done({})`, `_is_done({"fields": {}})`, and `_is_done({"fields": {"status": {}}})` all return `False` without raising an exception | ✓ Met | `test_is_done_missing_fields` |
 
+### 1b. Excluded Statuses
+
+Issues whose status matches an entry in `excluded_statuses` (schema `status_mapping.excluded_statuses`) are silently dropped from **all** metric calculations before any done-status check.
+
+| ID | Requirement | Acceptance Criterion | Status | Tests |
+|----|-------------|----------------------|--------|-------|
+| MC-V-ES-001 | User-configured `excluded_statuses` in schema removes issues from all metric calculations | A `Cancelled` issue with story points does not contribute to velocity, AI trend numerator, or AI trend denominator when `excluded_statuses=["Cancelled"]` | ✓ Met | `test_compute_velocity_excluded_statuses`, `test_ai_trend_excluded_statuses` |
+| MC-V-ES-002 | Excluded check has priority over `resolutiondate` fallback | A `Cancelled` issue that also has a `resolutiondate` is still excluded (`_is_excluded` returns `True` and the issue is skipped before `_is_done` is evaluated) | ✓ Met | `test_is_excluded_resolutiondate_does_not_override`, `test_compute_velocity_excluded_statuses`, `test_ai_trend_excluded_statuses` |
+| MC-V-ES-003 | Excluded status matching is case-insensitive | `_is_excluded` returns `True` for `"cancelled"`, `"CANCELLED"`, and `"Cancelled"` when the excluded set contains `"cancelled"` | ✓ Met | `test_is_excluded` |
+| MC-V-ES-004 | Empty or absent `excluded_statuses` is backward-compatible | When `excluded_statuses` is `None`, `frozenset()`, or absent from the schema, no issues are excluded and velocity results are identical to pre-feature behaviour | ✓ Met | `test_is_excluded`, `test_compute_velocity_no_excluded_statuses_backward_compat`, `test_post_schema_accepts_absent_excluded_statuses` |
+
 ---
 
 ## 2. Story Points Extraction

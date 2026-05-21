@@ -73,6 +73,7 @@ _DEFAULT_SCHEMA: dict[str, Any] = {
     "status_mapping": {
         "done_statuses": ["Done", "Closed", "Resolved", "Complete"],
         "in_progress_statuses": ["In Progress"],
+        "excluded_statuses": ["Cancelled"],
     },
 }
 
@@ -109,6 +110,9 @@ def get_schema(name: str, path: Path | None = None) -> dict[str, Any] | None:
     """Find a schema by name. Returns None if not found."""
     for s in load_schemas(path):
         if s.get("schema_name") == name:
+            sm = s.get("status_mapping")
+            if isinstance(sm, dict) and "excluded_statuses" not in sm:
+                s = {**s, "status_mapping": {**sm, "excluded_statuses": ["Cancelled"]}}
             return s
     return None
 
@@ -196,6 +200,17 @@ def get_in_progress_statuses(schema: dict[str, Any]) -> list[str]:
     """Return in-progress status names from the schema's status_mapping."""
     mapping = schema.get("status_mapping") or {}
     return list(mapping.get("in_progress_statuses") or ["In Progress"])
+
+
+def get_excluded_statuses(schema: dict[str, Any]) -> list[str]:
+    """Return statuses excluded from all metric calculations (e.g. Cancelled, Withdrawn).
+
+    Issues with these statuses are silently dropped before any done-status check,
+    so a resolutiondate on an excluded issue does not make it count as done.
+    Returns an empty list when the key is absent (backward-compatible default).
+    """
+    mapping = schema.get("status_mapping") or {}
+    return list(mapping.get("excluded_statuses") or [])
 
 
 # Well-known Jira custom field schema identifiers used for auto-detection

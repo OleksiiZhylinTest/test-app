@@ -13,6 +13,26 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_DONE = frozenset(("done", "closed", "resolved", "complete"))
 _DEFAULT_IN_PROGRESS = frozenset(("in progress",))
+_DEFAULT_EXCLUDED: frozenset[str] = frozenset()
+
+
+def _is_excluded(
+    issue: dict[str, Any],
+    excluded_statuses: frozenset[str] | None = None,
+) -> bool:
+    """True if the issue's status is in the excluded set.
+
+    Excluded issues are dropped from all metric calculations before any
+    done-status check, so a resolutiondate on an excluded issue does not
+    make it count as done (e.g. a Cancelled ticket that was resolved).
+    Returns False when excluded_statuses is None or empty (default).
+    """
+    statuses = excluded_statuses if excluded_statuses is not None else _DEFAULT_EXCLUDED
+    if not statuses:
+        return False
+    fields = issue.get("fields") or {}
+    name = ((fields.get("status") or {}).get("name") or "").lower()
+    return name in statuses
 
 
 def _parse_iso(s: str | None) -> datetime | None:
@@ -219,6 +239,7 @@ def compute_velocity(
     sprint_issues: dict[int | str, list[dict[str, Any]]],
     story_points_field: str | None = None,
     done_statuses: frozenset[str] | None = None,
+    excluded_statuses: frozenset[str] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Velocity per sprint: sum of story points for completed issues.
@@ -233,6 +254,8 @@ def compute_velocity(
         points = 0.0
         count = 0
         for iss in issues:
+            if _is_excluded(iss, excluded_statuses):
+                continue
             if _is_done(iss, done_statuses):
                 points += _get_story_points(iss, story_points_field)
                 count += 1
@@ -287,6 +310,7 @@ def compute_ai_assistance_trend(
     story_points_field: str | None = None,
     done_statuses: frozenset[str] | None = None,
     estimation_type: str | None = None,
+    excluded_statuses: frozenset[str] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Per-sprint AI assistance percentage.
@@ -320,6 +344,8 @@ def compute_ai_assistance_trend(
         total_sp = 0.0
         ai_sp = 0.0
         for iss in issues:
+            if _is_excluded(iss, excluded_statuses):
+                continue
             if not _is_done(iss, done_statuses):
                 continue
             labels = _get_labels(iss)
@@ -351,6 +377,7 @@ def compute_ai_usage_details(
     ai_tool_labels: list[str] | None = None,
     ai_action_labels: list[str] | None = None,
     done_statuses: frozenset[str] | None = None,
+    excluded_statuses: frozenset[str] | None = None,
 ) -> dict[str, Any]:
     """
     Aggregate AI tool and use-case breakdown across all done AI-assisted issues.
@@ -374,6 +401,8 @@ def compute_ai_usage_details(
             continue
         for iss in sprint_issues.get(sid) or []:
             key = iss.get("key") or ""
+            if _is_excluded(iss, excluded_statuses):
+                continue
             if not _is_done(iss, done_statuses) or key in seen_keys:
                 continue
             labels = _get_labels(iss)
@@ -412,6 +441,7 @@ def compute_sprint_issue_details(
     ai_action_labels: list[str] | None = None,
     story_points_field: str | None = None,
     done_statuses: frozenset[str] | None = None,
+    excluded_statuses: frozenset[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Per-sprint list of done issues with key, summary, points, status, labels, and AI flags.
 
@@ -450,6 +480,8 @@ def compute_sprint_issue_details(
         issues = sprint_issues.get(sid) or []
         issue_rows = []
         for iss in issues:
+            if _is_excluded(iss, excluded_statuses):
+                continue
             if not _is_done(iss, done_statuses):
                 continue
             fields = iss.get("fields") or {}
@@ -628,6 +660,7 @@ def get_done_issue_keys_for_changelog(
     sprint_issues: dict[int | str, list[dict[str, Any]]],
     max_count: int = 100,
     done_statuses: frozenset[str] | None = None,
+    excluded_statuses: frozenset[str] | None = None,
 ) -> list[str]:
     """Return up to *max_count* done-issue keys, most recent sprint first.
 
@@ -642,6 +675,8 @@ def get_done_issue_keys_for_changelog(
             continue
         end_date = sprint.get("endDate") or ""
         for iss in sprint_issues.get(sid) or []:
+            if _is_excluded(iss, excluded_statuses):
+                continue
             if not _is_done(iss, done_statuses):
                 continue
             key = iss.get("key") or ""
@@ -739,10 +774,11 @@ def compute_cycle_time(
 
 def _resolve_schema_params(
     schema: dict[str, Any] | None,
-) -> tuple[str | None, str | None, frozenset[str] | None, frozenset[str] | None]:
-    """Extract story_points_field, sprint_field, done_statuses, in_progress_statuses from a schema dict."""
+) -> tuple[str | None, str | None, frozenset[str] | None, frozenset[str] | None, frozenset[str] | None]:
+    """Extract story_points_field, sprint_field, done_statuses, in_progress_statuses,
+    excluded_statuses from a schema dict."""
     if schema is None:
-        return None, None, None, None
+        return None, None, None, None, None
 
     from app.core import schema as schema_mod
 
@@ -750,9 +786,11 @@ def _resolve_schema_params(
     sprint_field = schema_mod.get_field_id(schema, "sprint")
     done = schema_mod.get_done_statuses(schema)
     ip = schema_mod.get_in_progress_statuses(schema)
+    excluded = schema_mod.get_excluded_statuses(schema)
     done_fs = frozenset(s.lower() for s in done) if done else None
     ip_fs = frozenset(s.lower() for s in ip) if ip else None
-    return sp_field, sprint_field, done_fs, ip_fs
+    excluded_fs = frozenset(s.lower() for s in excluded) if excluded else None
+    return sp_field, sprint_field, done_fs, ip_fs, excluded_fs
 
 
 def build_metrics_dict(
@@ -762,11 +800,11 @@ def build_metrics_dict(
     issues_with_changelog: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build the single metrics dict used by both HTML and MD reporters."""
-    sp_field, sprint_field, done_fs, ip_fs = _resolve_schema_params(schema)
+    sp_field, sprint_field, done_fs, ip_fs, excluded_fs = _resolve_schema_params(schema)
     sprint_issues = deduplicate_sprint_issues(sprints, sprint_issues, sprint_field)
     logger.info("Computing metrics: %s sprint(s)", len(sprints))
 
-    velocity = compute_velocity(sprints, sprint_issues, sp_field, done_fs)
+    velocity = compute_velocity(sprints, sprint_issues, sp_field, done_fs, excluded_statuses=excluded_fs)
 
     estimation_type = config.ESTIMATION_TYPE
     if estimation_type == "JiraTickets":
@@ -785,17 +823,20 @@ def build_metrics_dict(
         story_points_field=sp_field,
         done_statuses=done_fs,
         estimation_type=estimation_type,
+        excluded_statuses=excluded_fs,
     )
     ai_usage = compute_ai_usage_details(
         sprints,
         sprint_issues,
         done_statuses=done_fs,
+        excluded_statuses=excluded_fs,
     )
     sprint_issue_details = compute_sprint_issue_details(
         sprints,
         sprint_issues,
         story_points_field=sp_field,
         done_statuses=done_fs,
+        excluded_statuses=excluded_fs,
     )
     cycle_time = compute_cycle_time(issues_with_changelog or [], done_fs, ip_fs)
     dau = compute_dau_metrics(config.DAU_NORMALIZED_DIR)
