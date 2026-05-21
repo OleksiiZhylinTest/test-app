@@ -102,7 +102,7 @@
         "in_progress_statuses": [
           "In Progress"
         ],
-        "excluded_statuses": []
+        "excluded_statuses": ["Cancelled"]
       }
     },
     {
@@ -207,7 +207,7 @@
         "in_progress_statuses": [
           "In Progress"
         ],
-        "excluded_statuses": []
+        "excluded_statuses": ["Cancelled"]
       }
     },
     {
@@ -312,7 +312,7 @@
         "in_progress_statuses": [
           "In Progress"
         ],
-        "excluded_statuses": []
+        "excluded_statuses": ["Cancelled"]
       }
     }
   ]

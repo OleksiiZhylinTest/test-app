@@ -111,7 +111,7 @@ def get_schema(name: str, path: Path | None = None) -> dict[str, Any] | None:
     for s in load_schemas(path):
         if s.get("schema_name") == name:
             sm = s.get("status_mapping")
-            if isinstance(sm, dict) and "excluded_statuses" not in sm:
+            if isinstance(sm, dict) and not sm.get("excluded_statuses"):
                 s = {**s, "status_mapping": {**sm, "excluded_statuses": ["Cancelled"]}}
             return s
     return None
