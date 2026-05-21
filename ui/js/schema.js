@@ -19,7 +19,7 @@ const TEMPLATE_SCHEMA = {
   status_mapping: {
     done_statuses:        ['Done', 'Closed', 'Resolved', 'Complete'],
     in_progress_statuses: ['In Progress'],
-    excluded_statuses:    [],
+    excluded_statuses:    ['Cancelled'],
   },
 };
 

@@ -503,6 +503,23 @@ if exist "requirements-dev.txt" (
 :: SECTION 7 - .GITIGNORE SAFETY CHECK
 :AFTER_DEPS
 :: ============================================================
+:: SECTION - INITIALISE USER DATA DIRECTORY
+:: Creates %LOCALAPPDATA%\AIMetrics directory tree and runs first-run migration
+:: so user-owned config/data lives outside the app folder from the first launch.
+:: ============================================================
+if exist "%VENV_DIR%\Scripts\python.exe" (
+    call :LOG "[INFO]" "Initialising user data directory..."
+    "%VENV_DIR%\Scripts\python.exe" -c "from app.core.user_data import ensure_user_data_dirs; from app.core.migration import run_first_time_migration; ensure_user_data_dirs(); run_first_time_migration()"
+    if !errorlevel! neq 0 (
+        call :LOG "[WARNING]" "User data directory initialisation returned a non-zero exit code. The app will retry on first launch."
+    ) else (
+        call :LOG "[SUCCESS]" "User data directory ready."
+    )
+) else (
+    call :LOG "[WARNING]" "Virtual environment not found — skipping user data directory initialisation."
+)
+
+:: ============================================================
 if exist ".gitignore" (
     findstr /i /c:".venv" .gitignore >nul 2>&1
     if !errorlevel! neq 0 (

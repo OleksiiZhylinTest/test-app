@@ -88,7 +88,7 @@ if errorlevel 1 ( echo [ERROR] Failed to create certs\README.txt & goto :ABORT )
 :: ============================================================
 echo  Copying configuration and scripts...
 
-for %%F in (main.py server.py requirements.txt .env.example start_app.bat project_setup.bat README.md) do (
+for %%F in (main.py server.py requirements.txt pyproject.toml .env.example start_app.bat project_setup.bat README.md) do (
     copy /Y "%%F" "%STAGING_DIR%\" >nul
     if errorlevel 1 (
         echo [ERROR] Failed to copy %%F
