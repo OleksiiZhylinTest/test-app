@@ -1,1 +1,0 @@
-DEBUG    app.core.schema:schema.py:131 Active schema: 'Custom' (1 fields)
