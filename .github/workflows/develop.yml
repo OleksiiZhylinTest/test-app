@@ -53,7 +53,6 @@ jobs:
             --exclude='.pytest_cache' --exclude='.mypy_cache' --exclude='.ruff_cache' \
             --exclude='*.log' --exclude='dau_report.json' \
             app/ "$STAGING/app/"
-          rsync -a templates/ "$STAGING/templates/"
           rsync -a ui/ "$STAGING/ui/"
           rsync -a config/ "$STAGING/config/"
           rsync -a data/ "$STAGING/data/"

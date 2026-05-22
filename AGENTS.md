@@ -31,13 +31,13 @@ Go directly to the source of truth — do not rely on summaries in other files:
 | `app/core/jira_client.py` | Jira REST wrapper; `fetch_sprint_data()` → `(sprints, sprint_issues)` |
 | `app/core/metrics.py` | Pure metric functions; `build_metrics_dict()` → dict consumed by reporters |
 | `app/core/schema.py` | Jira field schema registry backed by `config/jira_schema.json` |
-| `app/reporters/report_html.py` | Renders `templates/report.html.j2` via Jinja2 |
+| `app/reporters/report_html.py` | Renders `ui/templates/report.html.j2` via Jinja2 |
 | `app/reporters/report_md.py` | Builds Markdown report string and writes to disk |
 | `app/utils/logging_setup.py` | `setup_logging()` → `(root_logger, log_file_path)`; custom SUCCESS level |
 | `app/utils/cert_utils.py` | PEM certificate validation via `cryptography` library |
 | `config/jira_schema.json` | Jira field/status definitions per instance (source-controlled) |
 | `config/jira_filters.json` | Named JQL filter presets (source-controlled) |
-| `templates/report.html.j2` | Jinja2 HTML report template |
+| `ui/templates/report.html.j2` | Jinja2 HTML report template |
 | `tests/conftest.py` | Shared factories: `make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels` |
 | `tests/tools/test_coverage.py` | Regenerates `tests/coverage/test_coverage.md`; run after adding/removing tests |
 

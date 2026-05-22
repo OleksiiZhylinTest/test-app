@@ -11,7 +11,7 @@
 | ID | Requirement | Status | Tests |
 |----|-------------|--------|-------|
 | IR-01 | app/ source code included in release zip | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[app/]` |
-| IR-02 | templates/ Jinja2 HTML report template included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[templates/]` |
+| IR-02 | ui/templates/ Jinja2 HTML report template included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[ui/templates/]` |
 | IR-03 | ui/ browser UI files included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[ui/]` |
 | IR-04 | config/ Jira schema and filter presets included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[config/]` |
 | IR-05 | certs/ placeholder folder with README.txt included | ✅ | `component/test_release_zip.py::test_zip_contains_required_folder[certs/]`, `component/test_release_zip.py::test_zip_contains_certs_readme` |

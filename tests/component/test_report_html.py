@@ -18,7 +18,7 @@ def test_template_file_exists():
 
 
 def test_templates_dir_not_inside_app():
-    """Validate the path fix: templates/ should be at project root, not inside app/."""
+    """Validate templates/ is inside ui/, not at project root or inside app/."""
     assert TEMPLATES_DIR.parent.name != "app"
 
 

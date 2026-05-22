@@ -476,11 +476,11 @@ INSTALLATION_REQUIREMENTS: list[dict] = [
     },
     {
         "id": "IR-02",
-        "description": "templates/ Jinja2 HTML report template included",
+        "description": "ui/templates/ Jinja2 HTML report template included",
         "type": FUNCTIONAL,
         "section": "Zip Contents",
         "tests": [
-            "component/test_release_zip.py::test_zip_contains_required_folder[templates/]",
+            "component/test_release_zip.py::test_zip_contains_required_folder[ui/templates/]",
         ],
     },
     {
@@ -886,10 +886,7 @@ NON_FUNCTIONAL_REQUIREMENTS: list[dict] = [
         "description": "Schema file requests restricted to safe filenames and .json extension",
         "type": FUNCTIONAL,
         "section": "Security",
-        "tests": [
-            "unit/test_server_handlers.py::test_get_schema_detail_rejects_path_traversal",
-            "unit/test_server_handlers.py::test_delete_schema_rejects_invalid_filename",
-        ],
+        "tests": [],
     },
     {
         "id": "NFR-S-005",

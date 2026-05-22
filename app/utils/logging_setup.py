@@ -39,12 +39,11 @@ def _success(self: logging.Logger, message: str, *args: object, **kwargs: object
 logging.Logger.success = _success  # type: ignore[attr-defined]
 
 # ---------------------------------------------------------------------------
-# Env loading (defaults.env then .env; never override values already set)
+# Env loading (defaults.env then user_data_dir .env; never override values already set)
 # ---------------------------------------------------------------------------
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 _DEFAULTS_PATH = _PROJECT_ROOT / "config" / "defaults.env"
-_LEGACY_ENV_PATH = _PROJECT_ROOT / ".env"
 
 # When running under the test profile, default to DEBUG before defaults.env injects INFO.
 # An explicit LOG_LEVEL in the caller's environment (e.g. CI) still takes precedence.
@@ -53,7 +52,6 @@ if os.environ.get("APP_PROFILE", "").strip().lower() == "test" and "LOG_LEVEL" n
 
 for _k, _v in {
     **_dotenv_values(_DEFAULTS_PATH),
-    **_dotenv_values(_LEGACY_ENV_PATH),
     **_dotenv_values(_udd() / ".env"),
 }.items():
     if _k not in os.environ and _v is not None:

@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from urllib.parse import unquote as urlunquote
 
-from ._base import _root
+from ._base import _root, _user_data_dir
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,10 @@ class DauHandlerMixin:
             if entry.get("slug") == filter_slug:
                 dau_path = (entry.get("params") or {}).get("DAU_PATH", "").strip()
                 if dau_path:
-                    return (_root() / dau_path).resolve()
+                    p = Path(dau_path)
+                    if not p.is_absolute():
+                        p = _user_data_dir() / p
+                    return p.resolve()
         return None
 
     @staticmethod

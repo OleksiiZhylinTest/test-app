@@ -40,7 +40,7 @@ Full Sprint and Issue dict shapes: `docs/development/architecture.md`.
 1. Add `compute_<name>(sprints, sprint_issues) -> list[dict]` to `app/core/metrics.py`; each dict must include `sprint_id` and `sprint_name`. Accept optional schema-driven parameters if the metric depends on configurable field IDs or status names.
 2. Call it in `build_metrics_dict()` and add result to the returned dict.
 3. Add rendering in `app/reporters/report_md.py` (new section after `cycle_time`).
-4. Add rendering in `templates/report.html.j2`.
+4. Add rendering in `ui/templates/report.html.j2`.
 5. Add `tests/unit/test_<name>.py` using `make_sprint()` and `make_issue()` or `make_issue_with_labels()` factories.
 
 **Note:** `ai_assistance_trend` and `ai_usage_details` are already in `metrics_dict` but **not yet rendered** in the Markdown report. See `docs/product/metrics/ai_assistance_trend.md` for the exact code snippet.

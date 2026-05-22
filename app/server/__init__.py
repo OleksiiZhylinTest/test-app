@@ -19,14 +19,13 @@ from pathlib import Path
 from dotenv import dotenv_values as _dotenv_values
 from dotenv import dotenv_values as dotenv_values
 
-# Merge defaults (committed) → legacy app-root .env → user_data_dir .env (wins).
+# Merge defaults (committed) → user_data_dir .env (wins).
 # MUST run before importing ._base so HOST/PORT are populated when _base reads os.environ.
 from app.core.user_data import user_data_dir as _udd_fn
 
 _srv_root = Path(__file__).resolve().parent.parent.parent
 for _k, _v in {
     **_dotenv_values(_srv_root / "config" / "defaults.env"),
-    **_dotenv_values(_srv_root / ".env"),
     **_dotenv_values(_udd_fn() / ".env"),
 }.items():
     if _k not in _os.environ and _v is not None:

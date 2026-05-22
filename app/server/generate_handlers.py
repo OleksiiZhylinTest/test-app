@@ -38,8 +38,7 @@ class GenerateHandlerMixin:
             fresh_env = {
                 **os.environ,
                 **_dotenv_values(root / "config" / "defaults.env"),
-                **_dotenv_values(root / ".env"),  # legacy app-root .env
-                **_dotenv_values(_user_data_dir() / ".env"),  # user_data_dir .env wins
+                **_dotenv_values(_user_data_dir() / ".env"),
             }
 
             qs = parse_qs(urlparse(self.path).query)

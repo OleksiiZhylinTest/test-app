@@ -28,9 +28,9 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 USER_DATA_DIR = _udd()
 HOST = os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1"
 try:
-    PORT = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("PORT", 8080))
+    PORT = int(sys.argv[1]) if len(sys.argv) > 1 else config.SERVER_PORT
 except (ValueError, TypeError):
-    PORT = int(os.environ.get("PORT", 8080))
+    PORT = config.SERVER_PORT
 
 MIME = {
     "html": "text/html; charset=utf-8",
@@ -162,8 +162,7 @@ class HandlerBase(BaseHTTPRequestHandler):
             return None
 
     def _read_env_credentials(self) -> tuple[str, str, str]:
-        # Prefer user_data_dir .env; fall back to legacy app-root .env (pre-migration)
-        values = {**dotenv_values(_root() / ".env"), **dotenv_values(_user_data_dir() / ".env")}
+        values = dotenv_values(_user_data_dir() / ".env")
         return (
             str(values.get("JIRA_URL", "")).rstrip("/"),
             str(values.get("JIRA_EMAIL", "")),
@@ -220,9 +219,6 @@ class HandlerBase(BaseHTTPRequestHandler):
             self._handle_dau_roster_get()
         elif path == "/api/data-preview":
             self._handle_data_preview()
-        elif path.startswith("/api/schema-detail/"):
-            filename = path[len("/api/schema-detail/") :]
-            self._handle_get_schema_detail(filename)
         elif path.startswith("/generated/reports/"):
             target = self._resolve_report_path(path)
             if target is None:
@@ -268,15 +264,15 @@ class HandlerBase(BaseHTTPRequestHandler):
         elif path == "/api/dau/roster":
             self._handle_dau_roster_post()
         else:
+            length = int(self.headers.get("Content-Length", 0))
+            if length > 0:
+                self.rfile.read(length)
             self._send_json(404, {"ok": False, "error": "Not found"})
 
     def do_DELETE(self) -> None:
         path = self.path.split("?")[0]
 
-        if path.startswith("/api/schemas/"):
-            filename = path[len("/api/schemas/") :]
-            self._handle_delete_schema(filename)
-        elif path == "/api/schemas":
+        if path == "/api/schemas":
             self._handle_delete_schema()
         elif path.startswith("/api/filters/"):
             slug = urlunquote(path[len("/api/filters/") :])

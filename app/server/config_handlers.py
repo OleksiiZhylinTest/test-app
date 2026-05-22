@@ -42,9 +42,8 @@ class ConfigHandlerMixin:
         """Return current config values; JIRA_API_TOKEN is masked as '***'."""
         defaults_path = _root() / "config" / "defaults.env"
 
-        # Merge: defaults → legacy app-root .env → user_data_dir .env (wins)
+        # Merge: defaults → user_data_dir .env (wins)
         raw_config = _read_env_file(defaults_path)
-        raw_config.update(_read_env_file(_root() / ".env"))
         raw_config.update(_read_env_file(_user_data_dir() / ".env"))
 
         out: dict[str, str] = {}

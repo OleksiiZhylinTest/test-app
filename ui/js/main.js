@@ -37,7 +37,7 @@ try {
     .then((r) => r.json())
     .then((data) => {
       if (data.ok && data.version) {
-        document.getElementById('app-version').textContent = 'v' + data.version;
+        document.getElementById('app-version').textContent = 'App version ' + data.version;
       }
     })
     .catch(() => {});

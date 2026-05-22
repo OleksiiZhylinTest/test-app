@@ -3,7 +3,7 @@
 > Source document: [docs/product/requirements/app_non_functional_requirements.md](../../../docs/product/requirements/app_non_functional_requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
-**Total:** 32 | **✅ Covered:** 22 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 10 | **Functional:** 100%
+**Total:** 32 | **✅ Covered:** 21 | **🔶 Partial:** 0 | **❌ Gap:** 1 | **⬜ N/T:** 10 | **Functional:** 95%
 
 
 #### Performance
@@ -23,7 +23,7 @@
 | NFR-S-001 | API token always returned as *** in GET /api/config responses | ✅ | `test_server_config.py::TestGetConfig::test_token_always_masked_as_stars` |
 | NFR-S-002 | Path traversal on /generated/reports/ rejected with HTTP 404 | ✅ | `unit/test_server_handlers.py::test_resolve_report_path_rejects_path_traversal` |
 | NFR-S-003 | HTTP server binds exclusively to 127.0.0.1 by default | ✅ | `unit/test_server_handlers.py::test_run_defaults_host_to_loopback` |
-| NFR-S-004 | Schema file requests restricted to safe filenames and .json extension | ✅ | `unit/test_server_handlers.py::test_get_schema_detail_rejects_path_traversal`, `unit/test_server_handlers.py::test_delete_schema_rejects_invalid_filename` |
+| NFR-S-004 | Schema file requests restricted to safe filenames and .json extension | ❌ | — |
 | NFR-S-005 | .env and .env.backup-* listed in .gitignore, never committed | ⬜ | — |
 | NFR-S-006 | Credentials not included in exception messages, CLI stderr, or SSE events | ✅ | `unit/test_jira_client.py::test_sanitise_error_replaces_url`, `unit/test_jira_client.py::test_sanitise_error_replaces_email_and_token`, `unit/test_jira_client.py::test_sanitise_error_handles_none_config_values` |
 

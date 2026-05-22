@@ -24,8 +24,7 @@ The release package is named `ai_adoption_manager_v<version>.zip` (e.g. `ai_adop
 |------|-------------|
 | `app/` | Application source code |
 | `config/` | Jira field schema and named JQL filter presets (`jira_schema.json`, `jira_filters.json`, etc.) |
-| `data/` | DAU survey data files |
-| `templates/` | Jinja2 HTML report template |
+| `ui/templates/` | Jinja2 HTML report template |
 | `tools/` | Utility scripts for end users (`fetch_ssl_cert.py`) |
 | `ui/` | Browser UI files |
 | `certs/` | Placeholder folder for optional SSL certificate; contains `README.txt` |
@@ -42,6 +41,7 @@ The release package is named `ai_adoption_manager_v<version>.zip` (e.g. `ai_adop
 | Item | Reason |
 |------|--------|
 | `.venv/` | Created locally by `project_setup.bat` or manually |
+| `data/` | Created on first run by `project_setup.bat` in the user data directory |
 | `generated/` | Created at runtime (reports, filters, logs) |
 | `requirements-dev.txt` | Developer-only; not needed to run the app |
 | Test files | Developer-only |
