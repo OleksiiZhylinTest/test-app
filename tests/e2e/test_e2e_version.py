@@ -21,8 +21,8 @@ from tests.e2e.conftest import _goto
 
 pytestmark = pytest.mark.e2e
 
-_EXPECTED_VERSION = f"v{_app.__version__}"
-_VERSION_RE = re.compile(r"^v\d+\.\d+\.\d+")
+_EXPECTED_VERSION = f"App version {_app.__version__}"
+_VERSION_RE = re.compile(r"^App version \d+\.\d+\.\d+")
 
 
 # ---------------------------------------------------------------------------

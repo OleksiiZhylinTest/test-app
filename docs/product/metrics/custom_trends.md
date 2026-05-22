@@ -157,7 +157,7 @@ def compute_custom_trends(
    called by `build_metrics_dict()` by default.
 3. Both reporters already handle non-empty `custom_trends` automatically:
    - `app/reporters/report_md.py` renders a Markdown table.
-   - `templates/report.html.j2` renders an HTML table.
+   - `ui/templates/report.html.j2` renders an HTML table.
 4. Add a test file at `tests/unit/test_custom_trends.py`.
 5. Run `python tests/tools/test_coverage.py` to update `tests/coverage/test_coverage.md`.
 

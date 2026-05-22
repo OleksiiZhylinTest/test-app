@@ -7,7 +7,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 DEFAULT_OUTPUT = Path(__file__).resolve().parent.parent.parent / "report.html"
-TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "templates"
+TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "ui" / "templates"
 
 
 _SECTION_KEYS = [

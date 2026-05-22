@@ -5,8 +5,8 @@ Run once before first use — or whenever the Jira TLS certificate changes:
 
     python tools/fetch_ssl_cert.py
 
-The certificate is saved to certs/jira_ca_bundle.pem and is picked up
-automatically by the Jira API client (via JIRA_SSL_CERT in app/config.py).
+The certificate is saved to %LOCALAPPDATA%\\AIMetrics\\certs\\jira_ca_bundle.pem and
+is picked up automatically by the Jira API client (via JIRA_SSL_CERT in app/config.py).
 """
 
 import os
@@ -19,6 +19,10 @@ from urllib.parse import urlparse
 import certifi
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from app.core.user_data import user_data_dir  # noqa: E402
 
 
 def _get_windows_ca_certs() -> list[str]:
@@ -72,10 +76,11 @@ def _fetch_cert_chain(host: str, port: int) -> str:
 def fetch_and_save_cert(jira_url: str, root: Path | None = None) -> str:
     """Fetch the TLS certificate for *jira_url* and write it to ``<root>/certs/jira_ca_bundle.pem``.
 
+    *root* defaults to the user data directory (``%LOCALAPPDATA%/AIMetrics`` on Windows).
     Returns the path to the written PEM file.
     Raises ``SystemExit`` on any error (missing URL, unparseable host, SSL/OS failure).
     """
-    root = root or ROOT
+    root = root or user_data_dir()
 
     if not jira_url:
         print(

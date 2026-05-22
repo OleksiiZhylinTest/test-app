@@ -3,7 +3,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 #
 # STAGES:
-#   smoke-tests       → cross-layer @pytest.mark.smoke (~1-2 min) — ALWAYS-ON on push/PR
+#   smoke-tests       → cross-layer @pytest.mark.smoke (~1-2 min) — opt-in via ENABLE_SMOKE
 #   sanity-tests     → cross-layer "smoke or sanity" (~5-10 min) — opt-in via ENABLE_SANITY
 #   unit-tests        → pure functions, no I/O
 #   component-tests   → filesystem / HTTP, no cross-module orchestration
@@ -15,6 +15,7 @@
 # HOW TO ENABLE A STAGE:
 #   Automatic (push / PR):  GitHub → Settings → Variables → Actions
 #                           Set variable to the string  true
+#       ENABLE_SMOKE             smoke-tests
 #       ENABLE_SANITY            sanity-tests
 #       ENABLE_UNIT              unit-tests
 #       ENABLE_COMPONENT         component-tests
@@ -117,16 +118,20 @@ jobs:
       - name: Check formatting
         run: ruff format --check app/ tests/
 
-  # ── Smoke Tests (always-on, cross-layer) ────────────────────────────────────
+  # ── Smoke Tests (opt-in, cross-layer) ──────────────────────────────────────
   # Runs the curated `@pytest.mark.smoke` set across all layers (~1-2 min).
-  # Fast feedback on every push and PR. No opt-in variable.
+  # Gated by ENABLE_SMOKE repo variable (or workflow_dispatch input).
   smoke-tests:
     name: Smoke Tests
     runs-on: ubuntu-latest
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.run_smoke) ||
-      github.event_name == 'pull_request' ||
-      github.event_name == 'push'
+      (github.event_name == 'pull_request' &&
+       vars.ENABLE_SMOKE == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) ||
+      (github.event_name == 'push' &&
+       vars.ENABLE_SMOKE == 'true' &&
+       (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v6
 

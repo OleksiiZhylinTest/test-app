@@ -13,15 +13,12 @@ _logger = logging.getLogger(__name__)
 
 _PROJECT_APP_ROOT = Path(__file__).resolve().parent.parent.parent
 
-# Merge defaults (committed) → legacy app-root .env → user_data_dir .env (wins).
-# The legacy path ensures the app works on the very first run before migration runs.
-# Both yield to values already present in os.environ (e.g. set by tests or CI).
+# Merge defaults (committed) → user_data_dir .env (wins).
+# Yields to values already present in os.environ (e.g. set by tests or CI).
 _defaults_path = _PROJECT_APP_ROOT / "config" / "defaults.env"
-_legacy_env_path = _PROJECT_APP_ROOT / ".env"
 _env_path = _udd() / ".env"
 for _k, _v in {
     **_dotenv_values(_defaults_path),
-    **_dotenv_values(_legacy_env_path),
     **_dotenv_values(_env_path),
 }.items():
     if _k not in os.environ and _v is not None:
@@ -158,6 +155,9 @@ METRIC_AI_ASSISTANCE_TREND: bool = _env_bool("METRIC_AI_ASSISTANCE_TREND")
 METRIC_AI_USAGE_DETAILS: bool = _env_bool("METRIC_AI_USAGE_DETAILS")
 METRIC_DAU: bool = _env_bool("METRIC_DAU")
 METRIC_DAU_TREND: bool = _env_bool("METRIC_DAU_TREND")
+
+_port_raw = os.getenv("PORT", "8080").strip()
+SERVER_PORT: int = int(_port_raw) if _port_raw.isdigit() else 8080
 
 
 def validate_config() -> list[str]:

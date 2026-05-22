@@ -110,10 +110,8 @@ jobs:
             --exclude='.pytest_cache' --exclude='.mypy_cache' --exclude='.ruff_cache' \
             --exclude='*.log' --exclude='dau_report.json' \
             app/ "$STAGING/app/"
-          rsync -a templates/ "$STAGING/templates/"
           rsync -a ui/ "$STAGING/ui/"
           rsync -a config/ "$STAGING/config/"
-          rsync -a data/ "$STAGING/data/"
 
           mkdir -p "$STAGING/tools"
           cp tools/fetch_ssl_cert.py "$STAGING/tools/"
@@ -121,7 +119,7 @@ jobs:
           echo "Place jira_ca_bundle.pem here if your Jira instance uses a custom CA." \
             > "$STAGING/certs/README.txt"
 
-          for f in main.py server.py requirements.txt start_app.bat project_setup.bat README.md; do
+          for f in main.py server.py requirements.txt pyproject.toml start_app.bat project_setup.bat README.md; do
             cp "$f" "$STAGING/"
           done
           cp .env.example "$STAGING/"

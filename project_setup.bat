@@ -418,9 +418,9 @@ call :LOG "[SUCCESS]" "Virtual environment ready at '%VENV_DIR%'."
 :: ============================================================
 call :LOG "[INFO]" "Exporting Windows trusted certificates for pip SSL validation..."
 
-set "WIN_CERT_PEM=%PROJECT_ROOT%\certs\windows-trusted-roots.pem"
+set "WIN_CERT_PEM=%LOCALAPPDATA%\AIMetrics\certs\windows-trusted-roots.pem"
 
-if not exist "%PROJECT_ROOT%\certs" mkdir "%PROJECT_ROOT%\certs"
+if not exist "%LOCALAPPDATA%\AIMetrics\certs" mkdir "%LOCALAPPDATA%\AIMetrics\certs"
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
     "$stores = 'Root','CA'; " ^
@@ -444,7 +444,7 @@ if %errorlevel% neq 0 (
     call :LOG "[WARNING]" "If pip fails, ask IT to provide a CA bundle and set PIP_CERT to its path manually."
 ) else (
     set "PIP_CERT=!WIN_CERT_PEM!"
-    call :LOG "[SUCCESS]" "Certificates exported to 'certs\windows-trusted-roots.pem'. PIP_CERT set for this session."
+    call :LOG "[SUCCESS]" "Certificates exported to '%LOCALAPPDATA%\AIMetrics\certs\windows-trusted-roots.pem'. PIP_CERT set for this session."
 )
 
 :: Upgrade pip inside the isolated environment first
@@ -678,6 +678,6 @@ goto :eof
 :COUNTDOWN
 if "%SKIP_COUNTDOWN%"=="1" goto :eof
 echo.
-echo  Closing in 10 seconds - press any key to close now.
-timeout /t 10 >nul
+echo  This window will close automatically - press any key to close now.
+timeout /t 10
 goto :eof
