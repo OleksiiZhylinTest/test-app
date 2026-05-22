@@ -25,6 +25,7 @@ This document defines requirements for the field schema system that maps Jira cu
 | JSR-L-002 | A missing schema file returns an empty list | When `config/jira_schema.json` does not exist, `load_schemas()` returns `[]` without raising an exception | ✓ Met | `test_load_schemas_missing_file` |
 | JSR-L-003 | Malformed JSON in the schema file returns an empty list | When the file contains invalid JSON, `load_schemas()` returns `[]` without raising an exception | ✓ Met | `test_load_schemas_invalid_json` |
 | JSR-L-004 | A schema can be retrieved by name | `get_schema(name)` returns the matching dict when the name exists, and `None` when it does not | ✓ Met | `test_get_schema_found`, `test_get_schema_not_found` |
+| JSR-L-005 | `jira_schema.json` is read from `user_data_dir` first, with a fallback to the project-root `config/` directory | `_resolve_schema_path()` returns the `user_data_dir/config/jira_schema.json` path when that file exists; when it does not exist, it returns `<project_root>/config/jira_schema.json` instead | ✓ Met | `test_resolve_schema_path_prefers_user_data_dir`, `test_resolve_schema_path_falls_back_to_project_root` |
 
 ---
 

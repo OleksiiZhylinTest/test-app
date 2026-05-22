@@ -29,6 +29,33 @@ def test_load_schemas_missing_file(tmp_path):
     assert result == []
 
 
+# ---------------------------------------------------------------------------
+# _resolve_schema_path
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_schema_path_prefers_user_data_dir(tmp_path, monkeypatch):
+    udd = tmp_path / "udd"
+    udd_schema = udd / "config" / "jira_schema.json"
+    udd_schema.parent.mkdir(parents=True)
+    udd_schema.write_text("{}", encoding="utf-8")
+    project_root = tmp_path / "project"
+    monkeypatch.setattr(schema_mod, "_udd", lambda: udd)
+    monkeypatch.setattr(schema_mod, "_PROJECT_ROOT", project_root)
+    assert schema_mod._resolve_schema_path() == udd_schema
+
+
+def test_resolve_schema_path_falls_back_to_project_root(tmp_path, monkeypatch):
+    udd = tmp_path / "udd"  # udd config dir intentionally absent
+    project_root = tmp_path / "project"
+    fallback = project_root / "config" / "jira_schema.json"
+    fallback.parent.mkdir(parents=True)
+    fallback.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(schema_mod, "_udd", lambda: udd)
+    monkeypatch.setattr(schema_mod, "_PROJECT_ROOT", project_root)
+    assert schema_mod._resolve_schema_path() == fallback
+
+
 def test_load_schemas_invalid_json(tmp_path):
     p = tmp_path / "bad.json"
     p.write_text("not json", encoding="utf-8")

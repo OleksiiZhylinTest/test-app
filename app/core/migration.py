@@ -70,12 +70,6 @@ def run_first_time_migration() -> None:
     _copy_if_missing(root / "config" / "jira_filters.json", udd / "config" / "jira_filters.json")
     _copy_if_missing(root / "config" / "jira_schema.json", udd / "config" / "jira_schema.json")
 
-    old_schemas = root / "generated" / "schemas"
-    if old_schemas.is_dir():
-        for schema_file in old_schemas.glob("*.json"):
-            _copy_if_missing(schema_file, udd / "config" / "schemas" / schema_file.name)
-
-    _copy_if_missing(root / "data" / "dau", udd / "data" / "dau")
     _copy_if_missing(root / "generated" / "reports", udd / "reports")
     _copy_if_missing(root / "generated" / "logs", udd / "logs")
 

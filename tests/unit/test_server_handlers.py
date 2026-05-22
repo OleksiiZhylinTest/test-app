@@ -83,33 +83,6 @@ def test_read_env_credentials_reads_values_from_env_file(monkeypatch, tmp_path):
     )
 
 
-def test_get_schema_detail_returns_saved_schema_json(monkeypatch, tmp_path):
-    (_, handler) = _make_handler(monkeypatch, tmp_path)
-    schemas_dir = tmp_path / "config" / "schemas"
-    schemas_dir.mkdir(parents=True)
-    (schemas_dir / "team_schema.json").write_text(
-        json.dumps({"name": "Team Schema", "projects": ["TEAM"]}),
-        encoding="utf-8",
-    )
-
-    handler._handle_get_schema_detail("team_schema.json")
-    status, data = _json_response(handler)
-
-    assert status == 200
-    assert data["name"] == "Team Schema"
-    assert data["projects"] == ["TEAM"]
-
-
-def test_get_schema_detail_rejects_path_traversal(monkeypatch, tmp_path):
-    (_, handler) = _make_handler(monkeypatch, tmp_path)
-
-    handler._handle_get_schema_detail("../secret.json")
-    status, data = _json_response(handler)
-
-    assert status == 400
-    assert data["error"] == "Invalid filename"
-
-
 def test_resolve_report_path_allows_files_under_reports(monkeypatch, tmp_path):
     (_, handler) = _make_handler(monkeypatch, tmp_path)
     target = tmp_path / "reports" / "run-1" / "report.html"
@@ -261,41 +234,6 @@ def test_post_schema_updates_existing_entry(monkeypatch, tmp_path):
     matches = [s for s in persisted["schemas"] if s["schema_name"] == "Upsert"]
     assert len(matches) == 1
     assert matches[0]["description"] == "changed"
-
-
-def test_delete_schema_removes_existing_file(monkeypatch, tmp_path):
-    (_, handler) = _make_handler(monkeypatch, tmp_path)
-    schemas_dir = tmp_path / "config" / "schemas"
-    schemas_dir.mkdir(parents=True)
-    target = schemas_dir / "team_schema.json"
-    target.write_text("{}", encoding="utf-8")
-
-    handler._handle_delete_schema("team_schema.json")
-    status, data = _json_response(handler)
-
-    assert status == 200
-    assert data == {"ok": True}
-    assert not target.exists()
-
-
-def test_delete_schema_rejects_invalid_filename(monkeypatch, tmp_path):
-    (_, handler) = _make_handler(monkeypatch, tmp_path)
-
-    handler._handle_delete_schema("../team_schema.json")
-    status, data = _json_response(handler)
-
-    assert status == 400
-    assert data["error"] == "Invalid filename"
-
-
-def test_delete_schema_returns_404_when_missing(monkeypatch, tmp_path):
-    (_, handler) = _make_handler(monkeypatch, tmp_path)
-
-    handler._handle_delete_schema("missing.json")
-    status, data = _json_response(handler)
-
-    assert status == 404
-    assert data["error"] == "Schema not found"
 
 
 def test_handle_generate_emits_error_event_for_nonzero_exit(monkeypatch, tmp_path):

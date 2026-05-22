@@ -118,7 +118,7 @@ If the new data feeds a new metric, follow the extension pattern in `CLAUDE.md`:
 1. Add `compute_<name>(sprints, sprint_issues) -> list[dict]` to `app/metrics.py`
 2. Call it in `build_metrics_dict()` and include the result in the returned dict
 3. Add rendering in `app/report_md.py`
-4. Add rendering in `templates/report.html.j2`
+4. Add rendering in `ui/templates/report.html.j2`
 
 ### Step 6 — Write Tests
 

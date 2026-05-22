@@ -48,7 +48,7 @@ For any non-trivial code change (new feature, behavioral fix, refactor), follow 
 
 Extends global `CLAUDE.md` logging rules. Project adds `SUCCESS` (level 25, between INFO and WARNING) for user-visible positive outcomes (report written, server ready). Log at the call site; never log credential values.
 
-### UI Design Conventions (for `templates/report.html.j2` and `ui/index.html`)
+### UI Design Conventions (for `ui/templates/report.html.j2` and `ui/index.html`)
 
 - **No logic in templates**: `.j2` files receive pre-computed data only; all conditionals and loops that involve business logic belong in `report_html.py`.
 - **Semantic HTML**: use `<section>`, `<table>`, `<figure>`, `<nav>` — not bare `<div>` wrappers.
@@ -104,14 +104,14 @@ Full module responsibilities and data-flow diagrams are in `docs/development/arc
 | `app/core/jira_client.py` | Jira REST wrapper; `fetch_sprint_data()` → `(sprints, sprint_issues)` |
 | `app/core/metrics.py` | Pure computation; `build_metrics_dict()` assembles the dict both reporters consume |
 | `app/core/schema.py` | Jira field schema registry; load/save/query `config/jira_schema.json` |
-| `app/reporters/report_html.py` | Renders `templates/report.html.j2` via Jinja2 |
+| `app/reporters/report_html.py` | Renders `ui/templates/report.html.j2` via Jinja2 |
 | `app/reporters/report_md.py` | Builds Markdown report string and writes to disk |
 | `app/server.py` | Stdlib HTTPServer; serves `ui/index.html` and all `/api/*` routes |
 | `app/utils/logging_setup.py` | `setup_logging()` → `(root_logger, log_file_path)`; custom `SUCCESS_LEVEL=25` |
 | `app/utils/cert_utils.py` | `validate_cert(Path)` → `{valid, expires_at, days_remaining, subject}` |
 | `config/jira_schema.json` | Jira field/status definitions per instance; ships `Default_Jira_Cloud` entry |
 | `config/jira_filters.json` | Named JQL filter registry; source-controlled |
-| `templates/report.html.j2` | Jinja2 HTML report template |
+| `ui/templates/report.html.j2` | Jinja2 HTML report template |
 | `tests/conftest.py` | Shared factories: `make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels` |
 | `.env.example` | Source of truth for all config variables with inline comments |
 

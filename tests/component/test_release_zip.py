@@ -51,9 +51,9 @@ def release_zip() -> Path:
 
 @pytest.fixture(scope="session")
 def zip_entries(release_zip: Path) -> set[str]:
-    """All paths inside the ZIP."""
+    """All paths inside the ZIP, normalized to forward slashes."""
     with zipfile.ZipFile(release_zip) as zf:
-        return set(zf.namelist())
+        return {e.replace("\\", "/") for e in zf.namelist()}
 
 
 # ── Name format ────────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ def test_zip_name_format(release_zip: Path):
 
 @pytest.mark.parametrize(
     "folder",
-    ["app/", "templates/", "ui/", "config/", "data/", "tools/", "certs/"],
+    ["app/", "ui/templates/", "ui/", "config/", "tools/"],
 )
 def test_zip_contains_required_folder(zip_entries: set[str], folder: str):
     """Each required folder has at least one entry in the ZIP."""
@@ -105,11 +105,6 @@ def test_zip_contains_fetch_ssl_cert(zip_entries: set[str]):
     assert "tools/fetch_ssl_cert.py" in zip_entries
 
 
-def test_zip_contains_certs_readme(zip_entries: set[str]):
-    """certs/README.txt placeholder is present."""
-    assert "certs/README.txt" in zip_entries
-
-
 # ── Excluded items ─────────────────────────────────────────────────────────────
 
 
@@ -141,3 +136,8 @@ def test_zip_excludes_dotenv(zip_entries: set[str]):
 def test_zip_excludes_pycache(zip_entries: set[str]):
     """Compiled bytecode caches (__pycache__) are not distributed."""
     assert not any("__pycache__" in e for e in zip_entries)
+
+
+def test_zip_excludes_data(zip_entries: set[str]):
+    """User data folder (data/) is not distributed; it is created on first run."""
+    assert not any(e.startswith("data/") for e in zip_entries)

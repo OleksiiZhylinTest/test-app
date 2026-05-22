@@ -914,7 +914,7 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data.ok && data.version) {
-            document.getElementById('app-version').textContent = 'v' + data.version;
+            document.getElementById('app-version').textContent = 'App version ' + data.version;
           }
         })
         .catch(function () {});

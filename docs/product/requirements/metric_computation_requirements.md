@@ -147,7 +147,7 @@ reference for any reporter or template that renders metric data.
 ### 7.2 Chart and Table Display Format
 
 Defines how each metric's values must be rendered in HTML charts and data tables.
-Implementation location: `templates/report.html.j2`.
+Implementation location: `ui/templates/report.html.j2`.
 
 | ID | Metric | Chart / Table | Must show `%` | Acceptance Criterion | Status | Tests |
 |----|--------|---------------|---------------|----------------------|--------|-------|

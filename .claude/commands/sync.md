@@ -64,7 +64,7 @@ Run these checks in order. Each layer builds on the previous one.
 
 1. Review `docs/product/features/features.md` (if it exists):
    - Does it describe the main UI features?
-   - Does it match what's in `ui/index.html` and `templates/report.html.j2`?
+   - Does it match what's in `ui/index.html` and `ui/templates/report.html.j2`?
    - Any new UI features added (new tabs, new controls, new report sections) not documented? → flag as **gap**: "Feature <X> added but not documented"
 2. If no such file exists, report: "**gap**: `docs/product/features/features.md` missing"
 

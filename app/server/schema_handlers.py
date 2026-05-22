@@ -1,41 +1,19 @@
-"""Jira schema CRUD handler mixin — /api/schemas, /api/schema-detail/."""
+"""Jira schema CRUD handler mixin — /api/schemas."""
 
 from __future__ import annotations
 
-import json
 import logging
 import re
-from urllib.parse import unquote as urlunquote
-
-from ._base import _user_data_dir
 
 logger = logging.getLogger(__name__)
 
 
 class SchemaHandlerMixin:
     @staticmethod
-    def _schemas_dir():
-        return _user_data_dir() / "config" / "schemas"
-
-    @staticmethod
     def _slugify(name: str) -> str:
         slug = re.sub(r"[^a-z0-9]+", "_", name.lower().strip())
         slug = slug.strip("_")[:80]
         return slug or "schema"
-
-    def _handle_get_schema_detail(self, filename: str) -> None:
-        filename = urlunquote(filename)
-        if not filename.endswith(".json") or "/" in filename or "\\" in filename:
-            self._send_json(400, {"ok": False, "error": "Invalid filename"})
-            return
-        target = self._schemas_dir() / filename
-        if not target.is_file():
-            self._send_json(404, {"ok": False, "error": "Schema not found"})
-            return
-        try:
-            self._send_json(200, json.loads(target.read_text(encoding="utf-8")))
-        except (OSError, json.JSONDecodeError) as exc:
-            self._send_json(500, {"ok": False, "error": str(exc)})
 
     def _handle_get_schemas(self) -> None:
         """List schema names, or return a single schema when ?name= is provided."""
@@ -105,22 +83,9 @@ class SchemaHandlerMixin:
         schema_mod.save_schema(schema)
         self._send_json(200, {"ok": True, "updated": updated, "schema": schema})
 
-    def _handle_delete_schema(self, filename: str | None = None) -> None:
-        """Delete a schema entry by filename or by ?name=."""
+    def _handle_delete_schema(self) -> None:
+        """Delete a schema entry by ?name=."""
         from app.core import schema as schema_mod
-
-        if filename is not None:
-            filename = urlunquote(filename)
-            if not filename.endswith(".json") or "/" in filename or "\\" in filename:
-                self._send_json(400, {"ok": False, "error": "Invalid filename"})
-                return
-            target = self._schemas_dir() / filename
-            if target.is_file():
-                target.unlink()
-                self._send_json(200, {"ok": True})
-            else:
-                self._send_json(404, {"ok": False, "error": "Schema not found"})
-            return
 
         params = self._query_params()
         name_list = params.get("name")

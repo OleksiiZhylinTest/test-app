@@ -488,7 +488,7 @@
         <div class="filter-details-body">
           <p class="form-helper" style="margin-bottom:16px;">
             Folder that stores DAU survey responses for this filter. Each filter keeps its own
-            <code>data/dau/&lt;slug&gt;/</code> tree so reports do not mix data between teams. The folder
+            <code>data/dau/&lt;slug&gt;/</code> tree (under the user data directory) so reports do not mix data between teams. The folder
             is auto-created on save.
           </p>
 
@@ -504,7 +504,7 @@
               spellcheck="false"
               maxlength="200"
             />
-            <p class="form-helper">Path relative to the project root. Survey responses live under <code>&lt;DAU Path&gt;/original/</code>; the normalised set is regenerated under <code>&lt;DAU Path&gt;/normalized/</code> on every report run. Default: <strong>data/dau/&lt;filter-slug&gt;</strong>.</p>
+            <p class="form-helper">Path relative to the user data directory (<code>%LOCALAPPDATA%\AIMetrics</code> on Windows). Survey responses live under <code>&lt;DAU Path&gt;/original/</code>; the normalised set is regenerated under <code>&lt;DAU Path&gt;/normalized/</code> on every report run. Default: <strong>data/dau/&lt;filter-slug&gt;</strong>.</p>
           </div>
 
         </div>

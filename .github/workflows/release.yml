@@ -2,23 +2,27 @@
 # Release Pipeline — AI Adoption Metrics Report
 # ──────────────────────────────────────────────────────────────────────────────
 #
-# Git Flow: feature/* → develop → [PR rebase] → master → Release
+# Git Flow: feature/* → develop → release/vX.Y.Z → [merge commit] → master
 #
-# TRIGGER: Any push to master (including PR merge from develop).
+# TRIGGER: Any push to master (i.e. when a release/vX.Y.Z PR is merged).
 #   The `check` job reads the version from pyproject.toml and skips all
 #   downstream jobs if a tag for that version already exists — making the
 #   pipeline idempotent (hotfix commits without a version bump are safe).
 #
 # STAGES:
-#   check      → detect new version; gate for all downstream jobs
-#   validate   → lint + unit + component tests
-#   build      → create the release ZIP
-#   release    → create GitHub Release and attach ZIP
+#   check          → detect new version; gate for all downstream jobs
+#   validate       → lint + unit + component tests
+#   build          → create the release ZIP
+#   release        → create GitHub Release and attach ZIP
+#   sync-develop   → merge master back into develop to realign branch histories
 #
 # TO TRIGGER A RELEASE:
-#   1. Run bump-version.yml (workflow_dispatch) on develop to set the new version
-#   2. Merge develop → master via PR (rebase merge)
-#   3. This workflow fires automatically; creates tag v{version} and GitHub Release
+#   1. Run bump-version.yml (workflow_dispatch) — it cuts a release/vX.Y.Z branch
+#      from develop, bumps the version, and opens a PR to master automatically.
+#   2. Let CI validate the release branch (runs automatically on all branches).
+#   3. Merge the PR to master using a MERGE COMMIT (not squash or rebase).
+#   4. This workflow fires automatically: tags, builds, publishes the release,
+#      then merges master back into develop to sync the version bump.
 # ──────────────────────────────────────────────────────────────────────────────
 
 name: Release
@@ -110,10 +114,8 @@ jobs:
             --exclude='.pytest_cache' --exclude='.mypy_cache' --exclude='.ruff_cache' \
             --exclude='*.log' --exclude='dau_report.json' \
             app/ "$STAGING/app/"
-          rsync -a templates/ "$STAGING/templates/"
           rsync -a ui/ "$STAGING/ui/"
           rsync -a config/ "$STAGING/config/"
-          rsync -a data/ "$STAGING/data/"
 
           mkdir -p "$STAGING/tools"
           cp tools/fetch_ssl_cert.py "$STAGING/tools/"
@@ -121,7 +123,7 @@ jobs:
           echo "Place jira_ca_bundle.pem here if your Jira instance uses a custom CA." \
             > "$STAGING/certs/README.txt"
 
-          for f in main.py server.py requirements.txt start_app.bat project_setup.bat README.md; do
+          for f in main.py server.py requirements.txt pyproject.toml start_app.bat project_setup.bat README.md; do
             cp "$f" "$STAGING/"
           done
           cp .env.example "$STAGING/"
@@ -157,3 +159,33 @@ jobs:
           name: "Release v${{ needs.check.outputs.version }}"
           generate_release_notes: true
           files: dist/*.zip
+
+  # ── Sync master back to develop ───────────────────────────────────────────────
+  # bump-version.yml cuts a release/vX.Y.Z branch from develop and merges it
+  # into master (merge commit). This means develop never receives the version
+  # bump directly. This job merges master back into develop immediately after
+  # every release, bringing the version bump into develop via a proper merge
+  # commit and keeping branch histories aligned for future releases.
+  sync-develop:
+    name: Sync master → develop
+    runs-on: ubuntu-latest
+    needs: [check, release]
+    if: needs.check.outputs.should_release == 'true'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: develop
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge master into develop
+        run: |
+          git fetch origin master
+          git merge origin/master \
+            -m "chore: sync develop with master after v${{ needs.check.outputs.version }} release [skip ci]"
+          git push origin develop

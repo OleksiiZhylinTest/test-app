@@ -12,7 +12,18 @@ from app.exceptions import SchemaError
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_PATH = _udd() / "config" / "jira_schema.json"
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
+def _resolve_schema_path() -> Path:
+    """Return user-data-dir schema path if it exists, otherwise fall back to project root."""
+    primary = _udd() / "config" / "jira_schema.json"
+    if primary.exists():
+        return primary
+    return _PROJECT_ROOT / "config" / "jira_schema.json"
+
+
+SCHEMA_PATH = _resolve_schema_path()
 
 DEFAULT_SCHEMA_NAME = "Default_Jira_Cloud"
 

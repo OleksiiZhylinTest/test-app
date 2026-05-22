@@ -13,5 +13,5 @@ def user_data_dir() -> Path:
 
 def ensure_user_data_dirs() -> None:
     root = user_data_dir()
-    for sub in ("certs", "config/schemas", "data/dau", "reports", "logs"):
+    for sub in ("certs", "config", "data/dau", "reports", "logs"):
         (root / sub).mkdir(parents=True, exist_ok=True)

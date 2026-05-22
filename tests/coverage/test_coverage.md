@@ -8,7 +8,7 @@
 |--------|-------|-----------|------------|-------|--------|--------------|--------|
 | Technical Requirements | 47 | 25 | 0 | 0 | 22 | 100% | [→ detail](requirements/technical_requirements_coverage.md) |
 | Installation Requirements | 40 | 24 | 0 | 0 | 16 | 100% | [→ detail](requirements/installation_requirements_coverage.md) |
-| App Non Functional Requirements | 32 | 22 | 0 | 0 | 10 | 100% | [→ detail](requirements/app_non_functional_requirements_coverage.md) |
+| App Non Functional Requirements | 32 | 21 | 0 | 1 | 10 | 95% | [→ detail](requirements/app_non_functional_requirements_coverage.md) |
 | Dau Survey Requirements | 31 | 26 | 0 | 3 | 2 | 90% | [→ detail](requirements/dau_survey_requirements_coverage.md) |
 | Jira Connection Requirements | 33 | 23 | 0 | 6 | 4 | 79% | [→ detail](requirements/jira_connection_requirements_coverage.md) |
 | Jira Data Fetching Requirements | 19 | 14 | 1 | 1 | 3 | 94% | [→ detail](requirements/jira_data_fetching_requirements_coverage.md) |
@@ -16,7 +16,7 @@
 | Jira Filter Management Requirements | 23 | 21 | 0 | 0 | 2 | 100% | [→ detail](requirements/jira_filter_management_requirements_coverage.md) |
 | Logging Requirements | 18 | 16 | 0 | 0 | 2 | 100% | [→ detail](requirements/logging_requirements_coverage.md) |
 | Report Generation Requirements | 33 | 30 | 0 | 0 | 3 | 100% | [→ detail](requirements/report_generation_requirements_coverage.md) |
-| **All** | **305** | **224** | **1** | **12** | **68** | **95%** |  |
+| **All** | **305** | **223** | **1** | **13** | **68** | **95%** |  |
 
 ## Test Pyramid
 
@@ -25,12 +25,12 @@
              /----------\
             / Integration \           21 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
-          /    Component      \      229 tests  (29%)  (filesystem, HTTP, data shapes)        → tests/component/
+          /    Component      \      230 tests  (29%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   406 tests  (52%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   423 tests  (53%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     781 tests total
+                                     799 tests total
 ```
 
 ## Coverage Matrix
@@ -92,15 +92,15 @@ tests\run_e2e_tests.bat
 | `unit/test_config.py`             | Unit        |   52  | Config loading, validation          |
 | `unit/test_cert_validation.py`    | Unit        |    5  | Certificate validation helpers      |
 | `unit/test_cli.py`                | Unit        |    6  | `app.cli.main()` orchestration      |
-| `unit/test_metrics.py`            | Unit        |   95  | All metrics functions incl. AI      |
+| `unit/test_metrics.py`            | Unit        |  108  | All metrics functions incl. AI      |
 | `unit/test_main_helpers.py`       | Unit        |    5  | `_timestamp_folder_name()`          |
 | `unit/test_jira_client.py`        | Unit        |   46  | All jira_client functions (mocked)  |
-| `unit/test_server_handlers.py`    | Unit        |   34  | Internal `app.server` handler logic |
+| `unit/test_server_handlers.py`    | Unit        |   29  | Internal `app.server` handler logic |
 | `unit/test_imports.py`            | Unit        |    8  | Module imports (smoke)              |
 | `unit/test_logging_setup.py`      | Unit        |   22  | Logging setup, SUCCESS level, file creation, format |
 | `component/test_report_html.py`   | Component   |   31  | HTML template rendering, visibility |
 | `component/test_report_md.py`     | Component   |   37  | Markdown generation                 |
-| `component/test_server.py`        | Component   |   42  | HTTP routes, CORS, SSE              |
+| `component/test_server.py`        | Component   |   45  | HTTP routes, CORS, SSE              |
 | `component/test_contracts.py`     | Component   |   11  | Data shapes across boundaries       |
 | `integration/test_integration.py` | Integration |    8  | Full pipeline, filter flow, server  |
 | `integration/test_fetch_ssl_cert.py` | Integration |   10  | fetch_ssl_cert function + CLI smoke |

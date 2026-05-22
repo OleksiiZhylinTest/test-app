@@ -119,9 +119,6 @@ test-app/                          ← project root
 │   ├── jira_schema.json           ← Jira field schema definitions per instance
 │   └── jira_filters.json          ← saved JQL filters (default + user-saved)
 │
-├── templates/
-│   └── report.html.j2             ← Jinja2 HTML template
-│
 ├── data/                          ← per-filter DAU survey responses (gitignored except .gitkeep)
 │   └── dau/
 │       └── <filter-slug>/
@@ -131,6 +128,8 @@ test-app/                          ← project root
 ├── ui/
 │   ├── index.html                 ← single-file browser UI (served by app.server)
 │   ├── dau_survey.html            ← self-contained DAU survey form (served statically)
+│   ├── templates/
+│   │   └── report.html.j2         ← Jinja2 HTML template
 │   ├── css/                       ← modular CSS (tokens, layout, components, logs, reports)
 │   └── js/                        ← modular JS (api, config, connection, generate, filters, etc.)
 │
@@ -204,7 +203,7 @@ test-app/                          ← project root
        └────────────────────────────┘
 
   app/utils/cert_utils.py  ← used by app/server.py (/api/cert-status)
-  templates/report.html.j2 ← used by app/reporters/report_html.py
+  ui/templates/report.html.j2 ← used by app/reporters/report_html.py
   ui/index.html            ← served by app/server.py at /
 ```
 
@@ -218,7 +217,7 @@ test-app/                          ← project root
 | `app/core/jira_client.py` | Wraps `atlassian-python-api`. `create_client()` returns an authenticated `Jira` instance. `fetch_sprint_data()` returns `(sprints, sprint_issues)` for Scrum boards; `fetch_kanban_data()` returns the same shape for Kanban boards using ISO-week periods. Handles pagination and optional filter JQL. |
 | `app/core/metrics.py` | Pure functions: `compute_velocity`, `compute_cycle_time`, `compute_ai_assistance_trend`, `compute_ai_usage_details`, `compute_dau_metrics`, `compute_dau_trend`, `compute_custom_trends` (placeholder — not called by default). `build_metrics_dict()` assembles all results into a single dict consumed by both reporters. |
 | `app/core/schema.py` | Loads/saves/queries Jira field schemas from `config/jira_schema.json`. Registry only — the module does not pick an "active" schema; active-schema selection is the caller's responsibility (CLI reads `JIRA_SCHEMA_NAME`; the dev server's `/api/generate` exports the selected filter's `params.schema_name` onto the subprocess env). Ships a built-in `Default_Jira_Cloud` schema as fallback. |
-| `app/reporters/report_html.py` | Renders `templates/report.html.j2` via Jinja2. Accepts a `section_visibility` dict to hide/show individual report sections. |
+| `app/reporters/report_html.py` | Renders `ui/templates/report.html.j2` via Jinja2. Accepts a `section_visibility` dict to hide/show individual report sections. |
 | `app/reporters/report_md.py` | Builds a Markdown string (velocity bar chart, tables, cycle time stats) and writes to disk. Accepts a `section_visibility` dict to hide/show individual sections. |
 | `app/utils/cert_utils.py` | `validate_cert(Path)` — parses a PEM file with `cryptography`, returns a dict: `{valid, expires_at, days_remaining, subject}` (plus `error` on failure). |
 | `app/utils/logging_setup.py` | `setup_logging()` — configures the root logger with a timestamped `FileHandler` (`generated/logs/app-YYYYMMDD-HHMMSS.log`) and a `StreamHandler`; defines `SUCCESS_LEVEL = 25` and patches `.success()` onto `logging.Logger`. Called once per entry point. |
@@ -583,7 +582,7 @@ def _reload_config(env: dict):
 1. Add `compute_<name>(sprints, sprint_issues) -> list[dict]` to `app/core/metrics.py`. Each dict must include `sprint_id` and `sprint_name` plus the metric value key.
 2. Call it in `build_metrics_dict()` and include the result in the returned dict.
 3. Add rendering in `app/reporters/report_md.py` (new section after `custom_trends`).
-4. Add rendering in `templates/report.html.j2`.
+4. Add rendering in `ui/templates/report.html.j2`.
 5. Add `tests/unit/test_<name>.py` using `make_sprint()` and `make_issue()` factories.
 
 ### Adding a new config variable

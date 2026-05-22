@@ -33,7 +33,7 @@ Start the dev server on localhost.
 
 ## Live Development
 
-- Edit `ui/index.html`, `templates/report.html.j2`, or Python code
+- Edit `ui/index.html`, `ui/templates/report.html.j2`, or Python code
 - Refresh browser or restart server to see changes
 - Server runs in foreground; watch stdout for request logs
 
