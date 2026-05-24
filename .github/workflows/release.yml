@@ -119,10 +119,7 @@ jobs:
 
           mkdir -p "$STAGING/tools"
           cp tools/fetch_ssl_cert.py "$STAGING/tools/"
-          mkdir -p "$STAGING/certs"
-          echo "Place jira_ca_bundle.pem here if your Jira instance uses a custom CA." \
-            > "$STAGING/certs/README.txt"
-
+         
           for f in main.py server.py requirements.txt pyproject.toml start_app.bat project_setup.bat README.md; do
             cp "$f" "$STAGING/"
           done
