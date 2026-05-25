@@ -1,1 +1,0 @@
-WARNING  app.core.config:config.py:92 Could not read default DAU_PATH from /home/runner/AIMetrics/config/jira_filters.json: [Errno 2] No such file or directory: '/home/runner/AIMetrics/config/jira_filters.json'
