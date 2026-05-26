@@ -89,7 +89,7 @@ jobs:
           git push origin ${{ steps.bump.outputs.pr_branch }}
 
       - name: Create Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GH_PAT }}
           script: |
