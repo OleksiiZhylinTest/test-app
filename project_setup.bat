@@ -112,7 +112,7 @@ for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -For
     set "SESSION_STAMP=%%T"
 )
 if not defined SESSION_STAMP set "SESSION_STAMP=%RANDOM%"
-set "LOG_FILE=%LOG_DIR%\project_setup-%SESSION_STAMP%.log"
+set "LOG_FILE=%LOG_DIR%\project_setup-%SESSION_STAMP%-%RANDOM%.log"
 set "LOG_FILE_PATH=%PROJECT_ROOT%\%LOG_FILE%"
 
 :: ============================================================
@@ -178,7 +178,7 @@ if %errorlevel% == 0 (
     for /f "tokens=2 delims= " %%V in ('py --version 2^>^&1') do (
         set PYTHON_VERSION=%%V
     )
-    if defined PYTHON_VERSION (
+    if defined PYTHON_VERSION if not "!PYTHON_VERSION!"=="" (
         set PYTHON_FOUND=1
         set PYTHON_CMD=py
         call :LOG "[INFO]" "Python Launcher (py.exe) found. Reported version: !PYTHON_VERSION!"
@@ -192,7 +192,7 @@ if %errorlevel% == 0 (
     for /f "tokens=2 delims= " %%V in ('python --version 2^>^&1') do (
         set PYTHON_VERSION=%%V
     )
-    if defined PYTHON_VERSION (
+    if defined PYTHON_VERSION if not "!PYTHON_VERSION!"=="" (
         set PYTHON_FOUND=1
         set PYTHON_CMD=python
         call :LOG "[INFO]" "python found. Reported version: !PYTHON_VERSION!"
@@ -206,7 +206,7 @@ if %errorlevel% == 0 (
     for /f "tokens=2 delims= " %%V in ('python3 --version 2^>^&1') do (
         set PYTHON_VERSION=%%V
     )
-    if defined PYTHON_VERSION (
+    if defined PYTHON_VERSION if not "!PYTHON_VERSION!"=="" (
         set PYTHON_FOUND=1
         set PYTHON_CMD=python3
         call :LOG "[INFO]" "python3 found. Reported version: !PYTHON_VERSION!"
@@ -410,6 +410,17 @@ call :LOG "[INFO]" "PATH refreshed. New user segment: !USER_PATH!"
 :: Update PYTHON_CMD to use py launcher now that it's installed
 set PYTHON_CMD=py
 
+:: The py launcher sometimes doesn't pick up a freshly installed Python in the same session.
+:: Use the deterministic per-user install path directly to avoid that race.
+set "PYTHON_TARGET_DIR=%PYTHON_TARGET:.=%"
+set "INSTALLED_PYTHON_EXE=%LOCALAPPDATA%\Programs\Python\Python%PYTHON_TARGET_DIR%\python.exe"
+if exist "!INSTALLED_PYTHON_EXE!" (
+    set "PYTHON_CMD=!INSTALLED_PYTHON_EXE!"
+    call :LOG "[INFO]" "Using freshly installed Python directly: !INSTALLED_PYTHON_EXE!"
+) else (
+    call :LOG "[WARNING]" "Expected install path not found: !INSTALLED_PYTHON_EXE!. Falling back to py launcher."
+)
+
 :: ============================================================
 :: SECTION 5 - VIRTUAL ENVIRONMENT SETUP
 :: ============================================================
@@ -450,7 +461,7 @@ if exist "%VENV_DIR%" (
 if /i "%PYTHON_CMD%"=="py" (
     py -%PYTHON_TARGET% -m venv "%VENV_DIR%"
 ) else (
-    %PYTHON_CMD% -m venv "%VENV_DIR%"
+    "%PYTHON_CMD%" -m venv "%VENV_DIR%"
 )
 
 if %errorlevel% neq 0 (
