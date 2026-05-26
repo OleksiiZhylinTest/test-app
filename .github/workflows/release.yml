@@ -119,11 +119,17 @@ jobs:
 
           mkdir -p "$STAGING/tools"
           cp tools/fetch_ssl_cert.py "$STAGING/tools/"
-         
+
           for f in main.py server.py requirements.txt pyproject.toml start_app.bat project_setup.bat README.md; do
             cp "$f" "$STAGING/"
           done
           cp .env.example "$STAGING/"
+
+          # Ensure Windows batch scripts have CRLF line endings in the ZIP.
+          # .gitattributes enforces this on checkout, but this explicit step
+          # guards against edge cases (forks, old checkouts, CI image changes).
+          # sed 's/\r\{0,1\}$/\r/' normalises both LF-only and already-CRLF lines to CRLF.
+          find "$STAGING" -name "*.bat" -exec sed -i 's/\r\{0,1\}$/\r/' {} +
 
           (cd "generated/releases/${ZIP_NAME}" && zip -r "../${ZIP_NAME}.zip" .)
           rm -rf "generated/releases/${ZIP_NAME}/"
