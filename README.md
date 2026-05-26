@@ -1,6 +1,55 @@
 # AI Adoption Metrics Report
 
-Fetches data from Jira Cloud and generates AI adoption and velocity trend reports in HTML and Markdown (in parallel).
+## Overview
+
+**AI Adoption Metrics Report** is a Python 3.12+ tool for engineering teams that want to measure the impact of AI tooling on their delivery. It connects to Jira Cloud, fetches sprint and issue data, computes a set of engineering metrics, and generates self-contained reports in two formats: an interactive HTML report with charts and a Markdown report with tables. Both formats are produced in parallel from a single data fetch.
+
+The tool ships with a browser-based UI for configuration and on-demand report generation, and also supports a CLI mode for scripted or automated runs.
+
+## Key Features
+
+- **Velocity trend** — completed story points per sprint, visualised as a bar chart
+- **AI Assistance Trend** — percentage of done story points carrying an AI-assisted label, per sprint
+- **AI Usage Breakdown** — distribution of AI tool and use-case labels across all AI-assisted issues
+- **DAU Survey** — team daily-active-usage average from self-reported survey data plus week-over-week trend
+- **Live report generation** — browser UI streams generation output in real time via SSE
+- **Dual output** — HTML (interactive charts) and Markdown (plain tables) produced in parallel
+- **Named filter registry** — save and reuse JQL filters, each bound to a Jira field schema
+
+## Architecture
+
+The application has two entry points: a CLI (`main.py` → `app/cli.py`) and a local HTTP server (`server.py` → `app/server/`). Both share the same pipeline: validate config → fetch Jira data → compute metrics → render reports.
+
+| Layer | Module | Responsibility |
+|---|---|---|
+| Config | `app/core/config.py` | Loads `.env` and `config/defaults.env`; exposes all constants |
+| Fetch | `app/core/jira_client.py` | Jira REST wrapper; returns `(sprints, sprint_issues)` |
+| Compute | `app/core/metrics.py` | Pure metric computation; produces the dict both reporters consume |
+| Schema | `app/core/schema.py` | Jira field schema registry (`config/jira_schema.json`) |
+| HTML report | `app/reporters/report_html.py` | Renders `ui/templates/report.html.j2` via Jinja2 |
+| MD report | `app/reporters/report_md.py` | Builds and writes the Markdown report |
+| Server | `app/server/` | Stdlib `HTTPServer`; serves the UI and all `/api/*` routes |
+
+For full architecture documentation see [`docs/development/architecture.md`](docs/development/architecture.md).
+
+## Documentation
+
+| Topic | Link |
+|---|---|
+| Architecture & module map | [`docs/development/architecture.md`](docs/development/architecture.md) |
+| Metrics reference | [`docs/product/metrics/README.md`](docs/product/metrics/README.md) |
+| Features (browser UI) | [`docs/product/features/features.md`](docs/product/features/features.md) |
+| Requirements | [`docs/product/requirements/README.md`](docs/product/requirements/README.md) |
+| Jira API reference | [`docs/development/jira/README.md`](docs/development/jira/README.md) |
+| CI/CD pipeline | [`docs/development/pipeline.md`](docs/development/pipeline.md) |
+
+## Releases
+
+Latest release and download: **[GitHub Releases](https://github.com/Azhilin/test-app/releases)**
+
+Each release ships a self-contained ZIP (`ai_adoption_manager_vX.Y.Z.zip`) — extract and run, no build step needed.
+
+---
 
 ## Setup
 
@@ -19,20 +68,13 @@ Extract the ZIP to a **permanent folder that you own**, for example:
 | `Desktop\` | Synced by OneDrive/SharePoint on many corporate machines — large files slow sync |
 | `C:\Program Files\` | Requires administrator rights to write |
 
-> **Your data is safe across upgrades.** Credentials, reports, filters, DAU data, and certificates are stored in `%LOCALAPPDATA%\AIMetrics` — completely outside the application folder. Upgrading means unzipping a new version anywhere and running it; your data migrates automatically on first launch.
+> **Your data is safe across upgrades.** Credentials, reports, filters, DAU data, and certificates are stored in `%LOCALAPPDATA%\AIMetrics` (e.g. `C:\Users\<your-username>\AppData\Local\AIMetrics`) — completely outside the application folder. Upgrading means unzipping a new version anywhere and running it; your data migrates automatically on first launch.
 
 ### Step 1 - Install Python, dependencies, and bootstrap config (run once)
 
 Double-click **`project_setup.bat`**.
 
-This will:
-
-- Detect or install Python 3.12 (per-user, no admin rights needed)
-- Create a `.venv` virtual environment
-- Install all required packages from `requirements.txt`
-- Optionally install dev dependencies (`pytest`, linters, etc.) and the Playwright Chromium browser (required for e2e tests)
-- Create `.env` from `.env.example` when `.env` is missing
-- Prompt to keep or back up and recreate `.env` when it already exists
+This detects or installs Python 3.12 (per-user, no admin rights needed), creates a `.venv`, installs all required packages, and creates `.env` from `.env.example`.
 
 ### Step 2 - Configure Jira credentials
 
@@ -44,90 +86,16 @@ Open `.env` and fill in:
 
 That is all that `.env` needs. Non-sensitive settings (`JIRA_BOARD_ID`, `JIRA_SPRINT_COUNT`, `JIRA_SCHEMA_NAME`, AI labels, metric toggles, etc.) live in `config/defaults.env` — edit that file to change project-wide defaults.
 
+---
+
 ## Run
 
 ### Using the browser UI (recommended)
 
 Double-click **`start_app.bat`** — this starts a local server bound to `127.0.0.1` and opens the app in your browser at `http://localhost:8080`.
 
-Use the UI to configure your Jira connection, select a filter, and generate reports. On the **Filter Builder** tab, pick an **Active Schema** before saving a filter — the saved filter's `schema_name` determines which schema the pipeline uses when the filter is run. Select an existing filter from the **Filter Name** dropdown to load it into the form for in-place editing, or pick `— New filter —` to create one from scratch.
+Use the UI to configure your Jira connection, select a filter, and generate reports. On the **Filter Builder** tab, pick an **Active Schema** before saving a filter — the saved filter's `schema_name` determines which schema the pipeline uses when the filter is run.
 
 If your Jira instance uses a custom CA certificate, use the Jira Connection tab to fetch it or place the PEM bundle at `certs/jira_ca_bundle.pem`.
 
-### Managing schemas
-
-The **Schema Setup** tab (between *Jira Connection* and *Filter Builder*) is an editor for the Jira field schemas stored in `config/jira_schema.json`. Pick a schema from the dropdown to load its full JSON body into the editor, tweak `schema_name`, `fields`, or `status_mapping`, and click **Save** — saves upsert by `schema_name`. Click **New Schema** to start from a blank template; **Delete** removes any non-default schema (`Default_Jira_Cloud` is always preserved). The Schema Setup tab does not choose the schema used for report generation — that is determined by the selected filter's `schema_name` on the Filter Builder tab. For CLI-only runs (`python main.py`), `JIRA_SCHEMA_NAME` in `config/defaults.env` is used as a fallback.
-
-## Troubleshooting
-
-### Port 8080 already in use
-
-If the server fails to start because port 8080 is occupied by a stale previous instance:
-
-**Quick fix — use a different port:**
-
-Open `config/defaults.env` (or add to `.env` to override) and change the `PORT` line:
-
-```
-PORT=9000
-```
-
-Then restart the server and open `http://localhost:9000` in your browser.
-
-Alternatively, pass the port directly on the command line (overrides `.env`):
-
-```bash
-python server.py 9000
-```
-
-**Kill the stale process (Windows):**
-
-1. Find the PID holding port 8080:
-   ```
-   netstat -ano | findstr :8080
-   ```
-   The last column is the PID.
-
-2. Kill it:
-   ```powershell
-   # PowerShell - kill by PID
-   Stop-Process -Id <PID> -Force
-   
-   # Kill all Python processes
-   taskkill /IM python.exe /F
-   
-   # Kill by window title
-   taskkill /FI "WINDOWTITLE eq *server.py*" /F
-   
-   # Or in PowerShell:
-   Stop-Process -Name python -Force
-   ```
-   ```cmd
-   :: Command Prompt
-   taskkill /PID <PID> /F
-   ```
-
-3. Restart the server normally.
-
-## Release process
-
-This project uses semantic version tags and a GitHub release workflow.
-
-1. Update the version in `pyproject.toml`:
-   ```toml
-   version = "1.0.0"
-   ```
-2. Commit the bump:
-   ```bash
-   git add pyproject.toml
-   git commit -m "Bump version to 1.0.0"
-   git push origin master
-   ```
-3. Push the matching release tag:
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-
-The release workflow validates the code, builds `ai_adoption_manager_v1.0.0.zip`,
-and creates a GitHub Release with the ZIP attached.
+For full UI documentation see [`docs/product/features/features.md`](docs/product/features/features.md).

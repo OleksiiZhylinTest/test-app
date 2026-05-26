@@ -40,9 +40,9 @@
 
   /* ── Hero ── */
   .hero {
-    background: linear-gradient(135deg, #0052cc 0%, #0747a6 100%);
+    background: linear-gradient(135deg, #0747a6 0%, #0052cc 50%, #0065ff 100%);
     color: #fff;
-    padding: 36px 40px 28px;
+    padding: 40px 40px 32px;
   }
   .hero h1 {
     font-size: 26px;
@@ -58,20 +58,30 @@
   }
   .hero-links {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 8px;
   }
   .hero-links a {
-    background: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.15);
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.35);
-    border-radius: 3px;
-    padding: 5px 14px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 500;
-    transition: background 0.15s;
+    letter-spacing: 0.01em;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
   }
-  .hero-links a:hover { background: rgba(255,255,255,0.3); text-decoration: none; }
+  .hero-links a:hover { background: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.65); text-decoration: none; }
+  .hero-sep {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.35);
+    flex-shrink: 0;
+    margin: 0 4px;
+  }
 
   /* ── Content sections ── */
   .section {
@@ -308,7 +318,8 @@
   #tab1:checked ~ .tab-labels .lbl1,
   #tab2:checked ~ .tab-labels .lbl2,
   #tab3:checked ~ .tab-labels .lbl3,
-  #tab4:checked ~ .tab-labels .lbl4 {
+  #tab4:checked ~ .tab-labels .lbl4,
+  #tab5:checked ~ .tab-labels .lbl5 {
     color: #0052cc;
     border-color: #dfe1e6;
     border-bottom-color: #fff;
@@ -317,7 +328,8 @@
   #tab1:checked ~ .tab-contents .tc1,
   #tab2:checked ~ .tab-contents .tc2,
   #tab3:checked ~ .tab-contents .tc3,
-  #tab4:checked ~ .tab-contents .tc4 { display: block; }
+  #tab4:checked ~ .tab-contents .tc4,
+  #tab5:checked ~ .tab-contents .tc5 { display: block; }
 
   /* ── Accordion (details/summary) ── */
   details {
@@ -395,28 +407,6 @@
     padding: 1px 7px;
     margin-right: 8px;
     vertical-align: middle;
-  }
-  .download-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: #00875a;
-    color: #fff !important;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 20px;
-    border-radius: 4px;
-    text-decoration: none !important;
-    white-space: nowrap;
-    transition: background 0.15s;
-    flex-shrink: 0;
-  }
-  .download-btn:hover { background: #006644; }
-  .download-note {
-    width: 100%;
-    font-size: 11px;
-    color: #97a0af;
-    padding-top: 4px;
   }
 
   /* ── Screenshots ── */
@@ -537,14 +527,13 @@
        HERO
   ═══════════════════════════════════════════════════════════ -->
   <header class="hero">
+    <h1>AI Adoption Metrics Report</h1>
     <p>Automated sprint-level reporting for team velocity and AI adoption, powered by Jira Cloud data.</p>
     <nav class="hero-links" aria-label="Page navigation">
       <a href="#quick-start">⚡ Quick Start</a>
       <a href="#videos">▶ Video Guides</a>
       <a href="#app-reference">🖥 App Reference</a>
       <a href="#reports">📊 Reports</a>
-    </nav>
-    <nav class="hero-links" aria-label="Support navigation" style="margin-top:6px; opacity:0.8;">
       <a href="#labeling">🏷 Jira Labels</a>
       <a href="#troubleshooting">🔧 Troubleshooting</a>
       <a href="#faq">❓ FAQ</a>
@@ -558,18 +547,11 @@
     <div class="download-icon">📦</div>
     <div class="download-meta">
       <strong>
-        <span class="version-badge">v1.0.0</span>
-        AI Adoption Metrics Report — Latest Release
+        <span class="version-badge">v1.2.1</span>
+        AI Adoption Metrics Report — <a href="https://github.com/OleksiiZhylinTest/test-app/releases/" target="_blank" rel="noopener" style="color:#0052cc; text-decoration:underline;">Latest Release</a>
       </strong>
-      <span>Released: 2026-04-20 &nbsp;·&nbsp; Windows · Python 3.12 &nbsp;·&nbsp; ~5 MB</span>
+      <span>Released: 2026-05-26 &nbsp;·&nbsp; Windows · Python 3.12 &nbsp;·&nbsp; ~5 MB</span>
     </div>
-    <a class="download-btn" href="#" title="Replace # with the Confluence attachment URL">
-      ⬇ Download .zip
-    </a>
-    <p class="download-note">
-      Attach the <code>.zip</code> file to this Confluence page, then replace the button link with the attachment URL
-      (Insert → Files → copy link). Update the version badge and release date with each new release.
-    </p>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -623,7 +605,7 @@
         <div class="step-num">2</div>
         <div class="step-body">
           <h3>Configure Jira Credentials</h3>
-          <p>Open <code>.env</code> and fill in <code>JIRA_URL</code>, <code>JIRA_EMAIL</code>, and <code>JIRA_API_TOKEN</code>. Or use the <strong>Jira Connection</strong> tab in the UI.</p>
+          <p>In the app, go to the <strong>Jira Connection</strong> tab, enter your Jira URL, email, and API token, then click <strong>Save</strong>. Credentials are stored in <code>%LOCALAPPDATA%\AIMetrics\.env</code> — not in the project folder.</p>
         </div>
       </div>
       <div class="step">
@@ -636,8 +618,8 @@
     </div>
 
     <figure class="screenshot-wrap" style="margin-top:16px;">
-      <img src="../../../generated/tmp/screenshots/01_app_overview.png" alt="AI Adoption Manager app — Generate Report tab after launch">
-      <figcaption>The app after launch at localhost:8080 — four tabs across the top, Generate Report active by default.</figcaption>
+      <img src="screenshots/01_generate_report_tab.png" alt="AI Adoption Manager app — Generate Report tab after launch">
+      <figcaption>The app after launch at localhost:8080 — five tabs across the top, Generate Report active by default.</figcaption>
     </figure>
 
     <div class="callout tip" style="margin-top:16px;">
@@ -741,19 +723,21 @@
   <section class="section" id="app-reference">
     <div class="section-label">App Reference</div>
     <h2>Using the App</h2>
-    <p>The UI has four tabs. Follow the order below when setting up for the first time.</p>
+    <p>The UI has five tabs. Follow the order below when setting up for the first time.</p>
 
     <div class="tabs-wrap">
       <input class="tab-inputs" type="radio" name="tabs" id="tab1" checked>
       <input class="tab-inputs" type="radio" name="tabs" id="tab2">
       <input class="tab-inputs" type="radio" name="tabs" id="tab3">
       <input class="tab-inputs" type="radio" name="tabs" id="tab4">
+      <input class="tab-inputs" type="radio" name="tabs" id="tab5">
 
       <div class="tab-labels">
         <label class="tab-label lbl1" for="tab1">1 · Jira Connection</label>
         <label class="tab-label lbl2" for="tab2">2 · Schema Setup</label>
         <label class="tab-label lbl3" for="tab3">3 · Filter Builder</label>
-        <label class="tab-label lbl4" for="tab4">4 · Generate Report</label>
+        <label class="tab-label lbl4" for="tab4">4 · DAU Data</label>
+        <label class="tab-label lbl5" for="tab5">5 · Generate Report</label>
       </div>
 
       <div class="tab-contents">
@@ -771,11 +755,11 @@
           </table>
           <div class="screenshot-pair">
             <figure>
-              <img src="../../../generated/tmp/screenshots/05a_jira_connection_empty.png" alt="Jira Connection tab with credentials filled and saved">
+              <img src="screenshots/02a_connection_credentials.png" alt="Jira Connection tab with credentials filled and saved">
               <figcaption>Credentials saved — click <strong>Test Connection</strong> to verify.</figcaption>
             </figure>
             <figure>
-              <img src="../../../generated/tmp/screenshots/05b_jira_connection_tested.png" alt="Jira Connection tab showing Connected status">
+              <img src="screenshots/02b_connection_status.png" alt="Jira Connection tab showing Connected status">
               <figcaption>After a successful test — badge shows <strong>Connected</strong> with the Atlassian account name.</figcaption>
             </figure>
           </div>
@@ -783,22 +767,102 @@
             <span class="callout-icon">ℹ️</span>
             <p>The <strong>Test Connection</strong> button checks <code>JIRA_URL/rest/api/3/myself</code> with a 12-second timeout. The certificate badge shows <code>Valid</code>, <code>Expired</code>, or <code>No certificate</code>.</p>
           </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <p>Credentials saved here are written to <code>%LOCALAPPDATA%\AIMetrics\.env</code> — your personal user data folder — and take precedence over the project <code>.env</code> file. They are never committed to source control.</p>
+          </div>
         </div>
 
         <!-- Tab 2 -->
         <div class="tab-content tc2">
-          <p>Schemas map Jira custom-field IDs to story points, sprint, team, and status fields. The default schema (<code>Default_Jira_Cloud</code>) works for most standard Jira Cloud instances.</p>
+          <p>Schemas tell the pipeline which Jira custom-field IDs map to story points, sprint, team, and status. The default schema (<code>Default_Jira_Cloud</code>) ships with standard Jira Cloud field IDs that work for most instances — you only need a custom schema when your instance uses different IDs.</p>
+
+          <h3>Schema JSON Structure</h3>
+          <p>A schema is a JSON object with the following shape:</p>
+          <pre><code>{
+  "schema_name": "My Company Schema",
+  "description": "Optional — human-readable label",
+  "fields": {
+    "story_points": { "id": "customfield_10016", "type": "number" },
+    "sprint":       { "id": "customfield_10020", "type": "array"  },
+    "team":         { "id": "customfield_10001", "type": "string",
+                      "jql_name": "Team[Team]" },
+    "labels":       { "id": "labels",            "type": "array"  },
+    "status":       { "id": "status",            "type": "string" }
+  },
+  "status_mapping": {
+    "done_statuses":        ["Done", "Closed", "Resolved"],
+    "in_progress_statuses": ["In Progress", "In Review"],
+    "excluded_statuses":    ["Cancelled"]
+  }
+}</code></pre>
           <table>
-            <thead><tr><th>When to create a custom schema</th><th>How</th></tr></thead>
+            <thead><tr><th>Key</th><th>Required</th><th>Purpose</th></tr></thead>
             <tbody>
-              <tr><td>Your Jira uses non-standard custom field IDs for story points or sprint</td><td>Click <strong>New Schema</strong>, edit the JSON to match your field IDs, click <strong>Save</strong>.</td></tr>
-              <tr><td>Multiple Jira instances with different field setups</td><td>Create one schema per instance.</td></tr>
+              <tr><td><code>schema_name</code></td><td><strong>Yes</strong></td><td>Unique name shown in the Filter Builder dropdown</td></tr>
+              <tr><td><code>fields.story_points</code></td><td>Recommended</td><td>Velocity and AI % calculations; falls back to <code>customfield_10016</code> if absent</td></tr>
+              <tr><td><code>fields.sprint</code></td><td>Recommended</td><td>Sprint grouping for Scrum projects; falls back to <code>customfield_10020</code> if absent</td></tr>
+              <tr><td><code>fields.team</code></td><td>Optional</td><td>Team-scoped filtering; add <code>"jql_name"</code> when the JQL name differs from the field ID</td></tr>
+              <tr><td><code>status_mapping.done_statuses</code></td><td><strong>Yes</strong></td><td>Issues in these statuses count as completed — must be non-empty</td></tr>
+              <tr><td><code>status_mapping.in_progress_statuses</code></td><td><strong>Yes</strong></td><td>Used for work-in-progress indicators — must be non-empty</td></tr>
+              <tr><td><code>status_mapping.excluded_statuses</code></td><td>No</td><td>Issues in these statuses are dropped from all metric denominators</td></tr>
             </tbody>
           </table>
+          <p>Status names are matched case-insensitively. Standard fields (<code>labels</code>, <code>status</code>, <code>priority</code>) use the same IDs across all Jira Cloud instances and do not need to be changed.</p>
+
+          <h3>Finding Your Custom Field IDs</h3>
+          <p>Call the Jira REST API on any issue from your project to see which field IDs your instance uses:</p>
+          <pre><code>GET https://&lt;your-domain&gt;.atlassian.net/rest/api/3/issue/&lt;issue-id-or-key&gt;
+Authorization: Basic &lt;base64(your-email:your-api-token)&gt;</code></pre>
+          <p><strong>Example:</strong></p>
+          <pre><code>https://testprojectforanatolii.atlassian.net/rest/api/3/issue/10051</code></pre>
+          <p>In the response, look inside the <code>fields</code> object:</p>
+          <pre><code>{
+  "fields": {
+    "customfield_10016": 5,
+    "customfield_10020": [
+      { "id": 23, "name": "Sprint 4", "state": "active" }
+    ],
+    "customfield_10001": "Platform",
+    "status": { "name": "In Progress" },
+    "labels": ["ai_assisted"]
+  }
+}</code></pre>
+          <table>
+            <thead><tr><th>What you see in the response</th><th>Maps to</th></tr></thead>
+            <tbody>
+              <tr><td><code>"customfield_10016": 5</code></td><td><code>fields.story_points.id</code></td></tr>
+              <tr><td><code>"customfield_10020": [...]</code></td><td><code>fields.sprint.id</code></td></tr>
+              <tr><td><code>"customfield_10001": "..."</code></td><td><code>fields.team.id</code></td></tr>
+              <tr><td><code>"status": { "name": "In Progress" }</code></td><td>add <code>"In Progress"</code> to <code>status_mapping.in_progress_statuses</code></td></tr>
+              <tr><td><code>"labels": [...]</code></td><td>standard field — always <code>"labels"</code>, no change needed</td></tr>
+            </tbody>
+          </table>
+          <ul>
+            <li>Any key prefixed <code>customfield_</code> is instance-specific — copy it verbatim into your schema.</li>
+            <li>Check several issues across different workflow states to build a complete <code>status_mapping</code> list.</li>
+            <li>Wrong <code>story_points</code> ID → velocity shows as zero. This is the most impactful field to get right.</li>
+            <li><code>team</code> field only matters if you scope filters to a specific team; skip it otherwise.</li>
+          </ul>
           <figure class="screenshot-wrap">
-            <img src="../../../generated/tmp/screenshots/06_schema_setup.png" alt="Schema Setup tab showing the Default_Jira_Cloud JSON editor">
+            <img src="screenshots/06b_schema_field_discovery.png" alt="Jira REST API issue response showing customfield_* keys in the fields object">
+            <figcaption>Jira REST API response — locate <code>customfield_*</code> keys to copy into your schema.</figcaption>
+          </figure>
+
+          <h3>Managing Schemas</h3>
+          <figure class="screenshot-wrap">
+            <img src="screenshots/06c_schema_editor.png" alt="Schema Setup tab showing the Default_Jira_Cloud JSON editor">
             <figcaption>Schema Setup tab — the JSON editor shows <code>Default_Jira_Cloud</code> field mappings. Use <strong>New Schema</strong> to add a custom one.</figcaption>
           </figure>
+          <table>
+            <thead><tr><th>Action</th><th>Steps</th></tr></thead>
+            <tbody>
+              <tr><td>Create</td><td>Click <strong>New Schema</strong> → edit the JSON in the editor → click <strong>Save</strong></td></tr>
+              <tr><td>Edit</td><td>Select from dropdown → edit JSON → click <strong>Save</strong></td></tr>
+              <tr><td>Delete</td><td>Select schema → click <strong>Delete Schema</strong> (not available for <code>Default_Jira_Cloud</code>)</td></tr>
+            </tbody>
+          </table>
+          <p>Validation errors appear in the log below the editor immediately after Save.</p>
           <div class="callout tip">
             <span class="callout-icon">💡</span>
             <p>The Schema Setup tab is an editor only. The schema used for a specific report run is selected per-filter in the <strong>Filter Builder</strong> tab.</p>
@@ -808,63 +872,189 @@
         <!-- Tab 3 -->
         <div class="tab-content tc3">
           <p>Create a named filter that scopes your report to a specific team or project. The filter appears in the Generate Report dropdown once saved.</p>
+
+          <p><strong>Save Jira Filter fields:</strong></p>
           <table>
             <thead><tr><th>Field</th><th>Description</th></tr></thead>
             <tbody>
-              <tr><td><strong>Filter Name</strong></td><td>A unique name, e.g. <code>My Team Q2 2026</code></td></tr>
+              <tr><td><strong>Filter Name</strong></td><td>A unique name (e.g., <code>My Team Q2 2026</code>)</td></tr>
+              <tr><td><strong>Report Name</strong></td><td>Display name used in the report header and output filename (defaults to Filter Name if left blank)</td></tr>
               <tr><td><strong>Active Schema</strong></td><td>Select the schema for this filter's Jira instance</td></tr>
-              <tr><td><strong>Project Key(s)</strong></td><td>Jira project key(s) to include, e.g. <code>MYPROJ</code></td></tr>
-              <tr><td><strong>Issue Types</strong></td><td>e.g. <code>Story,Bug,Task</code></td></tr>
+            </tbody>
+          </table>
+
+          <p><strong>Data Source</strong> (collapsible):</p>
+          <table>
+            <thead><tr><th>Field</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Jira Filter ID</strong></td><td>Enter a saved Jira Filter ID to use its JQL directly instead of the builder below</td></tr>
+              <tr><td><strong>Filter Page Size</strong></td><td>Number of issues fetched per Jira API page (1–100; default 100)</td></tr>
+            </tbody>
+          </table>
+
+          <p><strong>JQL Builder</strong> (nested collapsible):</p>
+          <table>
+            <thead><tr><th>Field</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Project Key(s)</strong></td><td>Jira project key(s) to include (e.g., <code>MYPROJ</code>)</td></tr>
+              <tr><td><strong>Team ID</strong></td><td>Optional — scope to a specific team</td></tr>
+              <tr><td><strong>Issue Types</strong></td><td>E.g., <code>Story,Bug,Task</code></td></tr>
+              <tr><td><strong>Include Active Sprint</strong></td><td>Toggle — include the currently active (in-progress) sprint in metrics</td></tr>
+            </tbody>
+          </table>
+          <p>Use <strong>Copy JQL</strong> to copy the generated query to the clipboard for verification in Jira.</p>
+
+          <p><strong>Report Scope</strong> (collapsible):</p>
+          <table>
+            <thead><tr><th>Field</th><th>Description</th></tr></thead>
+            <tbody>
               <tr><td><strong>Project Type</strong></td><td>Scrum (sprint-based) or Kanban (continuous flow)</td></tr>
               <tr><td><strong>Estimation Type</strong></td><td>Story Points or Jira Tickets (issue count)</td></tr>
               <tr><td><strong>Board ID</strong></td><td>Required — find it in your Jira agile board URL</td></tr>
-              <tr><td><strong>Sprint Count</strong></td><td>How many sprints to look back, e.g. <code>8</code></td></tr>
+              <tr><td><strong>Sprint Count</strong></td><td>How many sprints to look back (e.g., <code>8</code>)</td></tr>
+              <tr><td><strong>Sprint Name Filter</strong></td><td>Optional — case-insensitive substring to match sprint names (e.g., <code>2026 Q2</code>)</td></tr>
             </tbody>
           </table>
+
+          <p><strong>DAU Survey Data</strong> (collapsible):</p>
+          <table>
+            <thead><tr><th>Field</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><strong>DAU Path</strong></td><td>Path to the folder containing DAU survey input files for this filter</td></tr>
+            </tbody>
+          </table>
+
           <div class="screenshot-pair">
             <figure>
-              <img src="../../../generated/tmp/screenshots/07a_filter_builder_empty.png" alt="Filter Builder with Jira Filter ID entered">
+              <img src="screenshots/07a_filter_jira_id.png" alt="Filter Builder with Jira Filter ID entered">
               <figcaption>Using a saved <strong>Jira Filter ID</strong> — simplest approach if your team already has a Jira filter.</figcaption>
             </figure>
             <figure>
-              <img src="../../../generated/tmp/screenshots/07b_filter_builder_filled.png" alt="Filter Builder with JQL Builder expanded and fields filled">
+              <img src="screenshots/07b_filter_jql_builder.png" alt="Filter Builder with JQL Builder expanded and fields filled">
               <figcaption>JQL Builder expanded — configure Project Type, Estimation Type, Board ID, and Sprint Count manually.</figcaption>
             </figure>
           </div>
-          <p style="margin-top:10px;">Below <strong>Data Source</strong> the <strong>AI Adoption Labels</strong> section is collapsible — expand it to set the labels (<code>AI_ASSISTED_LABEL</code>, <code>AI_EXCLUDE_LABELS</code>, <code>AI_TOOL_LABELS</code>, <code>AI_ACTION_LABELS</code>) that the AI metrics use. Click <strong>Save AI Labels</strong> to persist them to <code>.env</code>.</p>
+          <figure class="screenshot-wrap">
+            <img src="screenshots/07c_filter_builder_report_scope.png" alt="Filter Builder — Report Scope and DAU Survey Data sections expanded">
+            <figcaption>Report Scope and DAU Survey Data sections — set Board ID, Sprint Count, Sprint Name Filter, and DAU path.</figcaption>
+          </figure>
+
+          <p style="margin-top:10px;">Click <strong>Save Filter</strong> — the filter appears in the Generate Report dropdown. Previously saved filters are listed in the searchable <strong>Last Created Filters</strong> panel (last 20 entries).</p>
+
+          <p><strong>AI Adoption Labels</strong> (collapsible, below Data Source): expand to set the labels (<code>AI_ASSISTED_LABEL</code>, <code>AI_EXCLUDE_LABELS</code>, <code>AI_TOOL_LABELS</code>, <code>AI_ACTION_LABELS</code>) used by AI metrics. Click <strong>Save AI Labels</strong> to persist them to <code>.env</code>.</p>
           <div class="callout tip">
             <span class="callout-icon">💡</span>
-            <p>You can also enter a Jira Filter ID directly instead of building a JQL query.</p>
+            <p>You can also enter a Jira Filter ID directly instead of building a JQL query — simplest if your team already has a saved Jira filter.</p>
           </div>
         </div>
 
         <!-- Tab 4 -->
         <div class="tab-content tc4">
+          <p>Manage team roster and Daily Active Usage survey records that feed the DAU sections of the report.</p>
+          <table>
+            <thead><tr><th>Section</th><th>What to do</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Team / Filter selector</strong></td><td>Choose which filter's DAU data to view and edit</td></tr>
+              <tr><td><strong>Import from Excel</strong></td><td>Upload a DAU survey Excel file to bulk-import records; the importer maps columns to the expected schema automatically</td></tr>
+              <tr><td><strong>Team Roster</strong></td><td>Add or remove team members and assign their role (e.g., Developer, QA, PM); roles are used for the by-role DAU breakdown in reports</td></tr>
+              <tr><td><strong>Records table</strong></td><td>View, add, edit, or delete individual DAU survey records; supports pagination (50 / 100 / 200 / all) and bulk delete</td></tr>
+            </tbody>
+          </table>
+          <figure class="screenshot-wrap">
+            <img src="screenshots/08_dau_data_tab.png" alt="DAU Data tab showing Team Roster and Records table for a selected filter">
+            <figcaption>DAU Data tab — filter selector and Team Roster section with Alex Filter applied.</figcaption>
+          </figure>
+          <figure class="screenshot-wrap">
+            <img src="screenshots/08b_dau_data_tab_records.png" alt="DAU Data tab Records table filtered to week 2026-W20">
+            <figcaption>DAU Data tab — Records table filtered to week 2026-W20.</figcaption>
+          </figure>
+
+          <h3>Collecting DAU Data via MS Teams Polls</h3>
+          <p>The recommended way to gather DAU data is to run a weekly poll in your MS Teams team chat asking how often team members used AI tools during the week. After the poll closes, export the responses to Excel and import the file here.</p>
+          <ol>
+            <li>Open your MS Teams channel or group chat.</li>
+            <li>Create a <strong>Poll</strong> (via the Forms app or the "…" menu → Poll).</li>
+            <li>Ask the question: <em>"How often did you use AI tools last week?"</em></li>
+            <li>Include frequency options such as:
+              <ul>
+                <li><code>Every Day - all working days</code></li>
+                <li><code>Most Days: 3-4 days last week</code></li>
+                <li><code>Some Days: 1-2 days last week</code></li>
+                <li><code>Not at all</code></li>
+              </ul>
+            </li>
+            <li>After the poll closes, open the poll results and click <strong>Export to Excel</strong> — Teams downloads the file automatically.</li>
+          </ol>
+
+          <h3>Expected Excel Format</h3>
+          <p>The exported file must have one header row followed by one row per respondent. The importer reads these columns:</p>
+          <table>
+            <thead><tr><th>Column</th><th>Example value</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>ID</code></td><td><code>1</code></td><td>Auto-generated row number — not used by the importer</td></tr>
+              <tr><td><code>Start time</code></td><td><code>2026-05-22 15:23:20</code></td><td>Timestamp of the response submission</td></tr>
+              <tr><td><code>Completion time</code></td><td><code>2026-05-22 15:23:20</code></td><td>Usually the same as Start time for polls</td></tr>
+              <tr><td><code>Email</code></td><td><code>oleksii_zhylin@company.com</code></td><td>Used to match respondents to the Team Roster</td></tr>
+              <tr><td><code>Name</code></td><td><code>Oleksii Zhylin</code></td><td>Display name of the respondent</td></tr>
+              <tr><td>Poll question column</td><td><code>Every Day - all working days</code></td><td>The full poll question text becomes the column header; the cell value is the selected frequency option</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Example rows:</strong></p>
+          <table>
+            <thead><tr><th>ID</th><th>Start time</th><th>Completion time</th><th>Email</th><th>Name</th><th>How often did you use AI tools last week?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>2026-05-22 15:23:20</td><td>2026-05-22 15:23:20</td><td>oleksii_zhylin@company.com</td><td>Oleksii Zhylin</td><td>Every Day - all working days</td></tr>
+              <tr><td>2</td><td>2026-05-22 15:24:01</td><td>2026-05-22 15:24:01</td><td>dmytro_leliavskyi@company.com</td><td>Dmytro Leliavskyi</td><td>Every Day - all working days</td></tr>
+              <tr><td>3</td><td>2026-05-22 15:24:39</td><td>2026-05-22 15:24:39</td><td>oleksandr_zadvornyi@company.com</td><td>Oleksandr Zadvornyi</td><td>Most Days: 3-4 days last week</td></tr>
+              <tr><td>4</td><td>2026-05-22 15:26:15</td><td>2026-05-22 15:26:15</td><td>yuliia_lysak@company.com</td><td>Yuliia Lysak</td><td>Most Days: 3-4 days last week</td></tr>
+            </tbody>
+          </table>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <p>The poll question column header does not need to match exactly — the importer identifies the frequency column by position and by recognising the known frequency values. Only the <code>Email</code> column is used to join records to the Team Roster.</p>
+          </div>
+
+          <h3>Importing the Excel File</h3>
+          <ol>
+            <li>Go to the <strong>DAU Data</strong> tab and select the target filter from the dropdown.</li>
+            <li>Expand <strong>Import from Excel</strong>.</li>
+            <li>Click <strong>Choose file</strong> and select the exported <code>.xlsx</code> file.</li>
+            <li>Click <strong>Import</strong> — the importer parses each row and adds it to the Records table.</li>
+            <li>Review the imported records; use the Records table to correct or delete any rows as needed.</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <p>DAU report sections only populate when records exist for the selected filter. If the DAU sections of your report are empty, check that records are loaded here first.</p>
+          </div>
+        </div>
+
+        <!-- Tab 5 -->
+        <div class="tab-content tc5">
           <p>This is your main working tab for generating reports.</p>
           <ol>
             <li>Select a filter from the <strong>Saved Filter</strong> dropdown.</li>
             <li>Optionally set a <strong>Report Name</strong> (defaults to the filter name).</li>
-            <li>Expand <strong>Report Options</strong> to adjust Project Type, Estimation Type, and which metric sections to include.</li>
+            <li>Expand <strong>Report Options</strong> to toggle which metric sections to include: Velocity, AI Trend, AI Usage, DAU, DAU Trend.</li>
             <li>Click <strong>Generate Report</strong>.</li>
           </ol>
           <div class="screenshot-pair">
             <figure>
-              <img src="../../../generated/tmp/screenshots/09b_generate_report_options.png" alt="Report Options panel expanded showing Metric Sections checkboxes">
+              <img src="screenshots/09a_report_options_panel.png" alt="Report Options panel expanded showing Metric Sections checkboxes">
               <figcaption><strong>Report Options</strong> expanded — toggle individual metric sections on or off before generating.</figcaption>
             </figure>
             <figure>
-              <img src="../../../generated/tmp/screenshots/09_generate_report_ai_labels.png" alt="AI Adoption Labels card showing label configuration fields">
+              <img src="screenshots/09b_ai_adoption_labels.png" alt="AI Adoption Labels card showing label configuration fields">
               <figcaption><strong>AI Adoption Labels</strong> card — configure tool and action labels once; values persist to <code>.env</code>.</figcaption>
             </figure>
           </div>
           <p style="margin-top:10px;">Live output streams in the output panel. When complete, the report appears in <strong>Last Generated Reports</strong> — click the link to open it.</p>
           <div class="screenshot-pair">
             <figure>
-              <img src="../../../generated/tmp/screenshots/10_output_streaming.png" alt="Live output panel streaming log lines during report generation">
+              <img src="screenshots/09c_live_output.png" alt="Live output panel streaming log lines during report generation">
               <figcaption>Output panel streaming live — log lines appear as the pipeline runs.</figcaption>
             </figure>
             <figure>
-              <img src="../../../generated/tmp/screenshots/11_last_generated_reports.png" alt="Last Generated Reports list with timestamped links">
+              <img src="screenshots/09d_last_generated_reports.png" alt="Last Generated Reports list with timestamped links">
               <figcaption><strong>Last Generated Reports</strong> — each run produces a timestamped link to its <code>report.html</code>.</figcaption>
             </figure>
           </div>
@@ -884,7 +1074,7 @@
   <section class="section" id="reports">
     <div class="section-label">Output</div>
     <h2>Understanding Your Reports</h2>
-    <p>Each section can be toggled independently in <strong>Report Options</strong>. Reports are saved to <code>generated/reports/&lt;YYYY-MM-DDTHH-MM-SS&gt;/</code>.</p>
+    <p>Each section can be toggled independently in <strong>Report Options</strong>. Reports are saved to <code>%LOCALAPPDATA%\AIMetrics\reports\&lt;report-slug&gt;\</code>.</p>
 
     <table>
       <thead><tr><th>Section</th><th>Toggle</th><th>What It Shows</th></tr></thead>
@@ -902,7 +1092,7 @@
         <summary>📊 Velocity Trend — sprint-by-sprint story points completed</summary>
         <div class="accordion-body">
           <figure class="screenshot-wrap" style="margin:0;">
-            <img src="../../../generated/tmp/screenshots/12a_report_overview.png" alt="Velocity Trend chart with per-sprint bars and running average line">
+            <img src="screenshots/10a_velocity_trend_chart.png" alt="Velocity Trend chart with per-sprint bars and running average line">
             <figcaption>Report header and Velocity Trend — story points per sprint with running average line and sprint summary table.</figcaption>
           </figure>
         </div>
@@ -912,7 +1102,7 @@
         <summary>🤖 AI Assistance Trend — % of work that was AI-assisted per sprint</summary>
         <div class="accordion-body">
           <figure class="screenshot-wrap" style="margin:0;">
-            <img src="../../../generated/tmp/screenshots/12d_ai_assistance_trend.png" alt="AI Assistance Trend area chart with per-sprint percentage and summary table">
+            <img src="screenshots/10b_ai_assistance_chart.png" alt="AI Assistance Trend area chart with per-sprint percentage and summary table">
             <figcaption>AI Assistance Trend — per-sprint AI % with total SP, AI-labeled SP, and rolling totals.</figcaption>
           </figure>
         </div>
@@ -922,7 +1112,7 @@
         <summary>🔧 AI Usage Details — tools used and use-case breakdown</summary>
         <div class="accordion-body">
           <figure class="screenshot-wrap" style="margin:0;">
-            <img src="../../../generated/tmp/screenshots/12e_ai_usage_details.png" alt="AI Usage Details pie charts for tool distribution and use-case distribution">
+            <img src="screenshots/10c_ai_usage_details.png" alt="AI Usage Details pie charts for tool distribution and use-case distribution">
             <figcaption>AI Usage Details — two pie charts: AI tool distribution (Copilot, Gemini, etc.) and use-case distribution (CodeGen, Review, Testing, etc.).</figcaption>
           </figure>
         </div>
@@ -932,8 +1122,18 @@
         <summary>👥 DAU Survey — daily active usage by role</summary>
         <div class="accordion-body">
           <figure class="screenshot-wrap" style="margin:0;">
-            <img src="../../../generated/tmp/screenshots/12f_dau_section.png" alt="DAU section bar chart by role and usage frequency table">
+            <img src="screenshots/10d_dau_bar_chart.png" alt="DAU section bar chart by role and usage frequency table">
             <figcaption>DAU Survey — team AI tool usage by role (avg days/week), response count, and usage-frequency breakdown.</figcaption>
+          </figure>
+        </div>
+      </details>
+
+      <details>
+        <summary>📈 DAU Trend — weekly active usage over time</summary>
+        <div class="accordion-body">
+          <figure class="screenshot-wrap" style="margin:0;">
+            <img src="screenshots/10e_dau_trend_chart.png" alt="DAU Trend weekly combo chart with average score and response count per period">
+            <figcaption>DAU Trend — weekly AI tool usage trend showing average score and response count per reporting period.</figcaption>
           </figure>
         </div>
       </details>
@@ -943,8 +1143,8 @@
     <table>
       <thead><tr><th>File</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td><code>report.html</code></td><td>Self-contained HTML with interactive Chart.js charts — opens in any modern browser, no server needed.</td></tr>
-        <tr><td><code>report.md</code></td><td>Plain-text summary with ASCII bar charts and tables.</td></tr>
+        <tr><td><code>&lt;slug&gt;_&lt;timestamp&gt;.html</code></td><td>Self-contained HTML with interactive Chart.js charts — opens in any modern browser, no server needed.</td></tr>
+        <tr><td><code>&lt;slug&gt;_&lt;timestamp&gt;.md</code></td><td>Plain-text summary with ASCII bar charts and tables.</td></tr>
       </tbody>
     </table>
 
@@ -964,24 +1164,24 @@
 
     <div class="callout warning">
       <span class="callout-icon">⚠️</span>
-      <p>The <code>AI_assistance</code> label (or your configured label) is required on every AI-assisted issue. Without it, the issue is not counted in any AI metric.</p>
+      <p>The <code>ai_assisted</code> label (or your configured label) is required on every AI-assisted issue. Without it, the issue is not counted in any AI metric.</p>
     </div>
 
     <h3>Required Label</h3>
     <table>
       <thead><tr><th>Label type</th><th>Env var</th><th>Default value</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>AI Assisted</td><td><code>AI_ASSISTED_LABEL</code></td><td><code>AI_assistance</code></td><td>Marks an issue as AI-assisted — required for any AI metric.</td></tr>
+        <tr><td>AI Assisted</td><td><code>AI_ASSISTED_LABEL</code></td><td><code>ai_assisted</code></td><td>Marks an issue as AI-assisted — required for any AI metric.</td></tr>
       </tbody>
     </table>
 
     <h3>Optional Labels</h3>
     <table>
-      <thead><tr><th>Label type</th><th>Env var</th><th>Example values</th><th>Purpose</th></tr></thead>
+      <thead><tr><th>Label type</th><th>Env var</th><th>Default values</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>AI Tool</td><td><code>AI_TOOL_LABELS</code></td><td><code>AI_Tool_Copilot</code>, <code>AI_Tool_ChatGPT</code></td><td>Which AI tool was used.</td></tr>
-        <tr><td>AI Action / Use Case</td><td><code>AI_ACTION_LABELS</code></td><td><code>AI_Case_CodeGen</code>, <code>AI_Case_Review</code></td><td>How AI was used.</td></tr>
-        <tr><td>Exclude</td><td><code>AI_EXCLUDE_LABELS</code></td><td><code>spike</code>, <code>ops</code></td><td>Issues excluded from the AI % denominator (non-delivery work).</td></tr>
+        <tr><td>AI Tool</td><td><code>AI_TOOL_LABELS</code></td><td><code>gemini</code>, <code>github_copilot</code>, <code>rovo</code></td><td>Which AI tool was used.</td></tr>
+        <tr><td>AI Action / Use Case</td><td><code>AI_ACTION_LABELS</code></td><td><code>ai_automation</code>, <code>ai_dev</code>, <code>ai_test</code>, <code>ai_test_cases</code></td><td>How AI was used.</td></tr>
+        <tr><td>Exclude</td><td><code>AI_EXCLUDE_LABELS</code></td><td><code>ai_not_applicable</code></td><td>Issues excluded from the AI % denominator (non-delivery work).</td></tr>
       </tbody>
     </table>
 
@@ -1020,7 +1220,7 @@
         <p>If your company uses a custom Certificate Authority:</p>
         <ol>
           <li>Go to the <strong>Jira Connection</strong> tab.</li>
-          <li>Click <strong>Fetch Certificate</strong> — this caches the TLS cert at <code>certs/jira_ca_bundle.pem</code>.</li>
+          <li>Click <strong>Fetch Certificate</strong> — this caches the TLS cert at <code>%LOCALAPPDATA%\AIMetrics\certs\jira_ca_bundle.pem</code>.</li>
           <li>Retry the connection.</li>
         </ol>
         <p>Alternatively, run from the terminal: <code>python tools/fetch_ssl_cert.py</code></p>
@@ -1030,7 +1230,11 @@
     <details>
       <summary>Port 8080 in use</summary>
       <div class="accordion-body">
-        <p>Edit <code>config/defaults.env</code>, change <code>PORT=9000</code> (or any available port), and restart <code>start_app.bat</code>.</p>
+        <p>Set <code>PORT=9000</code> (or any available port) in either location and restart <code>start_app.bat</code>:</p>
+        <ul>
+          <li><code>config/defaults.env</code> — applies to all users of this project folder</li>
+          <li><code>%LOCALAPPDATA%\AIMetrics\.env</code> — applies to your user only; takes precedence over <code>config/defaults.env</code></li>
+        </ul>
       </div>
     </details>
 
@@ -1041,8 +1245,8 @@
           <thead><tr><th>Symptom</th><th>Fix</th></tr></thead>
           <tbody>
             <tr><td>Velocity section missing</td><td>Ensure at least one metric section is checked in Report Options.</td></tr>
-            <tr><td>AI metrics show 0%</td><td>Confirm issues have the <code>AI_assistance</code> label (or your configured label) in Jira.</td></tr>
-            <tr><td>DAU section empty</td><td>DAU data requires self-reported survey issues in Jira; check your team's workflow.</td></tr>
+            <tr><td>AI metrics show 0%</td><td>Confirm issues have the <code>ai_assisted</code> label (or your configured label) in Jira.</td></tr>
+            <tr><td>DAU section empty</td><td>Check the <strong>DAU Data</strong> tab — records must exist for the selected filter before DAU sections will populate.</td></tr>
             <tr><td>Charts render blank</td><td>Ensure you're opening the HTML file in a modern browser (Chrome, Edge, Firefox).</td></tr>
           </tbody>
         </table>
@@ -1081,14 +1285,14 @@
     <details>
       <summary>Where are reports saved?</summary>
       <div class="accordion-body">
-        <p>All reports are saved under <code>generated/reports/&lt;timestamp&gt;/</code> in the project folder. The <strong>Last Generated Reports</strong> list in the UI links directly to each <code>report.html</code>.</p>
+        <p>All reports are saved under <code>%LOCALAPPDATA%\AIMetrics\reports\&lt;report-slug&gt;\</code>. The <strong>Last Generated Reports</strong> list in the UI links directly to each HTML report.</p>
       </div>
     </details>
 
     <details>
       <summary>Can I share the HTML report with someone who doesn't have the tool?</summary>
       <div class="accordion-body">
-        <p>Yes. The <code>report.html</code> file is fully self-contained — all CSS, JavaScript, and data are inlined. Send it as an attachment; it opens in any modern browser without any server or installation.</p>
+        <p>Yes. The HTML report file is fully self-contained — all CSS, JavaScript, and data are inlined. Send it as an attachment; it opens in any modern browser without any server or installation.</p>
       </div>
     </details>
 
@@ -1103,6 +1307,13 @@
       <summary>The default filter can't be deleted — is that intentional?</summary>
       <div class="accordion-body">
         <p>Yes. <code>Default_Jira_Filter</code> is a read-only reference filter that ships with the tool. Create a new named filter for your team's use.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>The Markdown report has sections I don't see in the HTML report — is that expected?</summary>
+      <div class="accordion-body">
+        <p>Yes. The Markdown report always includes two additional sections not in the HTML: <strong>Sprint Issues</strong> (a table of individual issues per sprint) and <strong>Diagnostics</strong> (run metadata, Jira config, and AI label config). These are intended for debugging and audit trails.</p>
       </div>
     </details>
 
@@ -1131,7 +1342,8 @@
       document.getElementById('tab1'),
       document.getElementById('tab2'),
       document.getElementById('tab3'),
-      document.getElementById('tab4')
+      document.getElementById('tab4'),
+      document.getElementById('tab5')
     ];
     labels.forEach(function(lbl, idx) {
       lbl.setAttribute('tabindex', '0');
