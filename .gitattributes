@@ -1,0 +1,53 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Git line-ending policy
+#
+# Windows batch scripts (.bat) and .env files must always be checked out with
+# CRLF line endings regardless of the OS performing the checkout (Linux CI
+# runner included). Without this, a ZIP built on ubuntu-latest would contain
+# LF-only .bat files that break cmd.exe on Windows.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Default: normalise all text files to LF in the repo object store,
+# then apply per-pattern overrides on checkout.
+* text=auto
+
+# Windows batch scripts — must be CRLF on checkout (cmd.exe requirement)
+*.bat  text eol=crlf
+
+# Shell scripts — must be LF on checkout (bash/sh requirement)
+*.sh   text eol=lf
+
+# Python source — LF everywhere
+*.py   text eol=lf
+
+# Config / data files — LF is safe on all platforms
+*.json text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.cfg  text eol=lf
+*.ini  text eol=lf
+
+# .env files are read on Windows by python-dotenv — CRLF is safe but LF works
+# too; keep LF to avoid accidental whitespace diffs on Linux dev machines.
+.env         text eol=lf
+.env.example text eol=lf
+
+# HTML / CSS / JS — LF
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.j2   text eol=lf
+
+# Binary files — no line-ending conversion
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.zip  binary
+*.exe  binary
+*.dll  binary
+*.pem  binary
