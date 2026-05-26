@@ -57,8 +57,7 @@ exit /b 1
 if /i not "%OS%"=="Windows_NT" (
     echo [ERROR] This setup script is designed exclusively for Windows.
     echo         Please use setup.sh for macOS/Linux.
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 :: Architecture detection - handles WOW64 case (32-bit cmd on 64-bit Windows)
@@ -101,8 +100,7 @@ call :LOG "[INFO]" "OS validated: Windows_NT + Architecture: %ARCH%-bit"
 :: ============================================================
 call :ENSURE_ENV_FILE
 if errorlevel 1 (
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 if "%SMOKE_TEST_MODE%"=="1" (
@@ -221,8 +219,7 @@ set /p USER_CHOICE="  Proceed with installing Python %PYTHON_INSTALL_VERSION%? [
 if /i "!USER_CHOICE!"=="Y" goto :DO_INSTALL
 if /i "!USER_CHOICE!"=="YES" goto :DO_INSTALL
 call :LOG "[INFO]" "User declined installation. Exiting."
-call :COUNTDOWN
-exit /b 0
+call :EXIT_WITH_COUNTDOWN 0
 
 :: ============================================================
 :: SECTION 4 - PYTHON INSTALLATION (SECURE & SILENT)
@@ -298,15 +295,13 @@ if %errorlevel% neq 0 (
     echo   Then run project_setup.bat again.
     echo  ================================================================
     echo.
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 :DOWNLOAD_DONE
 if not exist "!INSTALLER_FILE!" (
     call :LOG "[ERROR]" "Installer file not found after download: !INSTALLER_FILE!"
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 :VERIFY_INSTALLER
@@ -324,8 +319,7 @@ if /i not "!ACTUAL_HASH!"=="!EXPECTED_HASH!" (
     call :LOG "[ERROR]" "SHA-256 checksum MISMATCH. The installer may have been tampered with (MITM risk)."
     call :LOG "[ERROR]" "Deleting the unsafe file and aborting installation."
     del /f /q "!INSTALLER_FILE!" >nul 2>&1
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 call :LOG "[SUCCESS]" "Checksum verified successfully. Installer is authentic."
@@ -337,8 +331,7 @@ call :LOG "[INFO]" "Running silent Python %PYTHON_INSTALL_VERSION% installer (pe
 if %errorlevel% neq 0 (
     call :LOG "[ERROR]" "Python installer exited with a non-zero code (%errorlevel%). Installation may have failed."
     del /f /q "!INSTALLER_FILE!" >nul 2>&1
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 call :LOG "[SUCCESS]" "Python %PYTHON_INSTALL_VERSION% installed successfully."
@@ -380,8 +373,7 @@ if exist "%VENV_DIR%" (
     rmdir /s /q "%VENV_DIR%" >nul 2>&1
     if !errorlevel! neq 0 (
         call :LOG "[ERROR]" "Failed to remove incomplete virtual environment at '%VENV_DIR%'."
-        call :COUNTDOWN
-        exit /b 1
+        call :EXIT_WITH_COUNTDOWN 1
     )
 )
 
@@ -394,16 +386,14 @@ if /i "%PYTHON_CMD%"=="py" (
 
 if %errorlevel% neq 0 (
     call :LOG "[ERROR]" "Failed to create virtual environment. Check that a compatible Python interpreter is available."
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 :AFTER_VENV_CREATE
 :: Verify activation script exists as confirmation the venv was built correctly
 if not exist "%VENV_DIR%\Scripts\activate.bat" (
     call :LOG "[ERROR]" "Virtual environment activation script not found at '%VENV_DIR%\Scripts\activate.bat'. Creation may have failed."
-    call :COUNTDOWN
-    exit /b 1
+    call :EXIT_WITH_COUNTDOWN 1
 )
 
 call :LOG "[SUCCESS]" "Virtual environment ready at '%VENV_DIR%'."
@@ -464,8 +454,7 @@ if exist "requirements.txt" (
 
     if !errorlevel! neq 0 (
         call :LOG "[ERROR]" "Dependency installation failed. Review the output above."
-        call :COUNTDOWN
-        exit /b 1
+        call :EXIT_WITH_COUNTDOWN 1
     )
     call :LOG "[SUCCESS]" "All dependencies installed successfully."
 ) else (
@@ -485,8 +474,7 @@ if exist "requirements-dev.txt" (
     "%VENV_DIR%\Scripts\pip.exe" install -r requirements-dev.txt
     if !errorlevel! neq 0 (
         call :LOG "[ERROR]" "Dev dependency installation failed. Review the output above."
-        call :COUNTDOWN
-        exit /b 1
+        call :EXIT_WITH_COUNTDOWN 1
     )
     call :LOG "[SUCCESS]" "Dev dependencies installed successfully."
     call :LOG "[INFO]" "Installing Playwright Chromium browser (required for e2e tests)..."
@@ -548,12 +536,19 @@ call :LOG "[SUCCESS]" "=========================================================
 call :LOG_RAW "  Session ended - %DATE% %TIME%"
 call :LOG_RAW "========================================================"
 echo.
-call :COUNTDOWN
-exit /b 0
+call :EXIT_WITH_COUNTDOWN 0
 
 :: ============================================================
 :: SUBROUTINES
 :: ============================================================
+
+:: :EXIT_WITH_COUNTDOWN [exit_code]
+::   Runs the countdown exactly once, then exits the script with the provided code.
+:EXIT_WITH_COUNTDOWN
+set "_EXIT_CODE=%~1"
+if not defined _EXIT_CODE set "_EXIT_CODE=0"
+call :COUNTDOWN
+exit /b %_EXIT_CODE%
 
 :: :LOG prefix message
 ::   Writes a timestamped, prefixed message to both the console and the log file.
