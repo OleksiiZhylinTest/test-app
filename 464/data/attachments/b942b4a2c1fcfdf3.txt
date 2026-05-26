@@ -1,0 +1,1 @@
+[2026-05-26 16:47:54] [INFO] format check message
