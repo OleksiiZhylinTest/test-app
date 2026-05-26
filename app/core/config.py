@@ -57,6 +57,11 @@ JIRA_FILTER_ID = int(_filter_id) if _filter_id.isdigit() else None
 # Optional: Jira project key (e.g. "MYPROJ"). Used to scope issue queries and shown in reports.
 JIRA_PROJECT = os.getenv("JIRA_PROJECT", "").strip() or None
 
+# Optional: comma-separated list of issue types to include (e.g. "Story,Task,Bug,Spike").
+# When set, only issues of these types are included in metrics.
+# When unset, sub-tasks are excluded by default via the issuetype.subtask boolean field.
+JIRA_ISSUE_TYPES: str = os.getenv("JIRA_ISSUE_TYPES", "").strip()
+
 # DAU survey data is per-filter. Each filter in jira_filters.json carries a DAU_PATH key
 # that points to a folder (absolute, under user_data_dir) containing:
 #   <DAU_PATH>/original/   raw dau_*.json submissions

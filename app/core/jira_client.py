@@ -85,6 +85,23 @@ def _strip_order_by(jql: str) -> str:
     return _ORDER_BY_RE.sub("", jql).strip()
 
 
+def _filter_by_type(issues: list[dict[str, Any]], issue_types: str) -> list[dict[str, Any]]:
+    """Filter issues by issue type.
+
+    When ``issue_types`` is set (comma-separated allowlist), only issues whose type name
+    is in the list are kept.  When empty, issues whose ``issuetype.subtask`` flag is
+    ``True`` are dropped — this prevents sub-tasks from inflating velocity when no
+    explicit type filter is configured.
+    """
+    if issue_types:
+        allowed = frozenset(t.strip().lower() for t in issue_types.split(",") if t.strip())
+        return [
+            i for i in issues if (((i.get("fields") or {}).get("issuetype") or {}).get("name") or "").lower() in allowed
+        ]
+    # Default: exclude sub-tasks using the Jira-provided boolean field.
+    return [i for i in issues if not ((i.get("fields") or {}).get("issuetype") or {}).get("subtask", False)]
+
+
 def get_filter_jql(jira: Jira) -> str:
     """Return the JQL string for the configured filter ID, or empty string if not set.
 
@@ -132,6 +149,11 @@ def fetch_sprint_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
     logger.debug("Fetching sprint data for board %s", board_id)
     sprints = get_sprints(jira, board_id)
     filter_jql = get_filter_jql(jira)
+    if not filter_jql and config.JIRA_ISSUE_TYPES:
+        types = [t.strip() for t in config.JIRA_ISSUE_TYPES.split(",") if t.strip()]
+        if types:
+            filter_jql = f"issuetype IN ({', '.join(types)})"
+            logger.debug("No saved filter — applying issue-type constraint: %s", filter_jql)
     if filter_jql:
         logger.debug("Applying filter JQL: %s", filter_jql)
     sprint_issues: dict[int | str, list[dict[str, Any]]] = {}
@@ -140,7 +162,7 @@ def fetch_sprint_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
         if sid is None:
             continue
         issues = get_issues_for_sprint(jira, board_id, sid, jql=filter_jql)
-        sprint_issues[sid] = issues
+        sprint_issues[sid] = _filter_by_type(issues, config.JIRA_ISSUE_TYPES)
     total_issues = sum(len(v) for v in sprint_issues.values())
     logger.info(
         "Sprint data ready: %s sprint(s), %s total issue(s)",
@@ -249,6 +271,8 @@ def fetch_kanban_data(jira: Jira) -> tuple[list[dict[str, Any]], dict[int | str,
             break
 
     logger.debug("Fetched %s total KANBAN issue(s)", len(all_issues))
+    all_issues = _filter_by_type(all_issues, config.JIRA_ISSUE_TYPES)
+    logger.debug("After type filter: %s KANBAN issue(s) remaining", len(all_issues))
 
     # Group issues into week periods by their completion date.
     # Use resolutiondate when set (most accurate), else fall back to updated.
