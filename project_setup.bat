@@ -22,67 +22,32 @@ set INSTALLER_LOCAL_DIR=installers
 set SKIP_COUNTDOWN=0
 set SMOKE_TEST_MODE=0
 set ENV_EXISTING_ACTION=prompt
-set DEV_DEPS_ACTION=prompt
-set REINSTALL_VENV=0
-set ARGS_ERROR=
 
 :: Parse optional arguments
 :PARSE_ARGS
 if "%~1"=="" goto :ARGS_DONE
-if /i "%~1"=="--help"       goto :SHOW_HELP
-if /i "%~1"=="-h"           goto :SHOW_HELP
 if /i "%~1"=="--smoke-test" (
     set SMOKE_TEST_MODE=1
     set SKIP_COUNTDOWN=1
 )
 if /i "%~1"=="--keep-env" (
-    if /i "%ENV_EXISTING_ACTION%"=="refresh" set ARGS_ERROR=1
-    if /i not "%ENV_EXISTING_ACTION%"=="refresh" set ENV_EXISTING_ACTION=keep
+    if /i not "%ENV_EXISTING_ACTION%"=="prompt" goto :ARGS_CONFLICT
+    set ENV_EXISTING_ACTION=keep
 )
 if /i "%~1"=="--refresh-env" (
-    if /i "%ENV_EXISTING_ACTION%"=="keep" set ARGS_ERROR=1
-    if /i not "%ENV_EXISTING_ACTION%"=="keep" set ENV_EXISTING_ACTION=refresh
+    if /i not "%ENV_EXISTING_ACTION%"=="prompt" goto :ARGS_CONFLICT
+    set ENV_EXISTING_ACTION=refresh
 )
-if /i "%~1"=="--dev" (
-    if /i "%DEV_DEPS_ACTION%"=="skip" set ARGS_ERROR=1
-    if /i not "%DEV_DEPS_ACTION%"=="skip" set DEV_DEPS_ACTION=install
-)
-if /i "%~1"=="--no-dev" (
-    if /i "%DEV_DEPS_ACTION%"=="install" set ARGS_ERROR=1
-    if /i not "%DEV_DEPS_ACTION%"=="install" set DEV_DEPS_ACTION=skip
-)
-if /i "%~1"=="--reinstall" set REINSTALL_VENV=1
 shift
 goto :PARSE_ARGS
 :ARGS_DONE
-if defined ARGS_ERROR goto :ARGS_CONFLICT
 goto :ARGS_OK
 
-:SHOW_HELP
-echo.
-echo  Usage: project_setup.bat [options]
-echo.
-echo  Options:
-echo    --help, -h       Show this help and exit
-echo    --keep-env       Keep the existing .env unchanged (default)
-echo    --refresh-env    Back up and recreate .env from .env.example
-echo    --dev            Install dev dependencies without prompting
-echo    --no-dev         Skip dev dependencies without prompting
-echo    --reinstall      Delete and recreate the virtual environment
-echo    --smoke-test     Fast CI check: verify OS + env file only
-echo.
-exit /b 0
-
 :ARGS_CONFLICT
-echo [ERROR] Conflicting options passed. Run with --help to see usage.
+echo [ERROR] Conflicting .env options. Use only one of --keep-env or --refresh-env.
 exit /b 1
 
 :ARGS_OK
-:: Smoke-test mode overrides: always keep env, never install dev deps
-if "%SMOKE_TEST_MODE%"=="1" (
-    if "%ENV_EXISTING_ACTION%"=="prompt" set ENV_EXISTING_ACTION=keep
-    set DEV_DEPS_ACTION=skip
-)
 
 :: ============================================================
 :: SECTION 1 - PRE-EXECUTION & OS VALIDATION
@@ -112,7 +77,7 @@ for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -For
     set "SESSION_STAMP=%%T"
 )
 if not defined SESSION_STAMP set "SESSION_STAMP=%RANDOM%"
-set "LOG_FILE=%LOG_DIR%\project_setup-%SESSION_STAMP%-%RANDOM%.log"
+set "LOG_FILE=%LOG_DIR%\project_setup-%SESSION_STAMP%.log"
 set "LOG_FILE_PATH=%PROJECT_ROOT%\%LOG_FILE%"
 
 :: ============================================================
@@ -122,16 +87,10 @@ set "LOG_FILE_PATH=%PROJECT_ROOT%\%LOG_FILE%"
 :: Create logs directory if it doesn't exist
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
-:: Write a session header to the log file and console
+:: Write a session header to the log file
 call :LOG_RAW "========================================================"
 call :LOG_RAW "  Project Setup Session Started - %DATE% %TIME%"
 call :LOG_RAW "========================================================"
-echo.
-echo  ================================================================
-echo   AI Adoption Manager — Project Setup
-echo   %DATE%  %TIME%
-echo  ================================================================
-echo.
 call :LOG "[INFO]" "Writing setup log to '%LOG_FILE_PATH%'."
 
 call :LOG "[INFO]" "OS validated: Windows_NT + Architecture: %ARCH%-bit"
@@ -178,7 +137,7 @@ if %errorlevel% == 0 (
     for /f "tokens=2 delims= " %%V in ('py --version 2^>^&1') do (
         set PYTHON_VERSION=%%V
     )
-    if defined PYTHON_VERSION if not "!PYTHON_VERSION!"=="" (
+    if defined PYTHON_VERSION (
         set PYTHON_FOUND=1
         set PYTHON_CMD=py
         call :LOG "[INFO]" "Python Launcher (py.exe) found. Reported version: !PYTHON_VERSION!"
@@ -192,7 +151,7 @@ if %errorlevel% == 0 (
     for /f "tokens=2 delims= " %%V in ('python --version 2^>^&1') do (
         set PYTHON_VERSION=%%V
     )
-    if defined PYTHON_VERSION if not "!PYTHON_VERSION!"=="" (
+    if defined PYTHON_VERSION (
         set PYTHON_FOUND=1
         set PYTHON_CMD=python
         call :LOG "[INFO]" "python found. Reported version: !PYTHON_VERSION!"
@@ -206,7 +165,7 @@ if %errorlevel% == 0 (
     for /f "tokens=2 delims= " %%V in ('python3 --version 2^>^&1') do (
         set PYTHON_VERSION=%%V
     )
-    if defined PYTHON_VERSION if not "!PYTHON_VERSION!"=="" (
+    if defined PYTHON_VERSION (
         set PYTHON_FOUND=1
         set PYTHON_CMD=python3
         call :LOG "[INFO]" "python3 found. Reported version: !PYTHON_VERSION!"
@@ -315,16 +274,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 
 if %errorlevel% equ 0 goto :DOWNLOAD_DONE
 
-:: Strategy 2: Fallback via BITS transfer (PowerShell Start-BitsTransfer; uses Windows certificate store)
-call :LOG "[WARNING]" "Primary download failed. Retrying via BITS transfer..."
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "try { " ^
-    "  Start-BitsTransfer -Source '!INSTALLER_URL!' -Destination '!INSTALLER_FILE!'; " ^
-    "  Write-Host 'Download complete.' " ^
-    "} catch { " ^
-    "  Write-Host ('DOWNLOAD_FAILED: ' + $_.Exception.Message); " ^
-    "  exit 1 " ^
-    "}"
+:: Strategy 2: Fallback via bitsadmin (built-in, handles SSL differently on restricted systems)
+call :LOG "[WARNING]" "Primary download failed. Retrying via bitsadmin..."
+bitsadmin /transfer "PythonInstaller" /download /priority NORMAL "!INSTALLER_URL!" "!INSTALLER_FILE!" >nul 2>&1
 
 if %errorlevel% neq 0 (
     call :LOG "[ERROR]" "Both download methods failed."
@@ -410,35 +362,11 @@ call :LOG "[INFO]" "PATH refreshed. New user segment: !USER_PATH!"
 :: Update PYTHON_CMD to use py launcher now that it's installed
 set PYTHON_CMD=py
 
-:: The py launcher sometimes doesn't pick up a freshly installed Python in the same session.
-:: Use the deterministic per-user install path directly to avoid that race.
-set "PYTHON_TARGET_DIR=%PYTHON_TARGET:.=%"
-set "INSTALLED_PYTHON_EXE=%LOCALAPPDATA%\Programs\Python\Python%PYTHON_TARGET_DIR%\python.exe"
-if exist "!INSTALLED_PYTHON_EXE!" (
-    set "PYTHON_CMD=!INSTALLED_PYTHON_EXE!"
-    call :LOG "[INFO]" "Using freshly installed Python directly: !INSTALLED_PYTHON_EXE!"
-) else (
-    call :LOG "[WARNING]" "Expected install path not found: !INSTALLED_PYTHON_EXE!. Falling back to py launcher."
-)
-
 :: ============================================================
 :: SECTION 5 - VIRTUAL ENVIRONMENT SETUP
 :: ============================================================
 :SETUP_VENV
 call :LOG "[INFO]" "Setting up Python virtual environment in '%VENV_DIR%'..."
-
-:: Remove existing venv if --reinstall was requested
-if "%REINSTALL_VENV%"=="1" (
-    if exist "%VENV_DIR%" (
-        call :LOG "[INFO]" "Reinstall requested. Removing existing virtual environment at '%VENV_DIR%'..."
-        rmdir /s /q "%VENV_DIR%" >nul 2>&1
-        if !errorlevel! neq 0 (
-            call :LOG "[WARNING]" "Could not fully remove '%VENV_DIR%'. Proceeding anyway..."
-        ) else (
-            call :LOG "[INFO]" "Existing virtual environment removed."
-        )
-    )
-)
 
 :: Check if venv already exists and is complete
 if exist "%VENV_DIR%\Scripts\activate.bat" (
@@ -461,7 +389,7 @@ if exist "%VENV_DIR%" (
 if /i "%PYTHON_CMD%"=="py" (
     py -%PYTHON_TARGET% -m venv "%VENV_DIR%"
 ) else (
-    "%PYTHON_CMD%" -m venv "%VENV_DIR%"
+    %PYTHON_CMD% -m venv "%VENV_DIR%"
 )
 
 if %errorlevel% neq 0 (
@@ -546,11 +474,6 @@ if exist "requirements.txt" (
 
 :: Optionally install dev dependencies
 if exist "requirements-dev.txt" (
-    if /i "%DEV_DEPS_ACTION%"=="skip" (
-        call :LOG "[INFO]" "Skipping dev dependency installation (--no-dev)."
-        goto :AFTER_DEV
-    )
-    if /i "%DEV_DEPS_ACTION%"=="install" goto :INSTALL_DEV
     echo.
     set /p DEV_CHOICE="  Install dev dependencies (pytest, pytest-mock)? [Y/N]: "
     if /i "!DEV_CHOICE!"=="Y" goto :INSTALL_DEV
@@ -576,9 +499,11 @@ if exist "requirements-dev.txt" (
     :AFTER_DEV
 )
 
+:: ============================================================
+:: SECTION 7 - .GITIGNORE SAFETY CHECK
 :AFTER_DEPS
 :: ============================================================
-:: SECTION 6 - INITIALISE USER DATA DIRECTORY
+:: SECTION - INITIALISE USER DATA DIRECTORY
 :: Creates %LOCALAPPDATA%\AIMetrics directory tree and runs first-run migration
 :: so user-owned config/data lives outside the app folder from the first launch.
 :: ============================================================
@@ -594,8 +519,6 @@ if exist "%VENV_DIR%\Scripts\python.exe" (
     call :LOG "[WARNING]" "Virtual environment not found — skipping user data directory initialisation."
 )
 
-:: ============================================================
-:: SECTION 7 - .GITIGNORE SAFETY CHECK
 :: ============================================================
 if exist ".gitignore" (
     findstr /i /c:".venv" .gitignore >nul 2>&1
@@ -755,6 +678,6 @@ goto :eof
 :COUNTDOWN
 if "%SKIP_COUNTDOWN%"=="1" goto :eof
 echo.
-echo  Press any key to close, or wait 10 seconds...
+echo  This window will close automatically - press any key to close now.
 timeout /t 10
 goto :eof
