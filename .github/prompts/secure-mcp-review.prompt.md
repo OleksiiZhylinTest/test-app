@@ -1,7 +1,7 @@
 ---
 name: Secure MCP Review
 description: 'Review MCP usage and external-system access for security, least privilege, and assistant-boundary compliance.'
-agent: GH Copilot Architect
+agent: GH AI Architect
 argument-hint: 'Describe the MCP server, external system, or access pattern to review'
 tools: [read, search]
 ---

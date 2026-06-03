@@ -1,7 +1,7 @@
 ---
 name: Copilot Monitoring Review
 description: 'Review GitHub Copilot monitoring, OpenTelemetry setup, telemetry privacy, or repo-local Copilot telemetry artifacts.'
-agent: GH Copilot Architect
+agent: GH AI Architect
 argument-hint: 'Describe the monitoring task, telemetry artifact, or OTel setup to review'
 tools: [read, search]
 ---

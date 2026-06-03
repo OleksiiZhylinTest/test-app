@@ -51,6 +51,31 @@ Use one shared layer plus assistant-owned customization namespaces.
 | `CLAUDE.md`, `.claude/**` | Claude Code | Other assistants should not inspect or modify during normal tasks |
 | `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**` | GitHub Copilot | Other assistants should not inspect or modify during normal tasks |
 
+**Claude Code primary entry point:** `project-manager` subagent (`.claude/agents/project-manager.md`) handles intake and routing for all requests. Delegates Claude environment work to `ai-architect` and external lookups to `web-search`.
+
+**Claude Code SDLC agent roster** (`.claude/agents/`):
+
+| Agent | Role | Primary workspace |
+|-------|------|-------------------|
+| `project-manager` | Intake, routing, plan-mode orchestration | All surfaces (read); no namespace ownership |
+| `ai-architect` | Claude env, hooks, settings, subagent definitions, `.github/**` read/explain, `AGENTS.md`/`CLAUDE.md`, AI env audit | `.claude/**`, `CLAUDE.md`; `.github/**` read-only |
+| `web-search` | External documentation lookups | Web only (read-only) |
+| `product-owner` | Backlog, acceptance criteria, prioritisation | `docs/product/` |
+| `business-analyst` | Requirements elicitation, user stories, gap analysis | `docs/product/requirements/` |
+| `dev-lead` | Technical oversight, code review, sprint breakdown | `app/`, `tests/`, `docs/development/` |
+| `backend-developer` | Server-side Python, API routes, reporters, config | `app/core/`, `app/server/`, `app/reporters/`, `app/utils/`, `config/` |
+| `frontend-developer` | UI templates, HTML/CSS, accessibility | `ui/templates/`, `ui/index.html` |
+| `test-lead` | Test strategy, coverage gates, quality sign-off | `tests/` (strategy) |
+| `manual-qa` | Exploratory testing, regression checklists, bug reports | `tests/` (read), `docs/product/requirements/` |
+| `automation-qa` | Automated tests, CI integration, flaky test triage | `tests/` (write) |
+| `devops-lead` | CI/CD strategy, deployment approval, incident review | `.github/workflows/` (review) |
+| `devops-engineer` | Pipeline implementation, Dockerfile, deploy scripts | `.github/workflows/`, infra config |
+| `security-engineer` | OWASP review, threat modelling, secrets audit | All surfaces (read + run only) |
+| `ux-designer` | Interaction specs, accessibility, design contracts | `docs/product/features/`, `ui/` |
+| `technical-writer` | README, architecture docs, changelogs, API docs | `docs/`, `README.md` |
+
+RACI matrix for the SDLC process: `.claude/sdlc-raci.md`.
+
 Rules:
 - Default scope for any assistant is the shared repo surfaces plus its own customization namespace.
 - Cross-tool governance, audit, migration, or alignment tasks must be explicitly requested before one assistant reads or edits the other assistant's customization namespace.

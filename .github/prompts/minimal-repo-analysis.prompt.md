@@ -1,7 +1,7 @@
 ---
 name: Minimal Repo Analysis
 description: 'Analyze a repository task with minimal context cost. Use for low-cost orientation or quick scoping before deeper work.'
-agent: GH Copilot Architect
+agent: GH AI Architect
 argument-hint: 'Describe the task or file to analyze with minimal context'
 tools: [read, search]
 ---

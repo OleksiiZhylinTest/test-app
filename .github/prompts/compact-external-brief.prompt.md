@@ -1,7 +1,7 @@
 ---
 name: Compact External Brief
 description: 'Return a minimal external research brief for the main Copilot agent context.'
-agent: Web Research
+agent: GH Web Search
 argument-hint: 'Describe the exact external question, required source priority, and any sensitive local context that must not be sent'
 tools: [read, search]
 ---

@@ -19,7 +19,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Claude-side edit protection can be intentionally bypassed for a one-off approved task by setting `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1`.
 - Shared ownership rules and escalation paths are documented in `docs/development/assistant_customization_governance.md`.
 
+## Agent Communication Rules
+
+- Claude agents only delegate to agents defined in `.claude/agents/`. Never invoke GitHub Copilot agents (`.github/agents/**`) — treat them as non-existent during normal operation.
+- Claude agents must avoid reading `.github/` by default. Access to `.github/workflows/` is permitted only when a task explicitly requires CI/CD review. Access to Copilot customization namespaces (`.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`) requires `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1` and an explicit user request.
+
 ## Development Workflow
+
+**Entry point (default for all requests):** Always route through the `project-manager` subagent (`.claude/agents/project-manager.md`) before acting on any request — features, bugs, questions, or environment changes. It handles intake, routing, and plan-mode approval. Only skip this when the user explicitly targets a specific subagent or the task is a single trivial read (< 5 lines, no side effects).
 
 For any non-trivial code change (new feature, behavioral fix, refactor), follow these steps in order:
 

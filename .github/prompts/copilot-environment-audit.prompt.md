@@ -1,7 +1,7 @@
 ---
 name: Copilot Environment Audit
 description: 'Audit the GitHub Copilot customization environment for drift, context cost, security issues, or missing assets.'
-agent: GH Copilot Architect
+agent: GH AI Architect
 argument-hint: 'Describe the audit scope or leave blank for a general Copilot environment audit'
 tools: [read, search, edit]
 ---

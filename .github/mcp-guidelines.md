@@ -39,7 +39,7 @@ Use this document as the first Copilot-owned reference when designing, reviewing
 
 ## External Research Pattern
 
-- For external documentation lookup, prefer one narrowly scoped MCP server exposed only to the `Web Research` agent or its companion prompt.
+- For external documentation lookup, prefer one narrowly scoped MCP server exposed only to the `GH Web Search` agent or its companion prompt.
 - Do not widen that MCP access to unrelated Copilot agents by default.
 - Prefer read-only web or documentation lookup behavior over general remote execution.
 - Confirm the actual tool names exposed by the chosen server locally before depending on them in agent instructions.
@@ -60,7 +60,7 @@ Before enabling or changing an MCP server for Copilot, verify:
 
 The boundary hook in `.github/hooks/` uses Claude Code's `PreToolUse` hook schema and is invoked by Claude Code only. GitHub Copilot does not have an equivalent runtime hook system. Copilot boundary enforcement relies on:
 
-- The `tools` list in `.github/agents/copilot-architect.agent.md` (least-privilege tool scope)
+- The `tools` list in `.github/agents/gh-ai-architect.agent.md` (least-privilege tool scope)
 - Skill procedures that mandate summary-first context loading
 - Agent instructions that prohibit Claude-owned surface access during normal work
 

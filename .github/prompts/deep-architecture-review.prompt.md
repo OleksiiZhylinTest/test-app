@@ -1,7 +1,7 @@
 ---
 name: Deep Architecture Review
 description: 'Run a deliberate higher-context architecture review when minimal context is not enough. Use for cross-layer design analysis, refactoring strategy, or repo-wide design questions.'
-agent: GH Copilot Architect
+agent: GH AI Architect
 argument-hint: 'Describe the architecture question or review target'
 tools: [read, search, agent]
 ---

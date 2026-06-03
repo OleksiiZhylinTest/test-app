@@ -1,6 +1,6 @@
-# Copilot Web Research MCP Setup
+# Copilot GH Web Search MCP Setup
 
-Use this companion guide when enabling external lookup for the `Web Research` Copilot agent.
+Use this companion guide when enabling external lookup for the `GH Web Search` Copilot agent.
 
 ## Goal
 
@@ -50,7 +50,7 @@ Use this as a shape example only. Replace placeholder names locally after the se
 
 - Verify the server starts locally.
 - Verify the exposed tool names and behavior.
-- Keep `Web Research` compact-output constraints in place even after external lookup becomes available.
+- Keep `GH Web Search` compact-output constraints in place even after external lookup becomes available.
 - If the server exposes more than external lookup, restrict usage procedurally to the smallest safe subset.
 
 ## Shared-Layer Impact

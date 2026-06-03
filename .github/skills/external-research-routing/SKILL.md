@@ -20,7 +20,7 @@ Use this skill when GitHub Copilot needs a disciplined fallback from local repo 
 1. Read `AGENTS.md`, `.github/summaries/copilot-governance.md`, and `.github/summaries/external-research-policy.md` first.
 2. Confirm the problem is external, not repo-internal.
 3. If no sanctioned external lookup capability is available in the runtime, stop and return a prerequisite note instead of widening repo search.
-4. Delegate one concrete question to `Web Research` rather than an open-ended topic.
+4. Delegate one concrete question to `GH Web Search` rather than an open-ended topic.
 5. Require the compact brief schema from the policy summary: `Answer`, `Evidence`, `Sources`, `Confidence`, `Next action`.
 6. Validate any resulting repo change locally before editing `.github/**`.
 

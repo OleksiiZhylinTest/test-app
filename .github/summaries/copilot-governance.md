@@ -7,12 +7,22 @@ Use this summary for ownership, boundaries, and cross-tool escalation before loa
 - `docs/development/assistant_customization_governance.md`
 - `AGENTS.md`
 
+## Agent Hierarchy
+
+| Agent | Role | Delegates to |
+|-------|------|-------------|
+| `GH Project Manager` | Top-level orchestrator; first-contact for all requests | `GH AI Architect`, `GH Web Search`, `Explore` |
+| `GH AI Architect` | Copilot env, governance, MCP, monitoring, security | `GH Web Search`, `Explore` |
+| `GH Web Search` | External docs lookup only; read-only | — |
+
+**Entry point**: always start with `GH Project Manager` (via `project-task-intake` prompt) unless the task is explicitly scoped to Copilot environment work.
+
 ## Ownership at a Glance
 
 | Surface | Owner | Default access |
 |---------|-------|----------------|
 | `AGENTS.md`, project code, tests, config, normal docs | Shared | Both assistants may read and edit |
-| `CLAUDE.md`, `.claude/**` | Claude Code | Claude edits; Copilot should not touch by default |
+| `CLAUDE.md`, `.claude/**` | Claude Code | Claude edits; GH Copilot must never modify; GH Copilot may read only when user explicitly requests cross-tool governance |
 | `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**` | GitHub Copilot | Copilot edits; Claude should not touch by default |
 
 ## Key Rules
@@ -21,6 +31,8 @@ Use this summary for ownership, boundaries, and cross-tool escalation before loa
 - Claude behavior stays in `CLAUDE.md` or `.claude/**`; Copilot behavior stays in `.github/**`.
 - MCP configuration is assistant-scoped; do not reuse Claude wrappers for Copilot.
 - No secrets in any assistant customization file.
+- GH Copilot agents must never modify `.claude/**` — no exceptions.
+- GH Copilot agents must not invoke or delegate to Claude agents (`.claude/agents/**`).
 
 ## Cross-Tool Access
 
