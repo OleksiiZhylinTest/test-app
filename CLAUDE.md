@@ -9,6 +9,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Keep this file focused on Claude-specific interaction style, workflow, and unique implementation detail.
 - When project structure or workflow conventions change, update `AGENTS.md` first, then refresh this file only where Claude-specific guidance would drift.
 
+## Customization Ownership
+
+- Claude's shared/default operating surfaces are `AGENTS.md`, normal repo code, and normal repo docs.
+- Claude-owned customization surfaces are `CLAUDE.md` and `.claude/**`.
+- GitHub Copilot-owned customization surfaces are `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`, and any future Copilot-only instruction files under `.github/**`.
+- Do not inspect, modify, or depend on Copilot-owned customization surfaces during normal development or environment work.
+- Exception: when the user explicitly requests cross-tool governance, audit, migration, or alignment, Claude may inspect Copilot-owned customization files to report risks or propose changes. Prefer the owning assistant to author final changes in its namespace unless the user explicitly asks Claude to edit them.
+- Claude-side edit protection can be intentionally bypassed for a one-off approved task by setting `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1`.
+- Shared ownership rules and escalation paths are documented in `docs/development/assistant_customization_governance.md`.
+
 ## Development Workflow
 
 For any non-trivial code change (new feature, behavioral fix, refactor), follow these steps in order:

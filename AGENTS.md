@@ -2,7 +2,7 @@
 
 Assistant-neutral routing and token-efficiency layer for this repository.
 All AI assistants (Claude, Copilot, Cursor, Gemini, etc.) should read this file.
-Claude-specific guidance lives in `CLAUDE.md`.
+Assistant-specific guidance lives in `CLAUDE.md` for Claude Code and in assistant-owned assets under `.github/` for GitHub Copilot.
 
 ## Authoritative References
 
@@ -41,24 +41,43 @@ Go directly to the source of truth — do not rely on summaries in other files:
 | `tests/conftest.py` | Shared factories: `make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels` |
 | `tests/tools/test_coverage.py` | Regenerates `tests/coverage/test_coverage.md`; run after adding/removing tests |
 
-## Slash Commands (`.claude/commands/`)
+## Assistant Ownership Model
 
-Workflow helpers invoked via `/command` in Claude Code. All AI assistants can use these:
+Use one shared layer plus assistant-owned customization namespaces.
 
-| Command | Purpose | When to use |
-|---------|---------|------------|
-| `/requirements` | Find and update requirement files by feature area | Before implementing a feature; to understand acceptance criteria |
-| `/implement` | Full feature implementation workflow (7-step checklist) | Implementing a new feature or significant behavior change |
-| `/fix` | Bug-fix loop with verification and requirement update | When tests fail or a bug is reported |
-| `/sync` | Cross-layer alignment audit (requirements, code, tests, docs) | After completing a feature; periodic maintenance; before release |
-| `/test` | Run full CI test suite (lint + type + security + unit + component) | After code changes; before commit |
-| `/coverage` | Regenerate test coverage stats; decide whether to fix or remove tests | After adding/removing/renaming test functions |
-| `/commit` | Create a git commit following project format rules | After all changes are complete and tested |
-| `/lint` | Run lint + type checking + security scanning (no tests) | Quick feedback during development; also `--fix` flag for auto-correct |
-| `/extend` | Reference guide: data structures, extension recipes, patterns | Adding a new metric, config var, schema field, or server endpoint |
-| `/server` | Start the dev server and list all API routes | During development; serves UI + API proxies |
+| Surface | Owner | Default behavior |
+|---------|-------|------------------|
+| `AGENTS.md`, application code, tests, config, and project docs | Shared | All assistants may read and update when the task requires it |
+| `CLAUDE.md`, `.claude/**` | Claude Code | Other assistants should not inspect or modify during normal tasks |
+| `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**` | GitHub Copilot | Other assistants should not inspect or modify during normal tasks |
 
-**When to recommend a command:** If the user's request maps to a workflow step (requirements → implement → test → fix bugs → verify → commit), invoke the matching command as context for Claude's work.
+Rules:
+- Default scope for any assistant is the shared repo surfaces plus its own customization namespace.
+- Cross-tool governance, audit, migration, or alignment tasks must be explicitly requested before one assistant reads or edits the other assistant's customization namespace.
+- Prefer the owning assistant to author changes in its namespace. Other assistants may review or propose changes when explicitly asked.
+- When shared repo conventions change, update `AGENTS.md` first, then refresh assistant-owned files that depend on it.
+
+Assistant-specific operational guidance belongs in assistant-owned files:
+- Claude-specific workflow and commands belong in `CLAUDE.md` and `.claude/**`.
+- Copilot-specific agents, skills, prompts, and hooks belong in `.github/**`.
+
+Shared governance details live in `docs/development/assistant_customization_governance.md`.
+
+---
+
+## Context Optimization
+
+Use lean context by default.
+
+- Start from the nearest concrete anchor: a file, symbol, failing command, or active requirement.
+- Prefer focused local reads over broad repo exploration.
+- Prefer summaries, indexes, and owning docs before loading large reference manuals.
+- Load large docs such as `docs/development/architecture.md` only when the task directly needs full architectural detail.
+- Reuse existing authoritative references instead of duplicating long summaries into assistant-owned files.
+- If a task becomes broad, split it into smaller passes instead of front-loading more context than needed.
+
+Copilot-owned low-token context assets should live under `.github/`.
+Claude-owned low-token context assets should live under `.claude/`.
 
 ---
 

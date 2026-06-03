@@ -27,10 +27,11 @@ PROJECT_ROOT=$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null
 if [[ -z "$PROJECT_ROOT" ]]; then exit 0; fi
 cd "$PROJECT_ROOT" || exit 0
 
-# Run ruff format (auto-fix) on the edited file
+# Run ruff format then ruff check --fix on the edited file
 if command -v ruff &>/dev/null; then
     ruff format "$FILE" 2>/dev/null
-    exit $?
+    ruff check --fix "$FILE" 2>/dev/null
+    exit 0
 fi
 
 # Fallback if ruff not available

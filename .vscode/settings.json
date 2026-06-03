@@ -1,3 +1,7 @@
 {
-    "claudeCode.useTerminal": true
+    "claudeCode.useTerminal": true,
+    "github.copilot.chat.otel.enabled": true,
+    "github.copilot.chat.otel.exporterType": "file",
+    "github.copilot.chat.otel.outfile": "${workspaceFolder}/generated/debug/copilot_chat_otel.jsonl",
+    "github.copilot.chat.otel.captureContent": false
 }
