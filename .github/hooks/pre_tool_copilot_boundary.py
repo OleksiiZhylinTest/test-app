@@ -11,7 +11,7 @@ PATH_KEYS = ("file", "path", "uri", "target", "include")
 COMMAND_KEYS = ("command",)
 HEAVY_DOC_MARKERS = (
     "docs/development/architecture.md",
-    "docs/development/assistant_customization_governance.md",
+    "docs/development/ai/assistant_customization_governance.md",
     "docs/product/requirements/",
     "docs/product/metrics/",
 )

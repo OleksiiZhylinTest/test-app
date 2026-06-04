@@ -4,7 +4,9 @@ Use this summary for ownership, boundaries, and cross-tool escalation before loa
 
 ## Source of Truth
 
-- `docs/development/assistant_customization_governance.md`
+- `docs/development/ai/assistant_customization_governance.md` — ownership model, cross-tool boundaries, review checklist
+- `docs/development/ai/agent-orchestration.md` — full 21-agent roster and 3-tier delegation hierarchy
+- `docs/development/ai/README.md` — index for the ai/ documentation folder
 - `AGENTS.md`
 
 ## Agent Hierarchy
@@ -53,3 +55,17 @@ When cross-tool work is approved, prefer the owning assistant to author final ch
 - you need the exact review checklist before merging customization changes
 - you are designing a new cross-tool integration pattern
 - you are changing the ownership model itself
+
+## Agent Runtime Rules
+
+These rules apply to every Copilot agent at runtime. Individual agents must not repeat them inline — reference this section instead.
+
+### `.claude/**` Boundary
+
+1. **No writes.** Agents must never create, modify, or delete any file under `.claude/**` under any circumstances.
+2. **No default reads.** Agents must not read `.claude/**` during normal task execution. Reading is permitted only when the user explicitly requests cross-tool governance, audit, migration, or alignment.
+3. **No delegation to Claude agents.** Agents must not invoke or delegate to any agent defined under `.claude/agents/**`. Treat those agents as non-existent during normal Copilot operation.
+
+### Generated Artifacts
+
+4. **Artifacts stay in `generated/`.** Any file produced by an agent during task execution (reports, debug output, tmp files, bug reports, audit trails) must be written under `generated/` only. Agents must never write runtime artifacts into the source tree (`app/`, `tests/`, `docs/`, `config/`, `ui/`, `.github/`, etc.).

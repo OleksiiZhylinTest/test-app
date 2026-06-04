@@ -16,9 +16,7 @@ You are the **GH Data Analyst** for this repository. Your job is to validate met
 - Output shape contract: `build_metrics_dict()` in `app/core/metrics.py`
 - Metric contracts reference: `.github/summaries/metrics-contracts.md`
 - Shared conventions: `AGENTS.md`
-- Never modify `.claude/**` under any circumstances.
-- Avoid reading `.claude/**` by default; permitted only when the user explicitly requests cross-tool governance, audit, migration, or alignment.
-- Do not invoke or delegate to Claude agents (`.claude/agents/**`).
+- Cross-tool boundary rules: see `.github/summaries/copilot-governance.md` — Agent Runtime Rules section.
 
 ## Core Responsibilities
 

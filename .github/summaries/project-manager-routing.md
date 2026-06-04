@@ -13,24 +13,36 @@ Use this as the first context anchor whenever the GH Project Manager needs to cl
 |-------------|-----------------|-------------------|
 | Feature / improvement | `GH Explore` (impact) → GH specialist agent (implement) | `AGENTS.md` |
 | Bug fix | `GH Explore` (locate) → GH specialist agent (fix) | `AGENTS.md` |
-| Copilot env / governance / MCP / monitoring | `GH AI Architect` | `.github/summaries/copilot-governance.md` |
+| Copilot env / governance / MCP / monitoring | `GH AI Architect` → `GH AI Engineer` | `.github/summaries/copilot-governance.md` |
 | `.claude/` or `.github/` folder content / structure / explanation | `GH AI Architect` | `.github/summaries/copilot-governance.md` |
 | `AGENTS.md` or `CLAUDE.md` read / write / explanation | `GH AI Architect` (cross-tool confirmation required for `CLAUDE.md` writes) | `AGENTS.md`, `.github/summaries/copilot-governance.md` |
 | Token consumption / AI env audit / AI assistant environment | `GH AI Architect` | `.github/summaries/copilot-governance.md` |
 | External research / vendor docs | `GH Web Search` | `.github/summaries/external-research-policy.md` |
 | Codebase discovery (>3 files) | `GH Explore` | `AGENTS.md` |
-| Requirements update | GH specialist agent + `requirements-routing` skill | `docs/product/requirements/README.md` |
-| Test addition / layer selection | GH specialist agent + `test-layer-selection` skill | `tests/conftest.py` |
-| Architecture / module design | `GH Explore` + GH specialist agent synthesis | `docs/development/architecture.md` |
+| Architecture / module design / structural change | `GH Principal Solution Architect` → `GH Solution Architect` | `docs/development/architecture.md` |
+| Quality framework / NFR / test layer strategy | `GH Principal Solution Architect` → `GH Quality Architect` | `docs/product/requirements/` |
+| Requirements update | `GH Product Owner` → `GH Business Analyst` + `requirements-routing` skill | `docs/product/requirements/README.md` |
+| Test addition / layer selection | `GH Test Lead` → `GH Automation QA` + `test-layer-selection` skill | `tests/conftest.py` |
+| Performance testing | `GH Test Lead` → `GH Performance QA` | `tests/` |
+| Security review | `GH Test Lead` → `GH Security QA` | `docs/product/requirements/app_non_functional_requirements.md` |
+| Code implementation | `GH Dev Lead` → `GH Backend Developer` or `GH Frontend Developer` | `AGENTS.md` |
+| UI / UX design | `GH Product Owner` → `GH UX Designer` | `docs/product/features/features.md` |
+| CI/CD pipeline | `GH DevOps Lead` → `GH DevOps` | `docs/development/pipeline.md` |
 | Multi-type (≥2 categories) | Sequence per dependency order | `AGENTS.md` first |
 
-## Subagent Capabilities at a Glance
+## Direct Delegates of GH Project Manager
+
+The GH Project Manager delegates to exactly 7 direct subagents:
 
 | Subagent | Tools | Can edit? | Scope |
 |----------|-------|-----------|-------|
-| `GH AI Architect` | read, agent, edit, search | Yes — `.github/**` only | Copilot env, governance, MCP |
+| `GH AI Architect` | read, agent, search | No (read-only) — delegates implementation to `GH AI Engineer` | Copilot env, governance, MCP |
+| `GH Principal Solution Architect` | read, search, agent | No (read-only) — delegates to `GH Solution Architect` / `GH Quality Architect` | Architecture strategy, module design |
 | `GH Web Search` | read, search | No | External docs, vendor references |
-| `GH Explore` | read, search | No | Any local codebase discovery (GH Copilot Explore subagent — not the Claude-side Explore agent) |
+| `GH Product Owner` | read, search | No (read-only) — delegates to `GH Business Analyst`, `GH UX Designer`, `GH Technical Writer` | Requirements, features, priorities |
+| `GH Dev Lead` | read, search, agent | No (read-only) — delegates to `GH Backend Developer`, `GH Frontend Developer` | Code review, implementation approval |
+| `GH Test Lead` | read, search, agent | No (read-only) — delegates to `GH Manual QA`, `GH Automation QA`, `GH Performance QA`, `GH Security QA` | Test strategy, coverage gates |
+| `GH DevOps Lead` | read, search, agent | No (read-only) — delegates to `GH DevOps` | CI/CD strategy, pipeline approval |
 
 ## Agent Isolation Rules
 
