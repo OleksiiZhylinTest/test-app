@@ -20,13 +20,15 @@ Use this as the first context anchor whenever the GH Project Manager needs to cl
 | External research / vendor docs | `GH Web Search` | `.github/summaries/external-research-policy.md` |
 | Codebase discovery (>3 files) | `GH Explore` | `AGENTS.md` |
 | Architecture / module design / structural change | `GH Principal Solution Architect` → `GH Solution Architect` | `docs/development/architecture.md` |
-| Quality framework / NFR / test layer strategy | `GH Principal Solution Architect` → `GH Quality Architect` | `docs/product/requirements/` |
+| Quality framework / NFR / test layer strategy | `GH Principal Solution Architect` → `GH Solution Architect` | `docs/product/requirements/` |
 | Requirements update | `GH Product Owner` → `GH Business Analyst` + `requirements-routing` skill | `docs/product/requirements/README.md` |
-| Test addition / layer selection | `GH Test Lead` → `GH Automation QA` + `test-layer-selection` skill | `tests/conftest.py` |
-| Performance testing | `GH Test Lead` → `GH Performance QA` | `tests/` |
-| Security review | `GH Test Lead` → `GH Security QA` | `docs/product/requirements/app_non_functional_requirements.md` |
-| Code implementation | `GH Dev Lead` → `GH Backend Developer` or `GH Frontend Developer` | `AGENTS.md` |
-| UI / UX design | `GH Product Owner` → `GH UX Designer` | `docs/product/features/features.md` |
+| Manual / exploratory testing | `GH Test Lead` → `GH Test Engineer (task_type: manual)` | `docs/product/features/features.md` |
+| Test addition / layer selection | `GH Test Lead` → `GH Test Engineer (task_type: automation)` + `test-layer-selection` skill | `tests/conftest.py` |
+| Performance testing | `GH Test Lead` → `GH Test Engineer (task_type: performance)` | `tests/` |
+| Security review | `GH Test Lead` → `GH Test Engineer (task_type: security)` | `docs/product/requirements/app_non_functional_requirements.md` |
+| Code implementation | `GH Dev Lead` → `GH Developer` | `AGENTS.md` |
+| UI / UX design | `GH Product Owner` → `GH Business Analyst` | `docs/product/features/features.md` |
+| Documentation / technical writing | `GH Product Owner` → `GH Business Analyst` | `docs/` |
 | CI/CD pipeline | `GH DevOps Lead` → `GH DevOps` | `docs/development/pipeline.md` |
 | Multi-type (≥2 categories) | Sequence per dependency order | `AGENTS.md` first |
 
@@ -37,11 +39,11 @@ The GH Project Manager delegates to exactly 7 direct subagents:
 | Subagent | Tools | Can edit? | Scope |
 |----------|-------|-----------|-------|
 | `GH AI Architect` | read, agent, search | No (read-only) — delegates implementation to `GH AI Engineer` | Copilot env, governance, MCP |
-| `GH Principal Solution Architect` | read, search, agent | No (read-only) — delegates to `GH Solution Architect` / `GH Quality Architect` | Architecture strategy, module design |
+| `GH Principal Solution Architect` | read, search, agent | No (read-only) — delegates to `GH Solution Architect` | Architecture strategy, module design |
 | `GH Web Search` | read, search | No | External docs, vendor references |
-| `GH Product Owner` | read, search | No (read-only) — delegates to `GH Business Analyst`, `GH UX Designer`, `GH Technical Writer` | Requirements, features, priorities |
-| `GH Dev Lead` | read, search, agent | No (read-only) — delegates to `GH Backend Developer`, `GH Frontend Developer` | Code review, implementation approval |
-| `GH Test Lead` | read, search, agent | No (read-only) — delegates to `GH Manual QA`, `GH Automation QA`, `GH Performance QA`, `GH Security QA` | Test strategy, coverage gates |
+| `GH Product Owner` | read, search | No (read-only) — delegates to `GH Business Analyst` | Requirements, features, priorities |
+| `GH Dev Lead` | read, search, agent | No (read-only) — delegates to `GH Developer` | Code review, implementation approval |
+| `GH Test Lead` | read, search, agent | No (read-only) — delegates to `GH Test Engineer` | Test strategy, coverage gates |
 | `GH DevOps Lead` | read, search, agent | No (read-only) — delegates to `GH DevOps` | CI/CD strategy, pipeline approval |
 
 ## Agent Isolation Rules

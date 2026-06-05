@@ -157,15 +157,25 @@ Tier 3 (sequential, after Tier 2): [task-f — Maker-Checker review]
 
 This agent applies a **Maker-Checker review loop** to all delegated tasks. Full specification: `.github/summaries/maker-checker-protocol.md`.
 
-**Cycle cap**: 3 cycles maximum per delegated task.
+**Loop phases**: Checker Verification Plan (isolation) → Maker Execution → Checker Review. See §Loop Mechanics in the protocol for the full procedure.
 
-**Review criteria** (applied each cycle):
-- Output fulfills the delegated task exactly
-- Output stays within the subagent's permitted read/write scope
-- Output complies with `AGENTS.md` conventions and module rules
-- No security violations or unintended side effects on shared contracts
+**Cycle cap**: 3 cycles for simple changes; 5 cycles for shared contract changes. See §Cycle Cap in the protocol for the definition of shared contract changes.
 
-**Escalation**: After 3 rejected cycles, stop all delegation for this task and send the escalation message defined in `.github/summaries/maker-checker-protocol.md` to the user. Do not proceed with any further delegation until the user responds.
+**Gap analysis**: Every review cycle must cover both Tier A (compliance) and Tier B (gap analysis) as defined in §Gap Analysis Tiers in the protocol.
+
+**Union rule**: If the Maker implemented valid corner cases not in the Verification Plan, preserve them. Do not remove valid work because it was not anticipated.
+
+**Structured report**: Produce the Structured Checker Report format (§Structured Checker Report) only on REJECT cycles.
+
+**Domain-specific gap questions** (apply during Tier B review, in addition to the standard gap analysis):
+- Are new or modified agent files registered in `AGENTS.md` with correct ownership, tier, and write-scope?
+- Do new skills have the correct `applyTo` scope and do they reference the right authoritative files?
+- Are hook triggers non-overlapping and do they fire only on the intended events?
+- Does the change preserve the separation between Copilot-owned (`.github/**`) and Claude-owned (`.claude/**`) surfaces?
+- Are any new MCP server or tool registrations scoped to the minimum required permissions?
+- Does the change introduce any prompt injection surface (e.g., user-controlled content flowing into agent instructions)?
+
+**Escalation**: After the cycle cap is exhausted without approval, stop all delegation for this task and send the escalation message defined in §Escalation Message Format in the protocol to the user. Do not proceed with any further delegation until the user responds.
 
 ## Interaction Mode
 

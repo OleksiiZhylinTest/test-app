@@ -40,6 +40,7 @@ Go directly to the source of truth — do not rely on summaries in other files:
 | `ui/templates/report.html.j2` | Jinja2 HTML report template |
 | `tests/conftest.py` | Shared factories: `make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels` |
 | `tests/tools/test_coverage.py` | Regenerates `tests/coverage/test_coverage.md`; run after adding/removing tests |
+| `specs/[feature-name]/` | spec-kit SDD artifacts upstream of implementation: `spec.md`, `plan.md`, `tasks.md`, `data-model.md`, `api-spec.json` |
 
 ## Assistant Ownership Model
 
@@ -94,24 +95,26 @@ Copilot agent definitions live under `.github/agents/`. Maker-Checker review loo
 | `gh-project-manager.agent.md` | First-contact orchestrator, intake and routing | Orchestrate-only (no write) | gh-ai-architect, gh-principal-solution-architect, gh-web-search, gh-product-owner, gh-dev-lead, gh-test-lead, gh-devops-lead |
 | `gh-ai-architect.agent.md` | Copilot env governance, agent/skill/prompt/hook oversight | Read-only | gh-ai-engineer, gh-web-search |
 | `gh-ai-engineer.agent.md` | Copilot AI environment implementation (`.github/**`, `AGENTS.md`, `.vscode/`) | Write (`.github/**`, `AGENTS.md`, `.vscode/`) | None (leaf) |
-| `gh-principal-solution-architect.agent.md` | Strategic architecture oversight and approval | Read-only | gh-solution-architect, gh-quality-architect, gh-web-search |
-| `gh-solution-architect.agent.md` | Concrete architecture implementation (renamed from `gh-architect`) | Write (`docs/development/` excl. `docs/development/quality/`, `config/jira_schema.json`, `config/jira_filters.json`) | None (leaf) |
-| `gh-quality-architect.agent.md` | Quality framework, test layers, coverage gates, NFR docs | Write (`docs/product/requirements/`, `tests/coverage/`, `docs/development/quality/`) | None (leaf) |
+| `gh-principal-solution-architect.agent.md` | Strategic architecture oversight and approval | Read-only | gh-solution-architect, gh-web-search |
+| `gh-solution-architect.agent.md` | Concrete architecture implementation and quality framework: module-boundary changes, API/schema design, test layer assignments, coverage gates, and NFR definitions | Write (`docs/development/`, `config/jira_schema.json`, `config/jira_filters.json`, `docs/product/requirements/`, `tests/coverage/`) | None (leaf) |
 | `gh-web-search.agent.md` | External documentation research | External-only (no repo write) | None (leaf) |
-| `gh-product-owner.agent.md` | Requirements acceptance, feature acceptance, priority | Read-only | gh-business-analyst, gh-ux-designer, gh-technical-writer, gh-web-search |
-| `gh-business-analyst.agent.md` | Requirements elicitation, acceptance criteria, gap analysis | Read-only | None (leaf) |
-| `gh-ux-designer.agent.md` | Interaction design, accessibility specs, frontend design contracts | Write (`docs/product/features/`, `ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`) | None (leaf) |
-| `gh-technical-writer.agent.md` | Docs maintenance: README, architecture, pipeline, features, metrics | Write (`docs/`, `README.md`, `CHANGELOG.md`, `generated/tmp/`) | gh-web-search |
-| `gh-dev-lead.agent.md` | Code review, coding standards enforcement, implementation approval | Read-only | gh-frontend-developer, gh-backend-developer, gh-web-search |
-| `gh-frontend-developer.agent.md` | UI templates, HTML/CSS/JS implementation | Write (`ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`, `ui/dau_survey.html`) | None (leaf) |
-| `gh-backend-developer.agent.md` | Server-side Python, API routes, reporters, config | Write (`app/core/`, `app/server/`, `app/reporters/`, `app/utils/`, `app/cli.py`, `config/`) | None (leaf) |
-| `gh-test-lead.agent.md` | Test strategy, coverage gates, quality sign-off | Read-only | gh-manual-qa, gh-automation-qa, gh-performance-qa, gh-security-qa, gh-web-search |
-| `gh-manual-qa.agent.md` | Exploratory testing, regression checklists, bug reports | Read-only | None (leaf) |
-| `gh-automation-qa.agent.md` | Automated tests, CI integration, flaky test triage | Write (`tests/unit/`, `tests/component/`, `tests/integration/`, `tests/e2e/`, `tests/coverage/`) | None (leaf) |
-| `gh-performance-qa.agent.md` | Performance test suites, latency baselines, throughput benchmarks | Write (`tests/component/`, `tests/integration/`, `generated/reports/`, `generated/tmp/`, `docs/development/`) | None (leaf) |
-| `gh-security-qa.agent.md` | OWASP scanning, TLS validation, secrets audit, CVE review (renamed from `gh-security-reviewer`) | Read all + limited write (security NFR Status column) | None (leaf) |
+| `gh-product-owner.agent.md` | Requirements acceptance, feature acceptance, priority | Read-only | gh-business-analyst, gh-web-search |
+| `gh-business-analyst.agent.md` | Requirements elicitation, acceptance criteria, UX/interaction design, and documentation maintenance (README, architecture docs, features, metrics, CHANGELOG) | Write (`docs/`, `ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`, `README.md`, `CHANGELOG.md`, `generated/tmp/`) | gh-web-search |
+| `gh-dev-lead.agent.md` | Code review, coding standards enforcement, implementation approval | Read-only | gh-developer, gh-web-search |
+| `gh-developer.agent.md` | Full-stack implementation: backend Python (`app/core/`, `app/server/`, `app/reporters/`, `app/utils/`, `config/`) and frontend UI (`ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`). Enforces semantic HTML, WCAG AA, and responsive layout. | Write (`app/core/`, `app/server/`, `app/reporters/`, `app/utils/`, `app/cli.py`, `app/exceptions.py`, `config/`, `ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`, `ui/dau_survey.html`) | None (leaf) |
+| `gh-test-lead.agent.md` | Test strategy, coverage gates, quality sign-off | Read-only | gh-test-engineer, gh-web-search |
+| `gh-test-engineer.agent.md` | Unified QA Maker: manual, automation, performance, and security testing. Two-phase execution (Phase 1: checklist; Phase 2: implementation). Activated by task_type tag from GH Test Lead. | Write (domain-scoped per task_type) | None (leaf) |
 | `gh-devops-lead.agent.md` | CI/CD strategy, pipeline approval, infra governance | Read-only | gh-devops, gh-web-search |
 | `gh-devops.agent.md` | Pipeline implementation, workflow YAML, CI configuration | Write (`.github/workflows/`, `docs/development/pipeline.md`, `pyproject.toml`) | None (leaf) |
+| `speckit.specify.agent.md` | Spec-kit SDLC: create feature specification from natural language description | Write (`specs/[feature-name]/`) | None (leaf) |
+| `speckit.clarify.agent.md` | Spec-kit SDLC: identify and resolve underspecified areas in the active feature spec | Write (`specs/[feature-name]/`) | None (leaf) |
+| `speckit.plan.agent.md` | Spec-kit SDLC: generate implementation plan and design artifacts from approved spec | Write (`specs/[feature-name]/`) | None (leaf) |
+| `speckit.tasks.agent.md` | Spec-kit SDLC: generate dependency-ordered tasks.md from design artifacts | Write (`specs/[feature-name]/`) | None (leaf) |
+| `speckit.analyze.agent.md` | Spec-kit SDLC: cross-artifact consistency and quality analysis across spec/plan/tasks | Read-only | None (leaf) |
+| `speckit.implement.agent.md` | Spec-kit SDLC: execute approved tasks.md and drive full feature implementation | Write (`specs/[feature-name]/`, project source files per tasks.md) | None (leaf) |
+| `speckit.checklist.agent.md` | Spec-kit SDLC: generate requirements-quality checklists for the current feature | Write (`specs/[feature-name]/checklists/`) | None (leaf) |
+| `speckit.constitution.agent.md` | Spec-kit SDLC: create or update project constitution and propagate changes to spec-kit templates | Write (`.specify/memory/`, `.specify/templates/`) | None (leaf) |
+| `speckit.taskstoissues.agent.md` | Spec-kit SDLC: convert approved tasks.md into dependency-ordered GitHub issues via GitHub MCP server | External (GitHub API via MCP) | None (leaf) |
 
 Rules:
 - Default scope for any assistant is the shared repo surfaces plus its own customization namespace.
@@ -180,4 +183,11 @@ Claude-owned low-token context assets should live under `.claude/`.
 - Persistent config: `config/` (JSON files, source-controlled)
 - Test suite: `tests/` (layers: `unit/`, `component/`, `integration/`, `e2e/`)
 - Docs: `docs/development/` (architecture, pipeline, API refs) and `docs/product/` (metrics, requirements, features)
+- Spec artifacts: `specs/[feature-name]/` (spec-kit SDD output; source-controlled; authored by `business-analyst`)
 - Temporary/generated artifacts: `generated/tmp/`, `generated/debug/`, `generated/reports/`
+
+**Spec-Driven Development (spec-kit):**
+- New features begin with a spec phase before implementation: `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze`
+- Spec artifacts live in `specs/NNN-feature-name/` (sequential numbering; source-controlled; authored by `business-analyst`, approved by `product-owner`)
+- Approved spec acceptance criteria drive status column updates in `docs/product/requirements/` — they do not replace the requirements tables
+- Bug fixes and refactors may bypass the spec phase; new features must not

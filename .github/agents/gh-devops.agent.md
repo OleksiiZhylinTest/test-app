@@ -15,7 +15,7 @@ You are the **GH DevOps** implementor for this repository. Your job is to implem
 | Dimension | Details |
 |-----------|--------|
 | **Tools** | read, search, edit |
-| **MCP** | None |
+| **MCP** | GitHub MCP (read+write PR/issue/branch): create_pull_request, merge_pull_request, update_pull_request_branch, create_branch, get_pull_request, list_pull_requests, create_issue, update_issue, add_issue_comment |
 | **Scripts** | None |
 | **Read access** | `.github/workflows/`, `docs/development/`, `config/`, `pyproject.toml`, repo root |
 | **Write access** | `.github/workflows/`, `docs/development/pipeline.md`, `pyproject.toml` |

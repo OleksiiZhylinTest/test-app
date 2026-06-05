@@ -28,6 +28,60 @@ DELEGATING AGENT (Checker) assigns task to SUBAGENT (Maker)
 
 **Audit trail**: Before sending the escalation message, the Checker must write the full rejection history to `generated/tmp/maker-checker-<timestamp>.md` (plain text, one section per cycle, rejection reason verbatim). This preserves the record across context-compaction events.
 
+### Checker Pre-Review Plan
+
+**Before reading any Maker output**, the Checker must produce a written pre-review plan and save it to `generated/tmp/checker-plan-<timestamp>.md`. This plan is derived solely from the delegated task spec and the Checker's domain knowledge — not from the Maker's output or narrative.
+
+**Plan structure (write verbatim to file):**
+
+```
+Checker Pre-Review Plan
+Checker: <checker-agent-name>
+Maker: <maker-agent-name>
+Task: <one-line task description — copy from handoff>
+Timestamp: <ISO 8601>
+
+## Expected Outputs
+- <file or artifact expected to change, and why>
+
+## Behavioral Checklist
+- [ ] <behavior that must be present or absent per task spec>
+  Corner cases:
+    - [ ] <edge/boundary condition that must hold>
+    - [ ] <error path that must be handled or explicitly excluded>
+
+## Pass Criteria
+| Dimension | Pass condition |
+|---|---|
+| <domain dimension> | <specific, measurable condition> |
+```
+
+After writing this plan, the Checker reads the Maker's artifacts and annotates each checklist item as `[✓ Pass]`, `[⚠ Warn]`, or `[✗ Fail]`. Every REJECT must reference specific failing checklist items by ID/text.
+
+The pre-review plan file is preserved alongside the maker-checker audit trail and linked from any rejection message.
+
+### Evaluating Maker-Contributed Additions
+
+The Checker Pre-Review Plan defines the **minimum required** — not the maximum permitted. Makers may implement corner cases, defensive logic, or test coverage beyond what the plan specified. These are **Maker-contributed additions** and must be evaluated on their own merit; they must never be removed or rejected solely because they were absent from the pre-review plan.
+
+After annotating the pre-review plan against Maker artifacts, the Checker performs a second pass:
+
+1. Identify every artifact change not covered by any pre-review plan checklist item.
+2. For each addition, evaluate independently and annotate:
+   - `[✓ Accepted — Maker addition]` — correct, adds value, no constraint violation → approve as-is and record in the audit trail
+   - `[⚠ Warn — Maker addition]` — uncertain value or correctness → request clarification; does **not** count as REJECT and does **not** consume a cycle
+   - `[✗ Rejected — Maker addition]` — incorrect, harmful, or violates a stated constraint → cite the specific rule violated; "not in pre-review plan" is **not** a valid rejection reason
+
+**Enriching the Corner Case Catalog**: When a Maker-contributed addition is accepted, note it in the audit trail under `## Maker Additions` so future pre-review plans inherit the pattern.
+
+```
+## Maker Additions
+- <addition description> — accepted because: <reason>
+  → Candidate for Corner Case Catalog entry: <yes/no, and proposed wording if yes>
+```
+
+This section is appended to the existing `generated/tmp/checker-plan-<timestamp>.md` file after the review pass is complete.
+
 ### Escalation Message Format
 
 Use verbatim:
@@ -132,21 +186,15 @@ An INFO REQUEST is not a Maker output and is never subject to a Maker-Checker re
 | Requirements elicitation | Business Analyst | Product Owner | Dev Lead | Principal Solution Architect |
 | Feature planning & scope | Product Owner | Project Manager | Business Analyst, Dev Lead | All |
 | Architecture decision records | Principal Solution Architect | Dev Lead | Solution Architect | Product Owner |
-| Technical design / task breakdown | Dev Lead | Principal Solution Architect | Backend / Frontend Dev | Test Lead |
-| Backend implementation | Backend Developer | Dev Lead | Principal Solution Architect | Test Lead |
-| Frontend implementation | Frontend Developer | Dev Lead | UX Designer | Test Lead |
-| UX / interaction design | UX Designer | Dev Lead | Frontend Dev | Product Owner |
-| Test strategy & coverage gates | Test Lead | Dev Lead | Automation QA | Project Manager |
-| Manual / exploratory testing | Manual QA | Test Lead | Backend Developer | Product Owner |
-| Test automation & CI integration | Automation QA | Test Lead | DevOps Engineer | Dev Lead |
-| Performance testing | Performance QA | Test Lead | Backend Developer | Dev Lead |
-| Security review | Security QA | Test Lead | Dev Lead | Project Manager |
-| Architecture documentation | Solution Architect | Principal Solution Architect | Dev Lead | Product Owner |
-| Quality framework & coverage docs | Quality Architect | Principal Solution Architect | Test Lead | Dev Lead |
+| Technical design / task breakdown | Dev Lead | Principal Solution Architect | Developer | Test Lead |
+| Application implementation (backend + frontend) | Developer | Dev Lead | Principal Solution Architect | Test Lead |
+| Test strategy & coverage gates | Test Lead | Dev Lead | Test Engineer | Project Manager |
+| Testing execution (manual, automation, performance, security) | Test Engineer | Test Lead | Backend Developer, DevOps Engineer | Dev Lead, Project Manager |
+| Architecture & quality framework docs | Solution Architect | Principal Solution Architect | Dev Lead, Test Lead | Product Owner |
 | AI environment implementation | AI Engineer | AI Architect | Project Manager | Dev Lead |
 | CI/CD pipeline implementation | DevOps Engineer | DevOps Lead | Dev Lead | Test Lead |
 | Deployment & release | DevOps Lead | Project Manager | DevOps Engineer, Dev Lead | All |
-| Documentation | Technical Writer | Dev Lead | Business Analyst, Product Owner | All |
+| Documentation, UX design & requirements | Business Analyst | Product Owner | Dev Lead | All |
 
 ---
 
@@ -156,10 +204,10 @@ An INFO REQUEST is not a Maker output and is never subject to a Maker-Checker re
 |---|---|---|
 | Project Manager | ai-architect, principal-solution-architect, web-search, product-owner, dev-lead, test-lead, devops-lead | Project Manager |
 | AI Architect | ai-engineer, web-search | AI Architect |
-| Principal Solution Architect | solution-architect, quality-architect, web-search | Principal Solution Architect |
-| Product Owner | business-analyst, ux-designer, technical-writer, web-search | Product Owner |
-| Dev Lead | frontend-developer, backend-developer, web-search | Dev Lead |
-| Test Lead | manual-qa, automation-qa, performance-qa, security-qa, web-search | Test Lead |
+| Principal Solution Architect | solution-architect, web-search | Principal Solution Architect |
+| Product Owner | business-analyst, web-search | Product Owner |
+| Dev Lead | developer, web-search | Dev Lead |
+| Test Lead | test-engineer, web-search | Test Lead |
 | DevOps Lead | devops-engineer, web-search | DevOps Lead |
 
 ---

@@ -45,6 +45,20 @@ Use this document as the first Copilot-owned reference when designing, reviewing
 - Confirm the actual tool names exposed by the chosen server locally before depending on them in agent instructions.
 - Use `.github/mcp-web-research-setup.md` as the companion setup reference for this pattern.
 
+## Per-Agent MCP Tool Scope
+
+> GH CLI is the correct tool for `.github/workflows/` pipeline scripts. GitHub MCP is the correct tool for agent-driven Git/GitHub interactions.
+
+| Copilot Agent | Atlassian MCP Tools | GitHub MCP Tools | Playwright MCP Tools |
+|---|---|---|---|
+| `GH Business Analyst` | `search`, `searchJiraIssuesUsingJql`, `getJiraIssue`, `editJiraIssue`, `addCommentToJiraIssue`, `getConfluencePage`, `getPagesInConfluenceSpace`, `getConfluenceSpaces`, `getVisibleJiraProjects` | — | — |
+| `GH Developer` | `searchJiraIssuesUsingJql`, `getJiraIssue` | — | — |
+| `GH Dev Lead` | `searchJiraIssuesUsingJql`, `getJiraIssue` | `get_pull_request`, `list_pull_requests`, `get_pull_request_files`, `list_issues`, `search_code` | — |
+| `GH Test Lead` | `searchJiraIssuesUsingJql`, `getJiraIssue`, `addCommentToJiraIssue` | `get_pull_request`, `get_issue`, `list_issues` | — |
+| `GH Test Engineer` | — | — | `browser_navigate`, `browser_snapshot`, `browser_click`, `browser_type`, `browser_fill_form`, `browser_take_screenshot`, `browser_close`, `browser_wait_for`, `browser_evaluate`, `browser_console_messages` |
+| `GH DevOps` | — | `create_pull_request`, `merge_pull_request`, `update_pull_request_branch`, `create_branch`, `get_pull_request`, `list_pull_requests`, `create_issue`, `update_issue`, `add_issue_comment` | — |
+| `GH DevOps Lead` | — | `get_pull_request`, `list_pull_requests`, `get_issue`, `list_issues`, `get_pull_request_status` | — |
+
 ## Review Checklist
 
 Before enabling or changing an MCP server for Copilot, verify:

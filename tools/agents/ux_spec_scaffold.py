@@ -20,7 +20,7 @@ TEMPLATE = """\
 **Date:** {date}
 **Status:** Draft
 **Feature area:** {feature_name}
-**Spec author:** GH UX Designer
+**Spec author:** GH Business Analyst
 **Review required by:** GH Product Owner
 
 ---
@@ -77,7 +77,7 @@ TEMPLATE = """\
 
 ---
 
-*Review this spec with `gh-product-owner` before handing to `gh-frontend-developer`.*
+*Review this spec with `gh-product-owner` before handing to `gh-developer`.*
 """
 
 

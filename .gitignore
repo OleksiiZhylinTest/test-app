@@ -64,6 +64,11 @@ logs/
 Thumbs.db
 desktop.ini
 
+# spec-kit session state (project constitution and spec artifacts are committed)
+.specify/memory/session*.md
+.specify/memory/.session*
+.specify/.cache/
+
 # Misc
 *.bak
 sh.exe.stackdump

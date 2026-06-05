@@ -2,7 +2,7 @@
 name: GH AI Engineer
 description: 'Use for implementing GitHub Copilot AI environment changes instructed by GH AI Architect. Owns all Copilot customization files: agent definitions, skills, prompts, hooks, summaries, AGENTS.md, and .vscode/. Do NOT grant this agent write access to .claude/** — that is the Claude AI Engineer scope.'
 model: 'Claude Sonnet 4.6 (copilot)'
-tools: [read, search, edit]
+tools: [read, search, edit, run_shell]
 user-invocable: true
 ---
 
@@ -67,6 +67,7 @@ When a task requires an external fact that cannot be found in repository files o
 
 ## Constraints
 
+- **Shell commands require human confirmation**: Every `run_shell` invocation triggers a VS Code confirmation prompt before execution. Never chain multiple destructive shell commands in a single call. Prefer `git rm` over `Remove-Item` for tracked file deletions.
 - Do not write to `.claude/**` under any circumstances.
 - Do not implement changes without direction from `gh-ai-architect`.
 - Do not introduce `.github/copilot-instructions.md` while `AGENTS.md` remains the shared always-on instruction layer.

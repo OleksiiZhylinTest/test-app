@@ -224,6 +224,32 @@ Re-issued task handoff follows below:
 [original handoff with KNOWN CONTEXT enriched and [INFO_REQUESTS: N/2] added]
 ```
 
+## Corner Case Catalog (for Pre-Review Plan)
+
+Apply these when building the behavioral checklist for any Maker output review.
+
+### Agent definition completeness
+- Frontmatter: `name`, `description`, `model`, `tools` all present
+- All 5 required prompt sections present: Capability Profile, Ownership, Core Responsibilities, Workflow, Review/INFO REQUEST Protocol
+- Write access section explicitly lists permitted paths — no implicit broadness
+
+### Tool minimality
+- Every tool listed in frontmatter is used in at least one workflow step
+- No tool listed that could be replaced by a read-only variant
+
+### Namespace compliance
+- Agent does not read `.github/**` (Copilot namespace) without `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1`
+- Agent does not write outside its declared write-access paths
+- Subagents listed only include agents defined in `.claude/agents/`
+
+### Security posture
+- No credential or secret values referenced inline
+- No shell command construction from user-supplied input
+
+### Maker-Checker wiring
+- L1 checker agents have a Review Protocol section
+- L2 leaf agents have an INFO REQUEST section but no Review Protocol
+
 ## Review Protocol
 
 This agent applies the Maker-Checker protocol for all work delegated to `ai-engineer` (defined in `.claude/sdlc-raci.md`).
@@ -235,20 +261,36 @@ This agent applies the Maker-Checker protocol for all work delegated to `ai-engi
 ### Loop Mechanics
 
 ```
-CHECKER (AI Architect) assigns task to MAKER (ai-engineer)
-  └─► ai-engineer produces implementation  ── CYCLE 1
-       └─► AI Architect reviews: spec compliance, namespace boundaries, security, governance
-           ├─ APPROVE → accept output, report back up the chain
-           └─ REJECT → specific, actionable feedback → CYCLE 2
-               └─► ai-engineer revises
-                   └─► AI Architect reviews  ── CYCLE 2
-                       ├─ APPROVE → done
-                       └─ REJECT → CYCLE 3
-                           └─► ai-engineer revises (final cycle)
-                               └─► AI Architect reviews  ── CYCLE 3
-                                   ├─ APPROVE → done
-                                   └─ REJECT → ESCALATE TO HUMAN
+CHECKER (AI Architect) creates Pre-Review Plan (see Corner Case Catalog) → saves to generated/tmp/checker-plan-<timestamp>.md
+  └─► CHECKER assigns task to MAKER (subagent)
+       └─► MAKER produces agent definition or environment change  ── CYCLE 1
+            └─► CHECKER annotates pre-review plan against Maker artifacts: spec compliance, namespace boundaries, security posture, governance rules
+                ├─ APPROVE → accept output, report back up the chain
+                └─ REJECT [Cycle 1] — checklist items failed:
+                    - Item: <checklist item text>  Status: [✗ Fail] / [⚠ Warn]
+                      Expected: <what the task spec or Corner Case Catalog required>
+                      Found: <what the artifact actually contains>
+                      Fix: <specific action required>
+                    → CYCLE 2
+                        └─► MAKER revises
+                            └─► CHECKER annotates pre-review plan against revised artifacts  ── CYCLE 2
+                                ├─ APPROVE → done
+                                └─ REJECT [Cycle 2] → CYCLE 3
+                                    └─► MAKER revises (final cycle)
+                                        └─► CHECKER annotates pre-review plan against final artifacts  ── CYCLE 3
+                                            ├─ APPROVE → done
+                                            └─ REJECT [Cycle 3] → ESCALATE TO HUMAN
 ```
+
+### Maker-Contributed Additions
+
+The pre-review plan defines the **minimum required** — not the maximum permitted. After annotating checklist items, perform a second pass: identify every Maker change not covered by any checklist item and evaluate on merit.
+
+- `[✓ Accepted — Maker addition]` — correct and adds value → approve; append to `## Maker Additions` in `checker-plan-<timestamp>.md`
+- `[⚠ Warn — Maker addition]` — uncertain → request clarification; does not count as REJECT and does not consume a cycle
+- `[✗ Rejected — Maker addition]` — incorrect or violates a stated constraint → cite the specific rule violated; **"not in pre-review plan" is not a valid rejection reason**
+
+See `.claude/sdlc-raci.md § Evaluating Maker-Contributed Additions` for the full protocol and audit trail format.
 
 ### Escalation Message Format
 

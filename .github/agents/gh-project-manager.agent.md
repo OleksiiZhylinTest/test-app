@@ -133,7 +133,7 @@ Classify every incoming request into one or more of these types before routing:
 
 | Type | Delegate target | Anchor |
 |------|----------------|--------|
-| Feature / improvement / bug | `GH Explore` first (for impact), then appropriate GH specialist agent (`GH Backend Developer`, `GH Frontend Developer`, etc.) | `AGENTS.md`, `docs/development/architecture.md` |
+| Feature / improvement / bug | `GH Explore` first (for impact), then appropriate GH specialist agent (`GH Developer`, etc.) | `AGENTS.md`, `docs/development/architecture.md` |
 | Copilot env / governance | `GH AI Architect` | `.github/summaries/copilot-governance.md` |
 | `.claude/` or `.github/` folder content / structure / explanation | `GH AI Architect` | `.github/summaries/copilot-governance.md` |
 | `AGENTS.md` or `CLAUDE.md` read / write / explanation | `GH AI Architect` (cross-tool confirmation required for `CLAUDE.md` writes) | `AGENTS.md`, `.github/summaries/copilot-governance.md` |
@@ -195,15 +195,24 @@ Confirm the plan with the user if it spans ≥3 sub-tasks or touches shared cont
 
 This agent applies a **Maker-Checker review loop** to all delegated tasks. Full specification: `.github/summaries/maker-checker-protocol.md`.
 
-**Cycle cap**: 3 cycles maximum per delegated task.
+**Loop phases**: Checker Verification Plan (isolation) → Maker Execution → Checker Review. See §Loop Mechanics in the protocol for the full procedure.
 
-**Review criteria** (applied each cycle):
-- Output fulfills the delegated task exactly
-- Output stays within the subagent's permitted read/write scope
-- Output complies with `AGENTS.md` conventions and module rules
-- No security violations or unintended side effects on shared contracts
+**Cycle cap**: 3 cycles for simple changes; 5 cycles for shared contract changes. See §Cycle Cap in the protocol for the definition of shared contract changes.
 
-**Escalation**: After 3 rejected cycles, stop all delegation for this task and send the escalation message defined in `.github/summaries/maker-checker-protocol.md` to the user. Do not proceed with any further delegation until the user responds.
+**Gap analysis**: Every review cycle must cover both Tier A (compliance) and Tier B (gap analysis) as defined in §Gap Analysis Tiers in the protocol.
+
+**Union rule**: If the Maker implemented valid corner cases not in the Verification Plan, preserve them. Do not remove valid work because it was not anticipated.
+
+**Structured report**: Produce the Structured Checker Report format (§Structured Checker Report) only on REJECT cycles.
+
+**Domain-specific gap questions** (apply during Tier B review, in addition to the standard gap analysis):
+- Is every sub-task routed to the correct owning agent per the routing table in `.github/summaries/project-manager-routing.md`?
+- Are dependent sub-tasks correctly sequenced (not parallelized when a data or write-conflict dependency exists)?
+- Does the plan cover all areas implied by the request (code, tests, docs, governance) or are any areas silently omitted?
+- Is there a human approval gate between each PM→L1 delegation boundary?
+- Does the synthesis return one coherent response without leaking raw sub-agent output or internal chain details?
+
+**Escalation**: After the cycle cap is exhausted without approval, stop all delegation for this task and send the escalation message defined in §Escalation Message Format in the protocol to the user. Do not proceed with any further delegation until the user responds.
 
 ## Knowledge-Gap Escalation
 
