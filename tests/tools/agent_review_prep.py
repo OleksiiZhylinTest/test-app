@@ -44,7 +44,11 @@ _MODULE_MAP: list[tuple[list[str], str, str]] = [
     (["app/core/jira_client.py"], "app/core/jira_client.py", "Jira REST wrapper; fetch_sprint_data()"),
     (["app/core/metrics.py"], "app/core/metrics.py", "Pure metric functions; build_metrics_dict()"),
     (["app/core/schema.py"], "app/core/schema.py", "Jira field schema registry backed by config/jira_schema.json"),
-    (["app/reporters/report_html.py"], "app/reporters/report_html.py", "Renders ui/templates/report.html.j2 via Jinja2"),
+    (
+        ["app/reporters/report_html.py"],
+        "app/reporters/report_html.py",
+        "Renders ui/templates/report.html.j2 via Jinja2",
+    ),
     (["app/reporters/report_md.py"], "app/reporters/report_md.py", "Builds Markdown report string and writes to disk"),
     (["app/utils/logging_setup.py"], "app/utils/logging_setup.py", "setup_logging(); custom SUCCESS level"),
     (["app/utils/cert_utils.py"], "app/utils/cert_utils.py", "PEM certificate validation via cryptography library"),

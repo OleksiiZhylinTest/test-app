@@ -55,6 +55,15 @@ If implementing a **new feature**:
 3. Each test should assert one aspect of the requirement's acceptance criterion
 4. If you updated existing code, update existing tests — don't add redundant tests
 
+### Step 3.5: Delegate to Test Lead
+
+1. Delegate to `test-lead` with:
+   - List of changed files (from Step 2 and Step 3)
+   - Acceptance criteria from the relevant requirement rows (from Step 1)
+   - Spec directory path if a `specs/NNN-feature/` exists
+2. **Wait for `test-lead` to return `COMPLETE`** — this implies Phase 1 checklist approval and Phase 2 green smoke run (`python tests/runners/run_all_checks.py --smoke`).
+3. **Do not proceed to Step 4 without this sign-off.** If `test-lead` returns `BLOCKED`, resolve the reported issues before continuing.
+
 ### Step 4: Run Full Test Suite
 
 1. Run `/test` — all checks must pass (lint, type check, security, unit, component)

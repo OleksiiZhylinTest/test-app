@@ -67,7 +67,6 @@ _RULES: list[tuple[list[str], str, str]] = [
 
 def _matches_pattern(file_path: str, pattern: str) -> bool:
     pp = PurePosixPath(file_path.replace("\\", "/"))
-    pat = PurePosixPath(pattern)
     # Simple glob: support *, **, and exact matches
     try:
         return pp.match(pattern) or pp.full_match(pattern)

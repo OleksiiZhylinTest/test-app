@@ -189,12 +189,15 @@ An INFO REQUEST is not a Maker output and is never subject to a Maker-Checker re
 | Technical design / task breakdown | Dev Lead | Principal Solution Architect | Developer | Test Lead |
 | Application implementation (backend + frontend) | Developer | Dev Lead | Principal Solution Architect | Test Lead |
 | Test strategy & coverage gates | Test Lead | Dev Lead | Test Engineer | Project Manager |
-| Testing execution (manual, automation, performance, security) | Test Engineer | Test Lead | Backend Developer, DevOps Engineer | Dev Lead, Project Manager |
+| Testing execution (manual, automation, performance, security) | Test Engineer | Test Lead | Backend Developer, DevOps Engineer | Dev Lead |
+| Test-gate sign-off (feature complete) | Test Lead | **Project Manager** | Dev Lead | All |
 | Architecture & quality framework docs | Solution Architect | Principal Solution Architect | Dev Lead, Test Lead | Product Owner |
 | AI environment implementation | AI Engineer | AI Architect | Project Manager | Dev Lead |
 | CI/CD pipeline implementation | DevOps Engineer | DevOps Lead | Dev Lead | Test Lead |
 | Deployment & release | DevOps Lead | Project Manager | DevOps Engineer, Dev Lead | All |
 | Documentation, UX design & requirements | Business Analyst | Product Owner | Dev Lead | All |
+
+> **Test-gate rule**: PM is Accountable for the test-gate sign-off row. After `dev-lead` returns `COMPLETE` on any implementation task, PM must delegate to `test-lead` and await a `COMPLETE` response (green smoke run confirmed) before presenting the feature as done to the human. PM must not close an implementation delegation without this sign-off.
 
 ---
 

@@ -170,7 +170,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Suggest next steps if implementation cannot proceed
    - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
-9. Completion validation:
+9. Test-lead gate (mandatory before Completion Report):
+   - Delegate to `test-lead` with: (a) list of all files created or modified during implementation, (b) acceptance criteria from `spec.md`, (c) path to `specs/NNN-feature/` directory.
+   - **Block until `test-lead` returns `COMPLETE`.** A `COMPLETE` status from `test-lead` implies Phase 1 checklist approval + Phase 2 green smoke run. If `test-lead` returns `BLOCKED`, halt and report to the user.
+   - Add `[ ] test-lead returned COMPLETE` to the Done When checklist below; only mark it `[X]` when `test-lead` confirms.
+
+10. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
@@ -219,6 +224,7 @@ Report final status with summary of completed work.
 ## Done When
 
 - [ ] All tasks in tasks.md completed and marked `[X]`
+- [ ] `test-lead` returned `COMPLETE` (Phase 1 checklist + Phase 2 green smoke run confirmed)
 - [ ] Implementation validated against specification, plan, and test coverage
 - [ ] Extension hooks dispatched or skipped according to the rules in Mandatory Post-Execution Hooks above
 - [ ] Completion reported to user with summary of completed work

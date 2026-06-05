@@ -193,6 +193,7 @@ RETURN: <exact format — findings list | implementation plan | pass/fail | stru
 - Always apply the 6-step dev workflow from `CLAUDE.md` for non-trivial code changes.
 - Never implement a new feature without first completing the spec-kit spec phase (`specs/NNN-feature/tasks.md` approved by human).
 - Never implement a feature without plan-mode approval first.
+- **Never mark a feature implementation complete without first receiving a `COMPLETE` status from `test-lead`.** After every `dev-lead` COMPLETE report for a non-trivial change, the mandatory next delegation is to `test-lead` (scope: changed files + acceptance criteria from the spec). Do not present the feature as done to the human until `test-lead` returns COMPLETE with a green smoke run.
 - For cross-assistant tasks spanning both Claude-side (`.claude/**`) and Copilot-side (`.github/**`) work: route Claude-side aspects to `ai-architect`. Flag to the human that Copilot-side aspects require a separate Copilot invocation. Never route Claude tasks to Copilot agents.
 
 ## Context Cost Ladder
@@ -258,6 +259,10 @@ Apply these when building the behavioral checklist for any Maker output review.
 - BLOCKED state reported immediately, not after attempting a workaround
 - INFO REQUEST cap (2/task) tracked and enforced
 - Maker-Checker cycles tracked — cycle count correct in any escalation message
+
+### Test gate
+- `test-lead` was invoked after `dev-lead` COMPLETE and returned COMPLETE before accepting the implementation output
+- Green smoke run (`python tests/runners/run_all_checks.py --smoke`) confirmed in `test-lead` report
 
 ### Cross-cutting concerns
 - Requirements status current (`python tests/tools/requirements_status.py` exits zero)

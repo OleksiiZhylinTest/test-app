@@ -52,8 +52,7 @@ def _run_pip_audit() -> tuple[int, list[dict]]:
 
     if cmd is None:
         print(
-            "ERROR: pip-audit is not installed.\n"
-            "Install it with: pip install pip-audit",
+            "ERROR: pip-audit is not installed.\nInstall it with: pip install pip-audit",
             file=sys.stderr,
         )
         return 2, []
@@ -99,8 +98,7 @@ def _run_bandit() -> tuple[int, list[dict]]:
 
     if cmd is None:
         print(
-            "ERROR: bandit is not installed.\n"
-            "Install it with: pip install bandit",
+            "ERROR: bandit is not installed.\nInstall it with: pip install bandit",
             file=sys.stderr,
         )
         return 2, []
@@ -159,10 +157,7 @@ def main() -> int:
     if hc_issues:
         print(f"  FOUND {len(hc_issues)} HIGH/CRITICAL issue(s):")
         for issue in hc_issues:
-            print(
-                f"    [{issue['severity']}] {issue['file']}:{issue['line']} "
-                f"({issue['test_id']}) — {issue['text']}"
-            )
+            print(f"    [{issue['severity']}] {issue['file']}:{issue['line']} ({issue['test_id']}) — {issue['text']}")
     else:
         print("  OK — no HIGH or CRITICAL bandit findings.")
 

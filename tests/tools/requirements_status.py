@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -30,9 +30,7 @@ STATUS_MET = "✓ Met"
 STATUS_NOT_MET = "✗ Not met"
 STATUS_NT = "⬜ N/T"
 
-_STATUS_PATTERN = re.compile(
-    r"\|\s*(?P<status>[✓✗⬜][^|]*?)\s*\|?\s*$"
-)
+_STATUS_PATTERN = re.compile(r"\|\s*(?P<status>[✓✗⬜][^|]*?)\s*\|?\s*$")
 _TABLE_ROW = re.compile(r"^\|[^|]+\|")
 _SEPARATOR_ROW = re.compile(r"^\|[-| :]+\|")
 
@@ -121,7 +119,8 @@ def _print_table(stats: list[FileStats]) -> None:
         totals.not_tested += s.not_tested
         totals.unknown += s.unknown
     print(
-        f"{'TOTAL':<{col_w}}  {totals.total:>6}  {totals.met:>7}  {totals.not_met:>8}  {totals.not_tested:>7}  {totals.unknown:>8}"
+        f"{'TOTAL':<{col_w}}  {totals.total:>6}  {totals.met:>7}"
+        f"  {totals.not_met:>8}  {totals.not_tested:>7}  {totals.unknown:>8}"
     )
 
 
