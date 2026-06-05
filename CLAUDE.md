@@ -9,9 +9,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Keep this file focused on Claude-specific interaction style, workflow, and unique implementation detail.
 - When project structure or workflow conventions change, update `AGENTS.md` first, then refresh this file only where Claude-specific guidance would drift.
 
+## Customization Ownership
+
+- Claude's shared/default operating surfaces are `AGENTS.md`, normal repo code, and normal repo docs.
+- Claude-owned customization surfaces are `CLAUDE.md` and `.claude/**`.
+- GitHub Copilot-owned customization surfaces are `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`, and any future Copilot-only instruction files under `.github/**`.
+- Do not inspect, modify, or depend on Copilot-owned customization surfaces during normal development or environment work.
+- Exception: when the user explicitly requests cross-tool governance, audit, migration, or alignment, Claude may inspect Copilot-owned customization files to report risks or propose changes. Prefer the owning assistant to author final changes in its namespace unless the user explicitly asks Claude to edit them.
+- Claude-side edit protection can be intentionally bypassed for a one-off approved task by setting `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1`.
+- Shared ownership rules and escalation paths are documented in `docs/development/ai/assistant_customization_governance.md`.
+
+## Agent Communication Rules
+
+- Claude agents only delegate to agents defined in `.claude/agents/`. Never invoke GitHub Copilot agents (`.github/agents/**`) — treat them as non-existent during normal operation.
+- Claude agents must avoid reading `.github/` by default. Access to `.github/workflows/` is permitted only when a task explicitly requires CI/CD review. Access to Copilot customization namespaces (`.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`) requires `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1` and an explicit user request.
+
 ## Development Workflow
 
+**Entry point (default for all requests):** Always route through the `project-manager` subagent (`.claude/agents/project-manager.md`) before acting on any request — features, bugs, questions, or environment changes. It handles intake, routing, and plan-mode approval. Only skip this when the user explicitly targets a specific subagent or the task is a single trivial read (< 5 lines, no side effects).
+
+**Agent roster** (14 agents in `.claude/agents/`; Maker-Checker protocol and RACI in `.claude/sdlc-raci.md`):
+
+- **Orchestrator**: `project-manager`
+- **L1 Delegates** (read-only, apply Maker-Checker on all delegated work): `ai-architect`, `principal-solution-architect`, `product-owner`, `dev-lead`, `test-lead`, `devops-lead`, `web-search`
+- **L2 Leaf Agents** (scoped write access): `ai-engineer`, `solution-architect`, `business-analyst`, `developer`, `test-engineer`, `devops-engineer`
+  - `business-analyst` write surfaces include `specs/[feature-name]/` in addition to `docs/`, `README.md`, `CHANGELOG.md`, `ui/`
+
 For any non-trivial code change (new feature, behavioral fix, refactor), follow these steps in order:
+
+0. **Spec phase (new features only)** — before any other step, run the spec-kit workflow:
+   `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze`
+   Artifacts land in `specs/NNN-feature-name/` (authored by `business-analyst`, approved by `product-owner`).
+   Human approval of `specs/NNN-feature-name/tasks.md` is required before proceeding to step 1.
+   Skip this step for bug fixes and refactors.
 
 1. **Maintain requirements** — identify the relevant file(s) using `docs/product/requirements/README.md` (lists all files and their ID prefixes); update the `Status` column (`✓ Met`, `✗ Not met`, `⬜ N/T`) for rows whose acceptance criterion is affected. Do not add rows or create new files.
 2. **Maintain application functionality** — implement the feature, fix, or refactor.
@@ -58,6 +88,34 @@ Extends global `CLAUDE.md` logging rules. Project adds `SUCCESS` (level 25, betw
 ## Generated and Temporary Files
 
 Extends global `CLAUDE.md` file placement rules. Subdirectory convention: `generated/tmp/` for scratch, `generated/debug/` for diagnostics, `generated/reports/` for report artifacts. Never move source files into `generated/`.
+
+## Spec-Driven Development Skills (spec-kit)
+
+Invoked as slash commands in Claude Code. Skills live in `.claude/skills/speckit-*/SKILL.md`.
+
+| Skill | Purpose |
+|-------|---------|
+| `/speckit-specify <description>` | Create `specs/NNN-feature/spec.md` from feature description |
+| `/speckit-clarify` | Resolve `[NEEDS CLARIFICATION]` markers in the active spec |
+| `/speckit-plan` | Produce `specs/NNN-feature/plan.md` (technical approach) |
+| `/speckit-tasks` | Produce `specs/NNN-feature/tasks.md` (ordered task breakdown) |
+| `/speckit-analyze` | Cross-check spec/plan/tasks for coverage gaps |
+| `/speckit-implement` | Drive implementation from approved `tasks.md` |
+| `/speckit-checklist` | Generate/update quality checklists |
+| `/speckit-taskstoissues` | Convert `tasks.md` items to GitHub Issues |
+| `/speckit-constitution` | Update `.specify/memory/constitution.md` |
+
+Run the full workflow in order: specify → clarify → plan → tasks → analyze → (human approval) → implement.
+
+### Slash Command Placement Rule
+
+| Use `.claude/commands/<name>.md` | Use `.claude/skills/<name>/SKILL.md` |
+|----------------------------------|--------------------------------------|
+| Prose workflow checklist — ordered steps, no arguments | Parameterized command — accepts `$ARGUMENTS` |
+| Multi-step orchestration guide Claude follows | Needs frontmatter metadata (`argument-hint`, `compatibility`, `user-invocable`) |
+| No special dispatch required | Requires skill-dispatch features (`disable-model-invocation`, etc.) |
+
+When in doubt: if your command takes no input and is just "do these steps", use `.claude/commands/`. If it takes a description or identifier as input, use `.claude/skills/`.
 
 ## Commands
 
@@ -117,3 +175,9 @@ Full module responsibilities and data-flow diagrams are in `docs/development/arc
 
 
 
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at `specs/001-session-token-telemetry/plan.md`
+<!-- SPECKIT END -->

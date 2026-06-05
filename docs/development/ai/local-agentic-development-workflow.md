@@ -1,5 +1,7 @@
 # Local Agentic Development Workflow
 
+This guide is Claude Code-specific. GitHub Copilot should use Copilot-owned assets under `.github/` and the shared contract in `AGENTS.md` instead of assuming Claude commands or hooks are available.
+
 Based on your project setup (`CLAUDE.md` + `/subagents` command), here is the end-to-end process.
 
 ---

@@ -10,6 +10,7 @@ markers = [
     "windows_only: tests covering Windows-specific OS behaviour (automatically skipped on Linux/macOS via skipif decorator)",
     "smoke: critical happy-path tests across all layers (~1-2 min total). Select with -m smoke",
     "sanity: broader regression set across all layers (~5-10 min total). Select smoke+sanity with -m 'smoke or sanity'",
+    "performance: performance and load tests",
 ]
 
 [tool.playwright]

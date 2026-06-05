@@ -18,3 +18,21 @@ tests/coverage/
 
 # Survey data files — not source code
 data/
+
+# .github/ — Copilot-owned customization surfaces (CLAUDE.md §Customization Ownership)
+# CLAUDE.md rule: "Claude agents must avoid reading .github/ by default"
+.github/agents/
+.github/skills/
+.github/prompts/
+.github/hooks/
+.github/summaries/
+.github/mcp-guidelines.md
+.github/mcp-web-research-setup.md
+
+# .github/ — shared CI/infra; on-demand only (CLAUDE.md §Agent Communication Rules)
+.github/workflows/
+.github/dependabot.yml
+
+# Python bytecode — never source context
+**/__pycache__/
+**/*.pyc

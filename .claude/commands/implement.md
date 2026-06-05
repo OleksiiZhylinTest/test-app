@@ -18,6 +18,20 @@ Full feature implementation workflow — from requirements to commit-ready code.
 
 Follow these steps in order. Claude will mark each step complete and move to the next.
 
+### Step 0: Spec-Kit Gate (New Features Only)
+
+**Skip this step for bug fixes and refactors.**
+
+If implementing a **new feature**:
+
+1. Check whether `specs/` contains a directory for this feature: `specs/NNN-<feature-name>/`
+2. Verify `specs/NNN-<feature-name>/tasks.md` exists and carries a human-approval marker
+3. If `tasks.md` does not exist or has not been approved: **stop here**. Run the full spec-kit workflow first:
+   `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → (human approval of `tasks.md`)
+4. After human approval, return to this workflow and proceed to Step 1.
+
+> This gate exists because `/implement` operates from approved artifacts. Skipping spec-kit means implementing without agreed scope, acceptance criteria, or task breakdown — the source of most rework.
+
 ### Step 1: Read Requirements
 
 1. Look up the feature area using `/requirements` and find the relevant requirement file(s)
@@ -40,6 +54,15 @@ Follow these steps in order. Claude will mark each step complete and move to the
 2. Use test factories from `tests/conftest.py` — see `/test` for reference
 3. Each test should assert one aspect of the requirement's acceptance criterion
 4. If you updated existing code, update existing tests — don't add redundant tests
+
+### Step 3.5: Delegate to Test Lead
+
+1. Delegate to `test-lead` with:
+   - List of changed files (from Step 2 and Step 3)
+   - Acceptance criteria from the relevant requirement rows (from Step 1)
+   - Spec directory path if a `specs/NNN-feature/` exists
+2. **Wait for `test-lead` to return `COMPLETE`** — this implies Phase 1 checklist approval and Phase 2 green smoke run (`python tests/runners/run_all_checks.py --smoke`).
+3. **Do not proceed to Step 4 without this sign-off.** If `test-lead` returns `BLOCKED`, resolve the reported issues before continuing.
 
 ### Step 4: Run Full Test Suite
 
