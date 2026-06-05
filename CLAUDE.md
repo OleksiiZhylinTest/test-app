@@ -28,13 +28,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Entry point (default for all requests):** Always route through the `project-manager` subagent (`.claude/agents/project-manager.md`) before acting on any request — features, bugs, questions, or environment changes. It handles intake, routing, and plan-mode approval. Only skip this when the user explicitly targets a specific subagent or the task is a single trivial read (< 5 lines, no side effects).
 
-**Agent roster** (21 agents in `.claude/agents/`; Maker-Checker protocol and RACI in `.claude/sdlc-raci.md`):
+**Agent roster** (14 agents in `.claude/agents/`; Maker-Checker protocol and RACI in `.claude/sdlc-raci.md`):
 
 - **Orchestrator**: `project-manager`
 - **L1 Delegates** (read-only, apply Maker-Checker on all delegated work): `ai-architect`, `principal-solution-architect`, `product-owner`, `dev-lead`, `test-lead`, `devops-lead`, `web-search`
-- **L2 Leaf Agents** (scoped write access): `ai-engineer`, `solution-architect`, `quality-architect`, `business-analyst`, `backend-developer`, `frontend-developer`, `manual-qa`, `automation-qa`, `performance-qa`, `security-qa`, `ux-designer`, `technical-writer`, `devops-engineer`
+- **L2 Leaf Agents** (scoped write access): `ai-engineer`, `solution-architect`, `business-analyst`, `developer`, `test-engineer`, `devops-engineer`
+  - `business-analyst` write surfaces include `specs/[feature-name]/` in addition to `docs/`, `README.md`, `CHANGELOG.md`, `ui/`
 
 For any non-trivial code change (new feature, behavioral fix, refactor), follow these steps in order:
+
+0. **Spec phase (new features only)** — before any other step, run the spec-kit workflow:
+   `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze`
+   Artifacts land in `specs/NNN-feature-name/` (authored by `business-analyst`, approved by `product-owner`).
+   Human approval of `specs/NNN-feature-name/tasks.md` is required before proceeding to step 1.
+   Skip this step for bug fixes and refactors.
 
 1. **Maintain requirements** — identify the relevant file(s) using `docs/product/requirements/README.md` (lists all files and their ID prefixes); update the `Status` column (`✓ Met`, `✗ Not met`, `⬜ N/T`) for rows whose acceptance criterion is affected. Do not add rows or create new files.
 2. **Maintain application functionality** — implement the feature, fix, or refactor.
@@ -81,6 +88,24 @@ Extends global `CLAUDE.md` logging rules. Project adds `SUCCESS` (level 25, betw
 ## Generated and Temporary Files
 
 Extends global `CLAUDE.md` file placement rules. Subdirectory convention: `generated/tmp/` for scratch, `generated/debug/` for diagnostics, `generated/reports/` for report artifacts. Never move source files into `generated/`.
+
+## Spec-Driven Development Skills (spec-kit)
+
+Invoked as slash commands in Claude Code. Skills live in `.claude/skills/speckit-*/SKILL.md`.
+
+| Skill | Purpose |
+|-------|---------|
+| `/speckit-specify <description>` | Create `specs/NNN-feature/spec.md` from feature description |
+| `/speckit-clarify` | Resolve `[NEEDS CLARIFICATION]` markers in the active spec |
+| `/speckit-plan` | Produce `specs/NNN-feature/plan.md` (technical approach) |
+| `/speckit-tasks` | Produce `specs/NNN-feature/tasks.md` (ordered task breakdown) |
+| `/speckit-analyze` | Cross-check spec/plan/tasks for coverage gaps |
+| `/speckit-implement` | Drive implementation from approved `tasks.md` |
+| `/speckit-checklist` | Generate/update quality checklists |
+| `/speckit-taskstoissues` | Convert `tasks.md` items to GitHub Issues |
+| `/speckit-constitution` | Update `.specify/memory/constitution.md` |
+
+Run the full workflow in order: specify → clarify → plan → tasks → analyze → (human approval) → implement.
 
 ## Commands
 
@@ -140,3 +165,9 @@ Full module responsibilities and data-flow diagrams are in `docs/development/arc
 
 
 
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at `specs/001-session-token-telemetry/plan.md`
+<!-- SPECKIT END -->
