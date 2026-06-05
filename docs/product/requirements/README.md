@@ -6,21 +6,21 @@ Quick-lookup guide for AI agents and developers. Use this to identify which file
 
 ## Requirements files
 
-All standard requirements files follow the naming convention `<topic>_requirements.md` and use the table format `| ID | Requirement | Acceptance Criterion | Status |`.
+All standard requirements files follow the naming convention `<topic>-requirements.md` and use the table format `| ID | Requirement | Acceptance Criterion | Status |`.
 
 | File | Topic area | ID prefix(es) |
 |------|-----------|---------------|
-| [`app_non_functional_requirements.md`](app_non_functional_requirements.md) | Performance, security, usability, reliability, data privacy, compatibility, accessibility | `NFR-P-`, `NFR-S-`, `NFR-U-`, `NFR-R-`, `NFR-D-`, `NFR-C-`, `NFR-A-` |
-| [`dau_survey_requirements.md`](dau_survey_requirements.md) | DAU survey UI, file save, metric computation, report rendering | `DAU-F-`, `DAU-NFR-` |
-| [`jira_connection_requirements.md`](jira_connection_requirements.md) | Authentication, config validation, SSL | `JCR-A-`, `JCR-C-`, `JCR-SSL-` |
-| [`jira_data_fetching_requirements.md`](jira_data_fetching_requirements.md) | Board discovery, sprint fetching, issue fetching, changelog, filter scoping | `JDF-B-`, `JDF-SP-`, `JDF-IS-`, `JDF-CL-`, `JDF-F-` |
-| [`jira_filter_management_requirements.md`](jira_filter_management_requirements.md) | Default filter, CRUD operations, UI behaviour | `JFM-D-`, `JFM-C-`, `JFM-U-` |
-| [`jira_schema_requirements.md`](jira_schema_requirements.md) | Schema loading, field lookup, status mapping, auto-detection | `JSR-L-`, `JSR-F-`, `JSR-S-`, `JSR-D-` |
-| [`logging_requirements.md`](logging_requirements.md) | Log file creation, log level, log format, log cleanup | `LOG-` |
-| [`metric_computation_requirements.md`](metric_computation_requirements.md) | Done-status resolution, story points extraction, sprint attribution/deduplication, velocity aggregation, estimation type | `MC-V-DS-`, `MC-V-SP-`, `MC-V-SA-`, `MC-V-AG-`, `MC-V-ET-`, `MC-V-OUT-` |
-| [`report_generation_requirements.md`](report_generation_requirements.md) | Report generation config, project type, estimation type, metric toggles, UI controls, template labels | `RG-` |
-| [`installation_requirements.md`](installation_requirements.md) | Zip contents, setup steps, uninstall | *(no standard ID — uses descriptive sections)* |
-| [`technical_requirements.md`](technical_requirements.md) | OS compatibility, Python version, dependencies | *(no standard ID — uses descriptive sections)* |
+| [`app-non-functional-requirements.md`](app-non-functional-requirements.md) | Performance, security, usability, reliability, data privacy, compatibility, accessibility | `NFR-P-`, `NFR-S-`, `NFR-U-`, `NFR-R-`, `NFR-D-`, `NFR-C-`, `NFR-A-` |
+| [`dau-survey-requirements.md`](dau-survey-requirements.md) | DAU survey UI, file save, metric computation, report rendering | `DAU-F-`, `DAU-NFR-` |
+| [`jira-connection-requirements.md`](jira-connection-requirements.md) | Authentication, config validation, SSL | `JCR-A-`, `JCR-C-`, `JCR-SSL-` |
+| [`jira-data-fetching-requirements.md`](jira-data-fetching-requirements.md) | Board discovery, sprint fetching, issue fetching, changelog, filter scoping | `JDF-B-`, `JDF-SP-`, `JDF-IS-`, `JDF-CL-`, `JDF-F-` |
+| [`jira-filter-management-requirements.md`](jira-filter-management-requirements.md) | Default filter, CRUD operations, UI behaviour | `JFM-D-`, `JFM-C-`, `JFM-U-` |
+| [`jira-schema-requirements.md`](jira-schema-requirements.md) | Schema loading, field lookup, status mapping, auto-detection | `JSR-L-`, `JSR-F-`, `JSR-S-`, `JSR-D-` |
+| [`logging-requirements.md`](logging-requirements.md) | Log file creation, log level, log format, log cleanup | `LOG-` |
+| [`metric-computation-requirements.md`](metric-computation-requirements.md) | Done-status resolution, story points extraction, sprint attribution/deduplication, velocity aggregation, estimation type | `MC-V-DS-`, `MC-V-SP-`, `MC-V-SA-`, `MC-V-AG-`, `MC-V-ET-`, `MC-V-OUT-` |
+| [`report-generation-requirements.md`](report-generation-requirements.md) | Report generation config, project type, estimation type, metric toggles, UI controls, template labels | `RG-` |
+| [`installation-requirements.md`](installation-requirements.md) | Zip contents, setup steps, uninstall | *(no standard ID — uses descriptive sections)* |
+| [`technical-requirements.md`](technical-requirements.md) | OS compatibility, Python version, dependencies | *(no standard ID — uses descriptive sections)* |
 
 ---
 
@@ -40,7 +40,7 @@ Use exactly these three values in the `Status` column — no other variations:
 
 | File | Purpose |
 |------|---------|
-| [`app_nfr_gap_analysis.md`](app_nfr_gap_analysis.md) | Gap analysis against `app_non_functional_requirements.md` — records findings, recommended fixes, and resolution notes. Not a requirements file; do not update Status rows here. |
+| [`app-nfr-gap-analysis.md`](app-nfr-gap-analysis.md) | Gap analysis against `app-non-functional-requirements.md` — records findings, recommended fixes, and resolution notes. Not a requirements file; do not update Status rows here. |
 
 ---
 
@@ -48,6 +48,6 @@ Use exactly these three values in the `Status` column — no other variations:
 
 **Step 1 (Maintain requirements):** look up the relevant file(s) in the table above. Open the file, find the row(s) whose acceptance criterion is affected by the change, and update the `Status` column. Do not add rows or create new files.
 
-When the change affects NFRs (performance, security, reliability, etc.) → open `app_non_functional_requirements.md`.
-When the change affects a specific feature area → open the matching `<topic>_requirements.md`.
+When the change affects NFRs (performance, security, reliability, etc.) → open `app-non-functional-requirements.md`.
+When the change affects a specific feature area → open the matching `<topic>-requirements.md`.
 When the change affects multiple areas → update all relevant files.

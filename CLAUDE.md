@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Do not inspect, modify, or depend on Copilot-owned customization surfaces during normal development or environment work.
 - Exception: when the user explicitly requests cross-tool governance, audit, migration, or alignment, Claude may inspect Copilot-owned customization files to report risks or propose changes. Prefer the owning assistant to author final changes in its namespace unless the user explicitly asks Claude to edit them.
 - Claude-side edit protection can be intentionally bypassed for a one-off approved task by setting `ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1`.
-- Shared ownership rules and escalation paths are documented in `docs/development/ai/assistant_customization_governance.md`.
+- Shared ownership rules and escalation paths are documented in `docs/development/ai/assistant-customization-governance.md`.
 
 ## Agent Communication Rules
 
@@ -37,11 +37,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 For any non-trivial code change (new feature, behavioral fix, refactor), follow these steps in order:
 
-0. **Spec phase (new features only)** — before any other step, run the spec-kit workflow:
-   `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze`
-   Artifacts land in `specs/NNN-feature-name/` (authored by `business-analyst`, approved by `product-owner`).
-   Human approval of `specs/NNN-feature-name/tasks.md` is required before proceeding to step 1.
-   Skip this step for bug fixes and refactors.
+0. **SDD classification (all non-trivial requests)** — before any other step, the PM agent classifies the request into one of four SDD tracks (or SDD-free). SDD applies to **all** Create / Update / Improve / Delete work — not only new features.
+
+   | Track | Scope | Spec-kit workflow |
+   |---|---|---|
+   | **Track 0 — AI Ecosystem** | `.claude/**`, agent definitions, hooks | No spec-kit; AI Architect → AI Engineer Maker-Checker loop |
+   | **Track 1 — Product Feature** | `app/`, `ui/`, `config/`, user-visible behavior | Full spec-kit: `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` |
+   | **Track 2 — Tests / Coverage** | `tests/`, coverage thresholds | No spec-kit; Test Lead → Test Engineer Maker-Checker loop |
+   | **Track 3 — CI/CD & Infra** | `.github/workflows/`, Dockerfile, deployment scripts | No spec-kit; DevOps Lead → DevOps Engineer Maker-Checker loop |
+
+   For Track 1: artifacts land in `specs/NNN-feature-name/` (authored by `business-analyst`, approved by `product-owner`). Human approval of `specs/NNN-feature-name/tasks.md` is required before proceeding to step 1.
+
+   SDD-free requests (explain, audit, code review, execute tests, read docs) skip this step entirely — see `.claude/agents/project-manager.md § SDD Decision Framework`.
 
 1. **Maintain requirements** — identify the relevant file(s) using `docs/product/requirements/README.md` (lists all files and their ID prefixes); update the `Status` column (`✓ Met`, `✗ Not met`, `⬜ N/T`) for rows whose acceptance criterion is affected. Do not add rows or create new files.
 2. **Maintain application functionality** — implement the feature, fix, or refactor.
@@ -147,37 +154,13 @@ pytest tests/ -v
 # Update tests/coverage/test_coverage.md after adding/removing tests (never hand-edit it)
 python tests/tools/test_coverage.py
 python tests/tools/test_coverage.py --dry-run   # preview only
+
+# Documentation audit — scan docs/ for structure/content/format/link/gap issues
+python tools/docs_audit.py docs/ --output generated/reports/docs-audit.md   # docs/ only (recommended)
+python tools/docs_audit.py .    --output generated/reports/docs-audit.md   # full repo
+python tools/docs_audit.py docs/ --output generated/reports/docs-audit.md --json  # + machine-readable findings
 ```
 
 ## Key Files Quick Reference
 
-Full module responsibilities and data-flow diagrams are in `docs/development/architecture.md`. This table is a quick-lookup map.
-
-| File | Purpose |
-|------|---------|
-| `main.py` | Thin entry-point; delegates to `app/cli.py` |
-| `server.py` | Thin entry-point; delegates to `app/server.py` |
-| `app/cli.py` | CLI pipeline: validate config → fetch → compute → parallel HTML+MD report generation |
-| `app/core/config.py` | Loads `.env` via python-dotenv; all `JIRA_*` / `AI_*` constants; `validate_config()` |
-| `app/core/jira_client.py` | Jira REST wrapper; `fetch_sprint_data()` → `(sprints, sprint_issues)` |
-| `app/core/metrics.py` | Pure computation; `build_metrics_dict()` assembles the dict both reporters consume |
-| `app/core/schema.py` | Jira field schema registry; load/save/query `config/jira_schema.json` |
-| `app/reporters/report_html.py` | Renders `ui/templates/report.html.j2` via Jinja2 |
-| `app/reporters/report_md.py` | Builds Markdown report string and writes to disk |
-| `app/server.py` | Stdlib HTTPServer; serves `ui/index.html` and all `/api/*` routes |
-| `app/utils/logging_setup.py` | `setup_logging()` → `(root_logger, log_file_path)`; custom `SUCCESS_LEVEL=25` |
-| `app/utils/cert_utils.py` | `validate_cert(Path)` → `{valid, expires_at, days_remaining, subject}` |
-| `config/jira_schema.json` | Jira field/status definitions per instance; ships `Default_Jira_Cloud` entry |
-| `config/jira_filters.json` | Named JQL filter registry; source-controlled |
-| `ui/templates/report.html.j2` | Jinja2 HTML report template |
-| `tests/conftest.py` | Shared factories: `make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels` |
-| `.env.example` | Source of truth for all config variables with inline comments |
-
-
-
-
-<!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
-at `specs/001-session-token-telemetry/plan.md`
-<!-- SPECKIT END -->
+See `AGENTS.md § Module Map` — the authoritative, always-current source for module responsibilities and data-flow.

@@ -6,6 +6,7 @@ This directory contains quality strategy documents maintained by the `quality-ar
 
 | Topic | Document |
 |-------|----------|
+| Performance baselines | [performance-baselines.md](performance-baselines.md) |
 | Test layer pyramid strategy | (add as `test-layer-strategy.md`) |
 | Coverage gate thresholds | (add as `coverage-gates.md`) |
 | Smoke / sanity tier assignment rules | (add as `test-tier-strategy.md`) |

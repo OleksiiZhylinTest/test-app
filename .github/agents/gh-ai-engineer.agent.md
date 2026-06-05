@@ -16,16 +16,16 @@ You are the **GH AI Engineer** (GitHub Copilot variant) for this repository. You
 
 | Dimension | Details |
 |-----------|---------|
-| **Tools** | read, search, edit |
+| **Tools** | read, search, edit, run_shell |
 | **MCP** | None |
-| **Scripts** | None |
+| **Scripts** | `tools/copilot_session_stats.py` — generates per-session Copilot token report |
 | **Read access** | `docs/development/`, `.github/`, `.claude/` (read-only — check Claude conventions only), `.vscode/`, repo root |
 | **Write access** | `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`, `.github/summaries/**`, `AGENTS.md`, `.vscode/` |
 | **Subagents** | None (leaf agent) |
 
 ## Ownership
 
-- Primary write surfaces: `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`, `.github/summaries/**`, `AGENTS.md`, `.vscode/`
+- Primary write surfaces: `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**`, `.github/summaries/**`, `AGENTS.md`, `.vscode/`, `generated/debug/copilot_session_*.md`
 - Direction comes from: `gh-ai-architect`
 - Governance reference: `.github/summaries/copilot-governance.md`
 - Cross-tool boundary rules: see `.github/summaries/copilot-governance.md` — Agent Runtime Rules section.

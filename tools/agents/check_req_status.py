@@ -3,7 +3,7 @@ Scan all docs/product/requirements/*_requirements.md files and report status cou
 
 Usage:
   python tools/agents/check_req_status.py
-  python tools/agents/check_req_status.py --file jira_connection_requirements.md
+  python tools/agents/check_req_status.py --file jira-connection-requirements.md
   python tools/agents/check_req_status.py --unmet-only
 """
 
@@ -71,7 +71,7 @@ def main() -> None:
             return
         files = [target]
     else:
-        files = sorted(REQUIREMENTS_DIR.glob("*_requirements.md"))
+        files = sorted(REQUIREMENTS_DIR.glob("*-requirements.md"))
 
     if not files:
         print(f"No requirements files found in {REQUIREMENTS_DIR}")

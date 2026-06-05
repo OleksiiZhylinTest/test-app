@@ -35,6 +35,7 @@ https://<your-domain>.atlassian.net/rest/api/3/
 ## 3. Authentication
 
 See [authentication.md](authentication.md). v3 uses the same Basic auth scheme as v2.
+Credentials are base64-encoded as `email:api_token` and passed in the `Authorization: Basic` header on every request.
 
 ---
 
@@ -139,6 +140,7 @@ This project does not currently create or update issue descriptions, so ADF is n
 ## 6. Pagination, Status Codes, and Headers
 
 Identical to v2. See [api-v2.md — Pagination](api-v2.md#4-pagination), [Status Codes](api-v2.md#6-status-codes), and [Special Headers](api-v2.md#7-special-request-headers).
+Both offset-based (`startAt` + `maxResults`) and cursor patterns apply; rate-limit responses return `429 Too Many Requests` with a `Retry-After` header.
 
 ---
 

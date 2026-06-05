@@ -82,6 +82,14 @@ You are the **Developer** for this repository. Your job is to implement both ser
 10. If tests were added or removed, run `python tests/tools/test_coverage.py`.
 11. Notify Dev Lead that implementation is ready for review. **Work is not complete until Dev Lead approves.**
 
+## Canonical Sources (load in this order, stop when sufficient)
+1. `Read AGENTS.md` Key Files table for the module being changed
+2. `Grep` for the relevant function/class/symbol first; `Read` with `offset`/`limit` to the specific range only — full-file `Read` only if the targeted read is insufficient
+3. `tests/conftest.py` only if shared test fixtures are needed
+4. Requirements row in `docs/product/requirements/` only if acceptance criterion is affected
+5. Architecture doc only if module boundaries are being changed
+6. No broad repo scan — stop at the first level that answers the question
+
 ## INFO REQUEST
 
 If a required decision cannot be derived from local files and guessing carries non-trivial risk, emit an `INFO REQUEST` to Dev Lead instead of proceeding blindly.

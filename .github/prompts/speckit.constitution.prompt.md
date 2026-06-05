@@ -1,3 +1,1 @@
----
-agent: speckit.constitution
----
+DELETED

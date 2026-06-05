@@ -23,14 +23,16 @@ Use this skill for GitHub Copilot monitoring work in this repository.
 1. Read `AGENTS.md`, `.github/summaries/copilot-governance.md`, and `.github/summaries/monitoring-agents.md` first.
 2. Use `.github/summaries/monitoring-agents.md` for OTel defaults, exporter selection, privacy controls, and the preferred low-cost inspection order; configure `.vscode/settings.json` before suggesting any repo-level change.
 3. For ongoing analysis, use `tools/copilot_telemetry_stats.py` to summarize the current session debug logs into `generated/debug/copilot_telemetry_stats.json` and `generated/debug/copilot_telemetry_stats.md`. Use the top-run and top-request sections first when the question is about token spikes or context bloat.
-4. When the task is repo-local telemetry analysis, inspect `generated/debug/copilot_context_telemetry.jsonl` and `.github/hooks/pre_tool_copilot_boundary.py` together so you can explain both the recorded decision and the condition that triggered it.
-5. Treat `generated/debug/copilot_context_telemetry.jsonl` as a local debug artifact, not a clean product-telemetry stream, and distinguish that repo-local hook telemetry from GitHub Copilot runtime behavior.
-6. Escalate to `https://code.visualstudio.com/docs/agents/guides/monitoring-agents` only when the task needs detailed attribute tables, exporter semantics, or backend-specific setup guidance.
-7. Stay inside shared repo guidance plus Copilot-owned customization files unless the user explicitly requests cross-tool governance.
-8. Return the smallest viable monitoring recommendation, and include a lower-cost alternative when one exists.
+4. For per-session analysis, run `tools/copilot_session_stats.py` (or pass `--session-log-dir <path>` explicitly). It writes `generated/debug/copilot_session_<id>.md` with session totals, per-agent breakdown, and input-token hotspots. Use this report as the primary input when producing an improvement plan for a specific session.
+5. When the task is repo-local telemetry analysis, inspect `generated/debug/copilot_context_telemetry.jsonl` and `.github/hooks/pre_tool_copilot_boundary.py` together so you can explain both the recorded decision and the condition that triggered it.
+6. Treat `generated/debug/copilot_context_telemetry.jsonl` as a local debug artifact, not a clean product-telemetry stream, and distinguish that repo-local hook telemetry from GitHub Copilot runtime behavior.
+7. Escalate to `https://code.visualstudio.com/docs/agents/guides/monitoring-agents` only when the task needs detailed attribute tables, exporter semantics, or backend-specific setup guidance.
+8. Stay inside shared repo guidance plus Copilot-owned customization files unless the user explicitly requests cross-tool governance.
+9. Return the smallest viable monitoring recommendation, and include a lower-cost alternative when one exists.
 
 ## Output
 
+- Per-session report path: `generated/debug/copilot_session_<id>.md`
 - Name the affected Copilot-owned files, settings, or telemetry artifacts.
 - Name any repo-level telemetry settings changed in `.vscode/settings.json`.
 - Recommend the lowest-cost monitoring or inspection path that satisfies the task.

@@ -13,11 +13,7 @@ tools:
   - Agent
   - mcp__github__get_pull_request
   - mcp__github__get_pull_request_files
-  - mcp__github__get_pull_request_reviews
-  - mcp__github__get_pull_request_comments
   - mcp__github__get_pull_request_status
-  - mcp__github__list_pull_requests
-  - mcp__github__list_commits
 ---
 
 # DevOps Lead
@@ -29,7 +25,7 @@ You are the **DevOps Lead** for this repository. Your job is to own the CI/CD st
 | Dimension | Details |
 |-----------|---------|
 | **Tools** | Read, Glob, Grep, Agent |
-| **MCP** | GitHub: PR and CI read (no writes) |
+| **MCP** | GitHub: PR and CI read — `get_pull_request`, `get_pull_request_files` (change review), `get_pull_request_status` (deployment gate) |
 | **Scripts** | None — pipeline governance is decision-only; execution is delegated to `devops-engineer` |
 | **Read access** | `.github/workflows/`, `docs/development/pipeline.md`, `docs/development/architecture.md`, `pyproject.toml`, `AGENTS.md` |
 | **Write access** | None (read-only agent) |

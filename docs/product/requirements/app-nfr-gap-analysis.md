@@ -1,6 +1,6 @@
 # NFR Gap Analysis — AI Adoption Metrics Report
 
-This document records the results of a review of [`app_non_functional_requirements.md`](app_non_functional_requirements.md) against the actual codebase. For each gap, it describes the current behaviour, explains why the requirement is not met, and provides a recommended fix using the existing tech stack — no new libraries or frameworks are required.
+This document records the results of a review of [`app-non-functional-requirements.md`](app-non-functional-requirements.md) against the actual codebase. For each gap, it describes the current behaviour, explains why the requirement is not met, and provides a recommended fix using the existing tech stack — no new libraries or frameworks are required.
 
 **Review date:** 2026-03-27
 

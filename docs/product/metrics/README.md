@@ -9,12 +9,12 @@ interpret the results — written for both product users and developers/AI Copil
 | Metric | Short description | HTML report | MD report |
 |---|---|:---:|:---:|
 | [Velocity](velocity.md) | Completed story points per sprint | yes | yes |
-| [Cycle Time](cycle_time.md) | Average days from start to done per issue | yes | yes |
-| [AI Assistance Trend](ai_assistance_trend.md) | % of completed work that was AI-assisted, per sprint | yes | planned |
-| [AI Usage Details](ai_usage_details.md) | Breakdown of AI tools and use-cases across all AI-assisted issues | yes | planned |
-| [DAU Survey](dau_metric.md) | Team Daily Active Usage average from self-reported survey data | yes | yes |
-| [DAU Trend](dau_metric.md#compute_dau_trend-output-shape) | Week-over-week DAU average and adoption % | yes | yes |
-| [Custom Trends](custom_trends.md) | Extension point for team-specific metrics (placeholder — not active by default) | yes | yes |
+| [Cycle Time](cycle-time.md) | Average days from start to done per issue | yes | yes |
+| [AI Assistance Trend](ai-assistance-trend.md) | % of completed work that was AI-assisted, per sprint | yes | planned |
+| [AI Usage Details](ai-usage-details.md) | Breakdown of AI tools and use-cases across all AI-assisted issues | yes | planned |
+| [DAU Survey](dau-metric.md) | Team Daily Active Usage average from self-reported survey data | yes | yes |
+| [DAU Trend](dau-metric.md#compute_dau_trend-output-shape) | Week-over-week DAU average and adoption % | yes | yes |
+| [Custom Trends](custom-trends.md) | Extension point for team-specific metrics (placeholder — not active by default) | yes | yes |
 
 > **MD report gap:** AI Assistance Trend and AI Usage Details are currently rendered only in the HTML
 > report. They are computed and available in the `metrics_dict`; adding them to the Markdown report

@@ -29,6 +29,8 @@ Use this summary for monitoring choices, privacy defaults, and repo-local teleme
 - Use `tools/copilot_telemetry_stats.py` to summarize the current Copilot session debug logs.
 - The script writes rollups to `generated/debug/copilot_telemetry_stats.json` and `generated/debug/copilot_telemetry_stats.md`, including per-agent totals plus top costly runs and individual requests by input tokens.
 - The raw file-export OTel output and the generated stats are complementary when the JSONL export is present: the OTel file is raw export data, while the stats files are repo-local rollups for quick inspection.
+- Use `tools/copilot_session_stats.py` for **per-session analysis**: it reads the current session debug-log directory and writes `generated/debug/copilot_session_<id>.md` with session totals, per-agent breakdown, and input-token hotspots. Use this report as the primary input when `GH AI Architect` produces a session-specific improvement plan. Use `tools/copilot_telemetry_stats.py` for **cross-session aggregate trends**.
+- Artifact pattern: `generated/debug/copilot_session_<id>.md` — per-session report, ephemeral, gitignored.
 
 ## Repo-Local Telemetry Pattern
 

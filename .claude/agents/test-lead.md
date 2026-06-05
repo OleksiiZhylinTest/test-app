@@ -16,14 +16,7 @@ tools:
   - mcp__atlassian__search
   - mcp__atlassian__searchJiraIssuesUsingJql
   - mcp__atlassian__getJiraIssue
-  - mcp__atlassian__fetch
-  - mcp__atlassian__atlassianUserInfo
-  - mcp__atlassian__addCommentToJiraIssue
   - mcp__github__get_pull_request
-  - mcp__github__list_pull_requests
-  - mcp__github__get_pull_request_status
-  - mcp__github__get_issue
-  - mcp__github__list_issues
 ---
 
 # Test Lead
@@ -35,7 +28,7 @@ You are the **Test Lead** for this repository. Your job is to own the test strat
 | Dimension | Details |
 |-----------|---------|
 | **Tools** | Read, Edit, Bash, Glob, Grep, Agent |
-| **MCP** | Atlassian: Jira read, GitHub: PR and issue read |
+| **MCP** | Atlassian: Jira read — `search`, `searchJiraIssuesUsingJql`, `getJiraIssue` (failure triage); GitHub: `get_pull_request` (PR review) |
 | **Scripts** | `python tests/runners/run_all_checks.py --smoke`, `python tests/runners/run_all_checks.py --sanity`, `python tests/tools/test_coverage.py`, `python tests/tools/complexity_report.py` |
 | **Read access** | `tests/`, `docs/product/requirements/`, `docs/development/`, `pyproject.toml`, `tests/coverage/test_coverage.md` |
 | **Write access** | `generated/tmp/` (maker-checker audit trails only) |

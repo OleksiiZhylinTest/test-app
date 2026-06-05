@@ -42,7 +42,7 @@ If implementing a **new feature**:
 ### Step 2: Implement Code
 
 1. Follow the design principles in CLAUDE.md (Single Responsibility, Open/Closed, DRY, KISS, YAGNI)
-2. Use existing patterns and utilities — check `docs/development/architecture.md` for module responsibilities
+2. Use existing patterns and utilities — check `.claude/summaries/architecture-map.md` for module responsibilities; only load `docs/development/architecture.md` if deeper architectural detail is needed
 3. For new metrics: see `app/core/metrics.py` and `/extend`
 4. For new config vars: see `app/core/config.py` and `/extend`
 5. For new server endpoints: see `app/server/_base.py` and `/extend`

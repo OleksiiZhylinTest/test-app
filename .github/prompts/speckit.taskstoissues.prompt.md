@@ -1,3 +1,1 @@
----
-agent: speckit.taskstoissues
----
+DELETED

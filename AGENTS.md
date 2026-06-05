@@ -96,7 +96,7 @@ Copilot agent definitions live under `.github/agents/`. Maker-Checker review loo
 | `gh-ai-architect.agent.md` | Copilot env governance, agent/skill/prompt/hook oversight | Read-only | gh-ai-engineer, gh-web-search |
 | `gh-ai-engineer.agent.md` | Copilot AI environment implementation (`.github/**`, `AGENTS.md`, `.vscode/`) | Write (`.github/**`, `AGENTS.md`, `.vscode/`) | None (leaf) |
 | `gh-principal-solution-architect.agent.md` | Strategic architecture oversight and approval | Read-only | gh-solution-architect, gh-web-search |
-| `gh-solution-architect.agent.md` | Concrete architecture implementation and quality framework: module-boundary changes, API/schema design, test layer assignments, coverage gates, and NFR definitions | Write (`docs/development/`, `config/jira_schema.json`, `config/jira_filters.json`, `docs/product/requirements/`, `tests/coverage/`) | None (leaf) |
+| `gh-solution-architect.agent.md` | Concrete architecture implementation and quality framework ownership: module-boundary changes, API/schema design, test layer assignments, coverage gates, NFR definitions, quality strategy docs | Write (`docs/development/`, `config/jira_schema.json`, `config/jira_filters.json`, `docs/product/requirements/`, `tests/coverage/`) | None (leaf) |
 | `gh-web-search.agent.md` | External documentation research | External-only (no repo write) | None (leaf) |
 | `gh-product-owner.agent.md` | Requirements acceptance, feature acceptance, priority | Read-only | gh-business-analyst, gh-web-search |
 | `gh-business-analyst.agent.md` | Requirements elicitation, acceptance criteria, UX/interaction design, and documentation maintenance (README, architecture docs, features, metrics, CHANGELOG) | Write (`docs/`, `ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`, `README.md`, `CHANGELOG.md`, `generated/tmp/`) | gh-web-search |
@@ -106,15 +106,8 @@ Copilot agent definitions live under `.github/agents/`. Maker-Checker review loo
 | `gh-test-engineer.agent.md` | Unified QA Maker: manual, automation, performance, and security testing. Two-phase execution (Phase 1: checklist; Phase 2: implementation). Activated by task_type tag from GH Test Lead. | Write (domain-scoped per task_type) | None (leaf) |
 | `gh-devops-lead.agent.md` | CI/CD strategy, pipeline approval, infra governance | Read-only | gh-devops, gh-web-search |
 | `gh-devops.agent.md` | Pipeline implementation, workflow YAML, CI configuration | Write (`.github/workflows/`, `docs/development/pipeline.md`, `pyproject.toml`) | None (leaf) |
-| `speckit.specify.agent.md` | Spec-kit SDLC: create feature specification from natural language description | Write (`specs/[feature-name]/`) | None (leaf) |
-| `speckit.clarify.agent.md` | Spec-kit SDLC: identify and resolve underspecified areas in the active feature spec | Write (`specs/[feature-name]/`) | None (leaf) |
-| `speckit.plan.agent.md` | Spec-kit SDLC: generate implementation plan and design artifacts from approved spec | Write (`specs/[feature-name]/`) | None (leaf) |
-| `speckit.tasks.agent.md` | Spec-kit SDLC: generate dependency-ordered tasks.md from design artifacts | Write (`specs/[feature-name]/`) | None (leaf) |
-| `speckit.analyze.agent.md` | Spec-kit SDLC: cross-artifact consistency and quality analysis across spec/plan/tasks | Read-only | None (leaf) |
-| `speckit.implement.agent.md` | Spec-kit SDLC: execute approved tasks.md and drive full feature implementation | Write (`specs/[feature-name]/`, project source files per tasks.md) | None (leaf) |
-| `speckit.checklist.agent.md` | Spec-kit SDLC: generate requirements-quality checklists for the current feature | Write (`specs/[feature-name]/checklists/`) | None (leaf) |
-| `speckit.constitution.agent.md` | Spec-kit SDLC: create or update project constitution and propagate changes to spec-kit templates | Write (`.specify/memory/`, `.specify/templates/`) | None (leaf) |
-| `speckit.taskstoissues.agent.md` | Spec-kit SDLC: convert approved tasks.md into dependency-ordered GitHub issues via GitHub MCP server | External (GitHub API via MCP) | None (leaf) |
+
+> **SDD workflow**: Spec-Driven Development phases (specify, clarify, plan, tasks, analyze, implement, checklist, constitution, taskstoissues) and git integration are invoked as skills (`/speckit-*`) from `.github/skills/`, not as agents.
 
 Rules:
 - Default scope for any assistant is the shared repo surfaces plus its own customization namespace.
@@ -164,7 +157,7 @@ Claude-owned low-token context assets should live under `.claude/`.
 - CI: `smoke-tests` job runs always; `sanity-tests` job is opt-in via `ENABLE_SANITY` repo var.
 
 **Requirements tracking:**
-- Every feature area has a `docs/product/requirements/<topic>_requirements.md` file.
+- Every feature area has a `docs/product/requirements/<topic>-requirements.md` file.
 - Status values are exactly `✓ Met`, `✗ Not met`, `⬜ N/T` — no other variants.
 - Identify which file(s) to update using `docs/product/requirements/README.md`.
 - Do not add rows or create new requirements files.
