@@ -107,6 +107,16 @@ Invoked as slash commands in Claude Code. Skills live in `.claude/skills/speckit
 
 Run the full workflow in order: specify → clarify → plan → tasks → analyze → (human approval) → implement.
 
+### Slash Command Placement Rule
+
+| Use `.claude/commands/<name>.md` | Use `.claude/skills/<name>/SKILL.md` |
+|----------------------------------|--------------------------------------|
+| Prose workflow checklist — ordered steps, no arguments | Parameterized command — accepts `$ARGUMENTS` |
+| Multi-step orchestration guide Claude follows | Needs frontmatter metadata (`argument-hint`, `compatibility`, `user-invocable`) |
+| No special dispatch required | Requires skill-dispatch features (`disable-model-invocation`, etc.) |
+
+When in doubt: if your command takes no input and is just "do these steps", use `.claude/commands/`. If it takes a description or identifier as input, use `.claude/skills/`.
+
 ## Commands
 
 ```bash

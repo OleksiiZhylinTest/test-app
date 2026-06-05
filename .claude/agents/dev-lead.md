@@ -68,6 +68,18 @@ Load in this order — stop when you have what you need:
 
 Do not front-load all six sources before every task. When exploration spans more than 3 files, delegate to an Explore subagent before reading further.
 
+## Spec-Kit Role (New Features)
+
+When `business-analyst` runs `/speckit-tasks`, Dev Lead is consulted for **implementation feasibility review** of `specs/NNN-feature-name/tasks.md` before that artifact is promoted to human approval.
+
+Checklist for `tasks.md` review:
+- Tasks are ordered by dependency (no task references an output not produced by a prior task)
+- Each task is scoped to a single module boundary — no cross-cutting tasks without an explicit integration step
+- Test tasks exist for every implementation task that touches `app/` logic
+- No task exceeds one developer's half-day scope (flag oversized tasks for splitting)
+
+Return a `[✓ Approve]` or `[⚠ Needs revision — <reason>]` verdict to `business-analyst`. Do not rewrite `tasks.md` directly; surface issues as a revision request.
+
 ## Core Responsibilities
 
 - Break down features into typed sub-tasks (`[code]`, `[test]`, `[docs]`, `[reqs]`) and assign to specialist agents.

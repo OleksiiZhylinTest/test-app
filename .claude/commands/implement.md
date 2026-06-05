@@ -18,6 +18,20 @@ Full feature implementation workflow — from requirements to commit-ready code.
 
 Follow these steps in order. Claude will mark each step complete and move to the next.
 
+### Step 0: Spec-Kit Gate (New Features Only)
+
+**Skip this step for bug fixes and refactors.**
+
+If implementing a **new feature**:
+
+1. Check whether `specs/` contains a directory for this feature: `specs/NNN-<feature-name>/`
+2. Verify `specs/NNN-<feature-name>/tasks.md` exists and carries a human-approval marker
+3. If `tasks.md` does not exist or has not been approved: **stop here**. Run the full spec-kit workflow first:
+   `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → (human approval of `tasks.md`)
+4. After human approval, return to this workflow and proceed to Step 1.
+
+> This gate exists because `/implement` operates from approved artifacts. Skipping spec-kit means implementing without agreed scope, acceptance criteria, or task breakdown — the source of most rework.
+
 ### Step 1: Read Requirements
 
 1. Look up the feature area using `/requirements` and find the relevant requirement file(s)
