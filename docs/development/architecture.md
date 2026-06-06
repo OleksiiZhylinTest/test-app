@@ -665,11 +665,11 @@ python server.py 9000                 # custom port
 
 ## See Also
 
-- [`README.md`](../README.md) — user-facing quickstart
-- [`CLAUDE.md`](../CLAUDE.md) — AI assistant guidance and coding conventions
+- [`README.md`](../../README.md) — user-facing quickstart
+- [`CLAUDE.md`](../../CLAUDE.md) — AI assistant guidance and coding conventions
 - [`docs/development/jira/`](jira/) — Jira REST API reference notes
 - [`docs/development/confluence/`](confluence/) — Confluence API reference notes
 - [`docs/product/metrics/`](../product/metrics/) — metric definitions, field reference, and configuration guide
-- [`tests/coverage/test_coverage.md`](../tests/coverage/test_coverage.md) — auto-generated test count + requirements summary
-- [`tests/coverage/requirements/`](../tests/coverage/requirements/) — per-requirements-source coverage detail files
-- [`.env.example`](../.env.example) — all configuration variables with comments
+- [`tests/coverage/test_coverage.md`](../../tests/coverage/test_coverage.md) — auto-generated test count + requirements summary
+- [`tests/coverage/requirements/`](../../tests/coverage/requirements/) — per-requirements-source coverage detail files
+- [`.env.example`](../../.env.example) — all configuration variables with comments

@@ -25,6 +25,7 @@ GET https://your-domain.atlassian.net/wiki/api/v2/pages
 ## 2. Authentication
 
 Same HTTP Basic auth as v1 — see [authentication.md](authentication.md).
+Token-based auth uses an Atlassian API token (not your account password); generate one at `id.atlassian.com/manage-profile/security/api-tokens`.
 
 ---
 

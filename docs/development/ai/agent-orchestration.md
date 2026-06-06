@@ -70,6 +70,49 @@ All L1 Delegates are **read-only** (no Edit/Write/Bash tools). All L2 Leaf Agent
 
 ---
 
+## GitHub Copilot Agent Roster
+
+Copilot agent definitions live under `.github/agents/`. The GH Copilot hierarchy mirrors the Claude Code 3-tier structure.
+
+```
+GH Project Manager  (Orchestrator)
+│
+├── GH AI Architect            ──► GH AI Engineer
+│
+├── GH Principal Solution Architect ──► GH Solution Architect
+│
+├── GH Product Owner           ──► GH Business Analyst
+│
+├── GH Dev Lead                ──► GH Developer
+│
+├── GH Test Lead               ──► GH Test Engineer
+│
+├── GH DevOps Lead             ──► GH DevOps
+│
+└── GH Web Search  (leaf, external-only — no subagents)
+```
+
+| Tier | Agent file | Role | Write access |
+|------|-----------|------|--------------|
+| Orchestrator | `gh-project-manager.agent.md` | Intake, routing, plan-mode | None (read-only) |
+| L1 Delegate | `gh-ai-architect.agent.md` | Copilot env governance, agent/skill/hook oversight | None (read-only) |
+| L1 Delegate | `gh-principal-solution-architect.agent.md` | Strategic architecture oversight and approval | None (read-only) |
+| L1 Delegate | `gh-product-owner.agent.md` | Requirements acceptance, feature acceptance, priority | None (read-only) |
+| L1 Delegate | `gh-dev-lead.agent.md` | Code review, coding standards enforcement | None (read-only) |
+| L1 Delegate | `gh-test-lead.agent.md` | Test strategy, coverage gates, quality sign-off | None (read-only) |
+| L1 Delegate | `gh-devops-lead.agent.md` | CI/CD strategy, pipeline approval | None (read-only) |
+| L1 Delegate | `gh-web-search.agent.md` | External documentation research | None (external-only) |
+| L2 Leaf | `gh-ai-engineer.agent.md` | Copilot AI environment implementation | `.github/**`, `AGENTS.md`, `.vscode/` |
+| L2 Leaf | `gh-solution-architect.agent.md` | Architecture implementation and quality framework ownership: module-boundary changes, API/schema design, test layer assignments, coverage gates, NFR definitions | `docs/development/`, `config/jira_schema.json`, `config/jira_filters.json`, `docs/product/requirements/`, `tests/coverage/` |
+| L2 Leaf | `gh-business-analyst.agent.md` | Requirements elicitation, acceptance criteria, UX/interaction design, documentation | `docs/`, `ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/`, `README.md`, `CHANGELOG.md` |
+| L2 Leaf | `gh-developer.agent.md` | Full-stack implementation: backend Python and frontend UI | `app/core/`, `app/server/`, `app/reporters/`, `app/utils/`, `config/`, `ui/` |
+| L2 Leaf | `gh-test-engineer.agent.md` | Unified QA: manual, automation, performance, security. Two-phase execution (checklist → implementation). Stateless per invocation. | Domain-scoped per task_type |
+| L2 Leaf | `gh-devops.agent.md` | Pipeline implementation, workflow YAML, CI configuration | `.github/workflows/`, `docs/development/pipeline.md`, `pyproject.toml` |
+
+> **SDD workflow**: Spec-Driven Development (specify → clarify → plan → tasks → analyze → implement) and git integration are invoked as skills (`/speckit-*`) from `.github/skills/`, not as agents. See `.github/summaries/maker-checker-protocol.md` for the Maker-Checker loop specification.
+
+---
+
 ## Maker-Checker Review Loop
 
 Every L1 Delegate (Checker) applies this loop when assigning work to an L2 Leaf Agent (Maker):
@@ -100,4 +143,4 @@ Full protocol spec (escalation message format, audit trail rules): `.claude/sdlc
 
 Claude agents are defined in `.claude/agents/` and delegate only within that namespace. GitHub Copilot has a parallel agent hierarchy in `.github/agents/` — the two systems are independent and must never cross-invoke each other during normal operation.
 
-Full ownership rules and cross-tool exception handling: [`assistant_customization_governance.md`](assistant_customization_governance.md)
+Full ownership rules and cross-tool exception handling: [`assistant-customization-governance.md`](assistant-customization-governance.md)

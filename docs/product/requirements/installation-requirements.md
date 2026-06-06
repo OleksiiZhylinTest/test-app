@@ -1,6 +1,6 @@
 # Installation Requirements — AI Adoption Metrics Report
 
-This document describes how to obtain, install, and launch the AI Adoption Metrics Report tool from a release zip package. For a quickstart, see [`README.md`](../../../README.md). For software and hardware prerequisites, see [`technical_requirements.md`](technical_requirements.md).
+This document describes how to obtain, install, and launch the AI Adoption Metrics Report tool from a release zip package. For a quickstart, see [`README.md`](../../../README.md). For software and hardware prerequisites, see [`technical-requirements.md`](technical-requirements.md).
 
 ---
 

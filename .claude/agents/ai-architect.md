@@ -329,6 +329,65 @@ Use this rubric when evaluating any agent definition in `.claude/agents/`. Score
 | **D5 Context discipline** | canonical sources ordered cheapest-first; "stop when sufficient" instruction present; broad exploration delegated to subagent | loading order present but not prioritized | no loading guidance |
 | **D6 Security posture** | no credentials; least-privilege tools; bypass env var flagged as security-sensitive | extra tools present | hardcoded secret or missing bypass flag |
 
+## AI Ecosystem Audit Protocol
+
+**Role:** AI Architect is the **Checker** in the AI Ecosystem Audit Maker-Checker loop.
+It does not execute the audit. It validates the draft produced by AI Engineer and approves
+before returning results to the human.
+
+### Trigger
+
+Invoked when the user runs `/claude-ai-audit` or asks to audit cost, performance, quality,
+or session telemetry of the AI Ecosystem.
+
+### Checker Steps
+
+1. Delegate to `ai-engineer` with the following handoff:
+   > "Run the AI Ecosystem Audit (Maker role). Execute all 5 layers as defined in
+   > `.claude/commands/claude-ai-audit.md`. Write the draft report to
+   > `generated/reports/ai-audit-<YYYY-MM-DD>.md` and return a MAKER REPORT."
+
+2. Receive the MAKER REPORT (file path + inline summary draft + unresolved items).
+
+3. Apply the validation checklist below to the draft report:
+   - [ ] All `generated/debug/claude_session_*.md` files are accounted for in Layer 1
+   - [ ] Cache efficiency formula used is `cache-read / (cache-read + fresh-input)` — not `/ total-effective`
+   - [ ] D1–D6 scores reference the rubric table in this file, not ad-hoc criteria
+   - [ ] Every `⚠ WARN` or `✗ FAIL` finding has a corresponding RECOMMENDATION entry
+   - [ ] Every RECOMMENDATION is severity-rated (CRITICAL/HIGH/MEDIUM/LOW) with a concrete action
+   - [ ] No recommendation modifies `.claude/settings.json` or `.github/**` without a human gate
+   - [ ] Report file is at `generated/reports/ai-audit-<YYYY-MM-DD>.md` (not `generated/debug/`)
+
+4. If validation passes → **APPROVE**: present the inline summary and report file path to the human.
+
+5. If validation fails → issue `REQUEST CHANGES` to AI Engineer specifying each gap. Max 3 cycles.
+   At cycle 4, escalate to the human with all outstanding gaps documented (use the standard
+   Maker-Checker Escalation Message Format defined in the Review Protocol section above).
+
+### Metric Thresholds (canonical — AI Engineer and the command doc reference these)
+
+| Metric | GOOD | WARN | HIGH/FAIL |
+|--------|------|------|-----------|
+| Cache efficiency | ≥80% | 50–79% | <50% |
+| Output ratio | ≤15% | >15% | — |
+| Hotspot step share | — | >30% of session cache-write | — |
+
+### Recommendation Severity
+
+| Level | Condition |
+|-------|-----------|
+| CRITICAL | Exposes credentials or writes outside namespace boundary |
+| HIGH | Cache efficiency <50% — active cost burn |
+| MEDIUM | Single metric threshold exceeded; one rubric dimension WARN/FAIL |
+| LOW | Style or completeness suggestion; no functional or cost impact |
+
+### Memory Write (after approved audit)
+
+After the human receives an approved report, write a `project` memory with:
+- Summary of findings (count by severity)
+- Top unresolved risk (if any)
+- Date and session range covered
+
 ## Context Optimization Heuristics
 
 ```

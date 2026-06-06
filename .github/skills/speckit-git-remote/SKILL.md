@@ -1,10 +1,9 @@
 ---
-description: Detect Git remote URL for GitHub integration
+name: speckit-git-remote
+description: "Detect Git remote URL for GitHub integration"
+user-invocable: true
 ---
 
-
-<!-- Extension: git -->
-<!-- Config: .specify/extensions/git/ -->
 # Detect Git Remote URL
 
 Detect the Git remote URL for integration with GitHub services (e.g., issue creation).

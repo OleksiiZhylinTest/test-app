@@ -35,10 +35,19 @@ Audit the full Claude Code customization environment for drift, security issues,
 
 **Goal:** Verify agent definitions are complete, role-scoped, and non-overlapping.
 
-1. `Glob .claude/agents/*.md` — list all agent definitions.
-2. For each agent: check frontmatter (name, description, tools) and body structure.
-3. Flag: missing sections, overlapping role definitions, tools claimed but not used.
-4. Run `/agent-eval` mentally (or invoke it) for a full per-agent rubric score.
+Delegate to an Explore subagent — do not read all 14 agent files inline:
+
+```
+Explore .claude/agents/ — agent completeness audit:
+For each .md file in .claude/agents/:
+1. Read frontmatter: is name, description, and tools present?
+2. Check body for these top-level sections (## headings):
+   Role/Ownership, Responsibilities or Core Responsibilities, Workflow, Constraints, Output Expectations.
+3. Check tools list: for each tool, does a workflow step invoke it?
+Return a table: agent | D1 frontmatter ✓/⚠/✗ | D3 sections present | D2 tool gaps | finding.
+```
+
+Wait for result. For agents flagged with ⚠ or ✗ findings, invoke `/agent-eval <agent-name>` individually for a full D1-D6 rubric score. Include all findings in the Layer 2 section of the report.
 
 ### Layer 3 — Slash Commands
 
@@ -70,7 +79,7 @@ Audit the full Claude Code customization environment for drift, security issues,
 
 **Goal:** Verify Claude namespace stays within its ownership boundary and shared docs are current.
 
-1. Read `docs/development/assistant_customization_governance.md` — extract ownership rules.
+1. Read `.claude/summaries/claude-governance.md` — Claude namespace ownership rules (cheap anchor); only load `docs/development/ai/assistant_customization_governance.md` if the summary flags a gap that requires the authoritative full doc.
 2. Check `CLAUDE.md`:
    - Does it reference `AGENTS.md` as the shared contract?
    - Does the Customization Ownership section match the governance doc?

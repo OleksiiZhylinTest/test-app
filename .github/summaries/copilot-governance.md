@@ -16,17 +16,10 @@ Use this summary for ownership, boundaries, and cross-tool escalation before loa
 | `GH Project Manager` | Top-level orchestrator; first-contact for all requests | `GH AI Architect`, `GH Web Search`, `Explore` |
 | `GH AI Architect` | Copilot env, governance, MCP, monitoring, security | `GH Web Search`, `Explore` |
 | `GH Web Search` | External docs lookup only; read-only | — |
-| `speckit.specify` | Spec-kit SDLC: create feature specification | — |
-| `speckit.clarify` | Spec-kit SDLC: clarify feature spec | — |
-| `speckit.plan` | Spec-kit SDLC: generate implementation plan and design artifacts | — |
-| `speckit.tasks` | Spec-kit SDLC: generate dependency-ordered tasks.md | — |
-| `speckit.analyze` | Spec-kit SDLC: cross-artifact analysis (read-only) | — |
-| `speckit.implement` | Spec-kit SDLC: execute approved tasks.md | — |
-| `speckit.checklist` | Spec-kit SDLC: generate requirements-quality checklists | — |
-| `speckit.constitution` | Spec-kit SDLC: manage project constitution and template sync | — |
-| `speckit.taskstoissues` | Spec-kit SDLC: convert tasks.md to GitHub issues via MCP | — |
 
 **Entry point**: always start with `GH Project Manager` (via `project-task-intake` prompt) unless the task is explicitly scoped to Copilot environment work.
+
+> **Speckit SDLC agents**: invoked on-demand via `/speckit-*` prompts only. See `.github/agents/speckit.*.agent.md` for definitions.
 
 ## Ownership at a Glance
 

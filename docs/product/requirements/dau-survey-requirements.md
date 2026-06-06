@@ -4,7 +4,7 @@ This document defines the functional and non-functional requirements for the Dai
 (DAU) survey feature. Requirements are intended for implementation and testing.
 
 For the metric definition, scoring rationale, and `compute_dau_metrics()` output shape see
-[`docs/product/metrics/dau_metric.md`](../metrics/dau_metric.md).
+[`docs/product/metrics/dau-metric.md`](../metrics/dau-metric.md).
 
 ---
 

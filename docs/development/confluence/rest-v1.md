@@ -25,7 +25,8 @@ GET https://your-domain.atlassian.net/wiki/rest/api/content/{id}
 ## 2. Authentication
 
 HTTP Basic auth — see [authentication.md](authentication.md).  
-Some mutating endpoints require `X-Atlassian-Token: no-check` header.
+Some mutating endpoints require `X-Atlassian-Token: no-check` header to bypass XSRF protection.
+All requests must include the `Authorization: Basic <base64(email:token)>` header.
 
 ---
 

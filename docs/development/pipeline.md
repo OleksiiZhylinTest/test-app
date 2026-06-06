@@ -2,7 +2,7 @@
 
 ## Overview
 
-The pipeline lives in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).  
+The pipeline lives in `.github/workflows/ci.yml`.  
 It runs on **every push and pull request** to every branch.
 
 **Most stages are disabled by default** — integration, e2e, windows, and security
@@ -338,7 +338,7 @@ To require Lint + Unit + Component tests to pass before merging a PR to master:
 
 ## Dependabot
 
-[`.github/dependabot.yml`](../.github/dependabot.yml) is configured to open
+`.github/dependabot.yml` is configured to open
 weekly PRs for:
 
 - **pip** — production and dev Python dependencies
@@ -439,7 +439,7 @@ Only one genuine OS-specific behaviour exists:
 > `ConnectionResetError` instead.
 
 The test `test_handle_error_swallows_connection_aborted_error` in
-[`tests/component/test_server.py`](../tests/component/test_server.py) explicitly
+[`tests/component/test_server.py`](../../tests/component/test_server.py) explicitly
 contracts this behaviour and is automatically skipped on Linux/macOS via:
 
 ```python

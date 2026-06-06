@@ -84,48 +84,11 @@ PM is the sole router at every step. No agent initiates a write to another agent
 
 ## Task Dependency Analysis Protocol
 
-Apply this protocol before delegating two or more subtasks to subagents.
-
-### Step 1 — Enumerate subtasks
-List every subtask that will be delegated in this work item.
-
-### Step 2 — Classify each pair
-For each pair (A, B), mark **Sequential (A → B)** if **any** of the following hold:
-
-| Dependency type | Condition |
-|---|---|
-| Data | B requires a file, value, schema, or artifact produced by A |
-| Write conflict | A and B write to the same file or resource |
-| State | B requires A's side effects to be in place (e.g., migration before query, schema before data) |
-| Review gate | B is a Maker-Checker review or verification of A's output |
-
-If none of the above apply → the pair is **Independent**.
-
-### Step 3 — Build execution tiers
-Group mutually independent tasks into the same tier:
-
-```
-Tier 1 (parallel): [task-a, task-b, task-c]
-Tier 2 (parallel, after Tier 1): [task-d, task-e]
-Tier 3 (sequential, after Tier 2): [task-f — Maker-Checker review]
-```
-
-### Step 4 — Execute per tier
-- **Same tier → single Agent call**: issue all subtask prompts in one message
-- **Between tiers → wait**: do not start Tier N+1 until all Tier N results are received
-- **Uncertainty rule**: when unsure whether two tasks are independent, treat as sequential
+See [`.github/summaries/task-dependency-protocol.md`](.github/summaries/task-dependency-protocol.md) for the full protocol. Apply it before delegating two or more subtasks.
 
 ## Available Subagents
 
-| Subagent | When to invoke |
-|----------|---------------|
-| `GH AI Architect` | Copilot env changes, agent/skill/prompt/hook work, governance, MCP, monitoring, security of `.github/**`; any question about the content, structure, or explanation of `.claude/` or `.github/` folders; any read, write, or explanation question about `AGENTS.md` or `CLAUDE.md` (cross-tool confirmation required before reading/writing `CLAUDE.md`); token consumption, AI environment audit, or general AI assistant environment questions |
-| `GH Principal Solution Architect` | Architecture oversight, module-boundary decisions, API/schema design approvals, cross-module contract reviews |
-| `GH Web Search` | External docs, framework lookups, vendor references, standards — only after local sources are exhausted |
-| `GH Product Owner` | Requirements acceptance, feature acceptance, priority decisions, `docs/product/` governance |
-| `GH Dev Lead` | Code review, coding standards enforcement, implementation disputes, shared interface changes |
-| `GH Test Lead` | Test strategy, test pyramid balance, coverage gate decisions, smoke/sanity marker approvals |
-| `GH DevOps Lead` | CI/CD pipeline changes, `.github/workflows/` approvals, environment and secret strategy |
+See [`.github/summaries/project-manager-routing.md`](.github/summaries/project-manager-routing.md) for the full routing table and subagent list.
 
 ## Request Classification
 
@@ -195,16 +158,6 @@ Confirm the plan with the user if it spans ≥3 sub-tasks or touches shared cont
 
 This agent applies a **Maker-Checker review loop** to all delegated tasks. Full specification: `.github/summaries/maker-checker-protocol.md`.
 
-**Loop phases**: Checker Verification Plan (isolation) → Maker Execution → Checker Review. See §Loop Mechanics in the protocol for the full procedure.
-
-**Cycle cap**: 3 cycles for simple changes; 5 cycles for shared contract changes. See §Cycle Cap in the protocol for the definition of shared contract changes.
-
-**Gap analysis**: Every review cycle must cover both Tier A (compliance) and Tier B (gap analysis) as defined in §Gap Analysis Tiers in the protocol.
-
-**Union rule**: If the Maker implemented valid corner cases not in the Verification Plan, preserve them. Do not remove valid work because it was not anticipated.
-
-**Structured report**: Produce the Structured Checker Report format (§Structured Checker Report) only on REJECT cycles.
-
 **Domain-specific gap questions** (apply during Tier B review, in addition to the standard gap analysis):
 - Is every sub-task routed to the correct owning agent per the routing table in `.github/summaries/project-manager-routing.md`?
 - Are dependent sub-tasks correctly sequenced (not parallelized when a data or write-conflict dependency exists)?
@@ -220,7 +173,8 @@ When a task requires an external fact that cannot be found in repository files o
 
 ## Constraints
 
-- No direct file edits. All edits go through the owning specialist agent or the default agent.
+- No direct file edits, writes, deletes, or shell execution. All such operations must be delegated to `GH AI Architect` (Checker) → `GH AI Engineer` (Maker) via the Maker-Checker loop. PM never writes, edits, or deletes files directly.
+- File operation delegation rule: PM describes WHAT to change and WHY; `GH AI Architect` produces the Verification Plan and approves; `GH AI Engineer` executes the edit/write/delete/shell command and confirms.
 - No speculative sub-tasks. Only plan what the user's request requires.
 - Delegate only to GH Copilot agents listed in `.github/agents/`; never invoke Claude agents (`.claude/agents/**`).
 - Do not read or modify `.claude/**` under any circumstances.

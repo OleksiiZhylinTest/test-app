@@ -1,10 +1,10 @@
 ---
-description: Refresh the managed Spec Kit section in the coding agent context file
+name: speckit-agent-context-update
+description: "Refresh the managed Spec Kit section in the coding agent context file"
+argument-hint: "[plan_path]"
+user-invocable: true
 ---
 
-
-<!-- Extension: agent-context -->
-<!-- Config: .specify/extensions/agent-context/ -->
 # Update Coding Agent Context
 
 Refresh the managed Spec Kit section inside the active coding agent's context/instruction file (e.g. `CLAUDE.md`, `.github/copilot-instructions.md`, `AGENTS.md`).

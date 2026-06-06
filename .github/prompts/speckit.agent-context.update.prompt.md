@@ -1,3 +1,1 @@
----
-agent: speckit.agent-context.update
----
+DELETED

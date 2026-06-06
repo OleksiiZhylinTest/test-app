@@ -21,15 +21,20 @@ Run these checks in order. Each layer builds on the previous one.
 
 **Goal:** Verify that each requirement Status (`✓ Met`, `✗ Not met`, `⬜ N/T`) accurately reflects implementation.
 
-1. Open `docs/product/requirements/README.md` for the file map
-2. For each requirement file (start with one area at a time):
-   - Scan all rows with Status `✓ Met` (supposedly satisfied)
-   - For each such row, identify the test(s) that verify it — check `tests/unit/test_*.py` or `tests/component/test_*.py`
-   - If no test found → flag as **gap**: "Requirement X marked Met but no test coverage"
-   - Run `/test` — if a related test fails → flag as **gap**: "Requirement X marked Met but test fails"
-   - Scan all rows with Status `✗ Not met`
-   - If code exists that implements this requirement → flag as **gap**: "Requirement X marked Not Met but code exists"
-3. Report all gaps found (do NOT auto-fix — report and wait for direction)
+Delegate to an Explore subagent — do not read requirement files inline:
+
+```
+Explore docs/product/requirements/ — requirements cross-check:
+1. Read README.md for the file map.
+2. For each requirement file: scan all ✓ Met rows and identify the test(s) that verify them
+   (check tests/unit/ and tests/component/ for matching test names or requirement IDs).
+3. For each ✗ Not met row: check whether corresponding code already exists in app/.
+Return a gap table: requirement ID | file | status | test coverage | gap description.
+```
+
+Wait for result. Then also run `/test` — if any test directly tied to a `✓ Met` row fails, add it as an additional gap.
+
+Report all gaps found (do NOT auto-fix — report and wait for direction).
 
 ### Layer 2: Code ↔ Tests Alignment
 
@@ -46,40 +51,53 @@ Run these checks in order. Each layer builds on the previous one.
 
 **Goal:** Verify `docs/development/architecture.md` reflects current module structure and patterns.
 
-1. Check section 3 (Project Layout):
-   - Do all directories listed in the tree still exist? (`app/core/`, `app/reporters/`, `app/server/`, etc.)
-   - Any new directories added since last update? → flag as **gap**: "New directory <path> not in architecture.md"
-2. Check section 4 (Architecture & Module Map):
-   - Each module description — is it still accurate?
-   - `app/server/` package split (check our memory: `app/server/_base.py`, handler modules) — is this documented?
-   - Any new modules added (e.g., new `metrics_<name>.py`) → flag as **gap**: "New module not documented"
-3. Check data structures (Issue dict, Sprint dict, metrics_dict shapes):
-   - Do they match the current code in `app/core/metrics.py`, `app/core/jira_client.py`?
-   - Any new fields added to metrics_dict? → flag as **gap**: "metrics_dict has new fields not documented"
-4. Report gaps found
+Delegate to an Explore subagent — do not read architecture.md inline:
+
+```
+Explore docs/development/architecture.md vs current code:
+1. Read docs/development/architecture.md sections 3 (Project Layout) and 4 (Architecture & Module Map).
+2. For each directory in the Project Layout tree: verify it still exists (Glob or ls).
+3. Compare each module description against the actual file at that path.
+4. Check that Sprint dict and Issue dict shapes match app/core/jira_client.py.
+5. Check that metrics_dict fields match build_metrics_dict() in app/core/metrics.py.
+Return a gap list: section | expected | actual | gap description.
+```
+
+Wait for result, then report gaps.
 
 ### Layer 4: Feature Documentation
 
 **Goal:** Verify user-facing behavior is documented in `docs/product/features/features.md`.
 
-1. Review `docs/product/features/features.md` (if it exists):
-   - Does it describe the main UI features?
-   - Does it match what's in `ui/index.html` and `ui/templates/report.html.j2`?
-   - Any new UI features added (new tabs, new controls, new report sections) not documented? → flag as **gap**: "Feature <X> added but not documented"
-2. If no such file exists, report: "**gap**: `docs/product/features/features.md` missing"
+Delegate to an Explore subagent — do not read UI templates inline:
+
+```
+Explore docs/product/features/ vs current UI:
+1. Read docs/product/features/features.md (if it exists; if not, report missing).
+2. Read ui/index.html and ui/templates/report.html.j2 — list every named UI section,
+   tab, control, or report section.
+3. Cross-reference: which UI elements appear in features.md? Which are absent?
+Return a gap list: UI element | in features.md? | gap description.
+```
+
+Wait for result, then report gaps.
 
 ### Layer 5: Metric Documentation
 
 **Goal:** Verify `docs/product/metrics/` accurately describes all computed metrics and their output shapes.
 
-1. Open `docs/product/metrics/`:
-   - List all `.md` files in this directory
-2. For each metric:
-   - Read its documentation
-   - Compare to `app/core/metrics.py` — does the metric's computation and output shape match the doc?
-   - Check `metrics_dict` output — are all metric fields documented? (velocity, cycle_time, ai_assistance_trend, ai_usage_details, etc.)
-   - Any new metric added since last doc update? → flag as **gap**: "Metric <name> not documented in metrics/ dir"
-3. Report gaps found
+Delegate to an Explore subagent — do not read all metric docs inline:
+
+```
+Explore docs/product/metrics/ vs app/core/metrics.py:
+1. List all .md files in docs/product/metrics/.
+2. For each metric doc: extract the metric name, computation description, and output shape.
+3. Read app/core/metrics.py — list every field added to metrics_dict in build_metrics_dict().
+4. Cross-reference: which metrics_dict fields have a doc? Which are undocumented?
+Return a gap table: metric name | doc file | documented? | shape matches? | gap description.
+```
+
+Wait for result, then report gaps.
 
 ---
 

@@ -1,3 +1,1 @@
----
-agent: speckit.git.commit
----
+DELETED

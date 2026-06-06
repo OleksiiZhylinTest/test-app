@@ -62,7 +62,7 @@ Common fields you may access:
 
 No dedicated configuration variables exist for custom trends. If your metric needs
 configurable parameters, add them to `.env` and `app/core/config.py` following the
-[extension pattern for config variables](../../../.cursor/rules/extension-patterns.mdc).
+[extension pattern for config variables](../../development/jira/extension-guide.md).
 
 ## Calculation
 
@@ -148,7 +148,7 @@ def compute_custom_trends(
 
 **Location in `metrics_dict`:** `metrics["custom_trends"]` — a list, **once wired into `build_metrics_dict()`**. The key is absent from `metrics_dict` until you add the call; see step 2 of the extension checklist below.
 
-**Full extension checklist** (from the project's [Extension Patterns](../../../.cursor/rules/extension-patterns.mdc)):
+**Full extension checklist** (from the project's [Extension Guide](../../development/jira/extension-guide.md)):
 
 1. Replace the body of `compute_custom_trends()` in `app/core/metrics.py`. Each returned
    dict must include `sprint_id` and `sprint_name` plus at least one metric value key.

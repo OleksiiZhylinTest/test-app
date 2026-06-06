@@ -1,19 +1,17 @@
 ---
-description: Create a feature branch with sequential or timestamp numbering
+name: speckit-git-feature
+description: "Create a feature branch with sequential or timestamp numbering"
+argument-hint: "<feature description>"
+user-invocable: true
 ---
 
-
-<!-- Extension: git -->
-<!-- Config: .specify/extensions/git/ -->
 # Create Feature Branch
 
-Create and switch to a new git feature branch for the given specification. This command handles **branch creation only** — the spec directory and files are created by the core `/speckit.specify` workflow.
+Create and switch to a new git feature branch for the given specification. This command handles **branch creation only** — the spec directory and files are created by the core `/speckit-specify` workflow.
 
 ## User Input
 
-```text
 $ARGUMENTS
-```
 
 You **MUST** consider the user input before proceeding (if not empty).
 

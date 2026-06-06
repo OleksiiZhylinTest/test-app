@@ -1,10 +1,9 @@
 ---
-description: Validate current branch follows feature branch naming conventions
+name: speckit-git-validate
+description: "Validate current branch follows feature branch naming conventions"
+user-invocable: true
 ---
 
-
-<!-- Extension: git -->
-<!-- Config: .specify/extensions/git/ -->
 # Validate Feature Branch
 
 Validate that the current Git branch follows the expected feature branch naming conventions.
