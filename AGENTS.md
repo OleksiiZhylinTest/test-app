@@ -52,37 +52,7 @@ Use one shared layer plus assistant-owned customization namespaces.
 | `CLAUDE.md`, `.claude/**` | Claude Code | Other assistants should not inspect or modify during normal tasks |
 | `.github/agents/**`, `.github/skills/**`, `.github/prompts/**`, `.github/hooks/**` | GitHub Copilot | Other assistants should not inspect or modify during normal tasks |
 
-**Claude Code primary entry point:** `project-manager` subagent (`.claude/agents/project-manager.md`) handles intake and routing for all requests. Delegates to 7 direct reports (L1 delegates); each L1 delegate applies the Maker-Checker review loop before accepting work from its leaf agents.
-
-> **Cross-assistant routing (X2):** For tasks that span both Claude and Copilot sides, route the Claude-side work to `ai-architect` → `ai-engineer`. Flag the Copilot-side aspects as requiring a separate Copilot invocation. Never route Claude tasks to Copilot agents (`.github/agents/**`) — treat them as non-existent during normal Claude operation.
-
-**Claude Code SDLC agent roster** (`.claude/agents/`):
-
-| Agent | Tier | Role | Primary workspace |
-|-------|------|------|-------------------|
-| `project-manager` | Orchestrator | Intake, routing, plan-mode orchestration | All surfaces (read-only) |
-| `ai-architect` | L1 Delegate | Claude env governance, agent definitions, hooks, CLAUDE.md audit | `.claude/**` (read); `CLAUDE.md` (read); `.github/**` (read-only) |
-| `principal-solution-architect` | L1 Delegate | Strategic architecture oversight and approval | `docs/`, `app/`, `config/`, `tests/` (read-only) |
-| `product-owner` | L1 Delegate | Backlog, acceptance criteria, prioritisation | `docs/product/` (read-only) |
-| `dev-lead` | L1 Delegate | Technical oversight, code review, sprint breakdown | `app/`, `tests/`, `docs/development/` (read-only) |
-| `test-lead` | L1 Delegate | Test strategy, coverage gates, quality sign-off; owns all Code Review / Test Review / Coverage Review | `tests/` (read); `generated/tmp/` (audit trails write) |
-| `devops-lead` | L1 Delegate | CI/CD strategy, deployment approval, incident review | `.github/workflows/` (read-only) |
-| `web-search` | L1 Delegate | External documentation lookups | Web only (read-only) |
-| `ai-engineer` | L2 Leaf | Claude AI environment implementation (`.claude/**`, `CLAUDE.md`, `.vscode/`) | `.claude/**` (excl. `settings*.json`), `CLAUDE.md`, `.vscode/` |
-| `solution-architect` | L2 Leaf | Architecture implementation: module structure, API contracts, schema, ADRs | `docs/development/` (excl. `docs/development/quality/`), `config/jira_schema.json`, `config/jira_filters.json` |
-| `quality-architect` | L2 Leaf | Quality framework, test layers, coverage gates, NFR definitions | `docs/product/requirements/`, `docs/development/quality/` |
-| `business-analyst` | L2 Leaf | Requirements elicitation, user stories, gap analysis | `docs/product/requirements/` (read-only) |
-| `backend-developer` | L2 Leaf | Server-side Python, API routes, reporters, config | `app/core/`, `app/server/`, `app/reporters/`, `app/utils/`, `config/` |
-| `frontend-developer` | L2 Leaf | UI templates, HTML/CSS, accessibility | `ui/templates/`, `ui/index.html`, `ui/css/`, `ui/js/` |
-| `manual-qa` | L2 Leaf | Exploratory testing, regression checklists, bug reports | `tests/` (read), `docs/product/requirements/`; `generated/tmp/` (bug reports write) |
-| `automation-qa` | L2 Leaf | Automated tests, CI integration, flaky test triage | `tests/unit/`, `tests/component/`, `tests/integration/`, `tests/e2e/` |
-| `performance-qa` | L2 Leaf | Performance test suites, latency baselines, throughput benchmarks | `tests/component/`, `tests/integration/`, `generated/reports/`, `generated/tmp/` |
-| `security-qa` | L2 Leaf | OWASP review, TLS validation, secrets audit, CVE triage | All surfaces (read); security NFR Status column; `generated/tmp/` and `generated/debug/` (findings write) |
-| `ux-designer` | L2 Leaf | Interaction specs, accessibility, design contracts | `docs/product/features/`, `ui/templates/`, `ui/css/`, `ui/js/` |
-| `technical-writer` | L2 Leaf | README, architecture docs, changelogs, API docs | `docs/`, `README.md`, `CHANGELOG.md` |
-| `devops-engineer` | L2 Leaf | Pipeline implementation, Dockerfile, deploy scripts | `.github/workflows/`, `docs/development/pipeline.md`, `pyproject.toml` |
-
-RACI matrix and Maker-Checker Protocol: `.claude/sdlc-raci.md`.
+For Claude Code agents and SDLC workflow, see [`docs/development/ai/claude-agent-roster.md`](docs/development/ai/claude-agent-roster.md).
 
 **GitHub Copilot primary entry point:** `GH Project Manager` agent (`.github/agents/gh-project-manager.agent.md`) handles intake and routing for all requests. Delegates Claude environment work to `GH AI Architect` → `GH AI Engineer`, and external lookups to `GH Web Search`.
 

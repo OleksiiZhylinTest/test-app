@@ -31,36 +31,7 @@ Use these skills at the appropriate step in the review workflow:
 
 ## Task Dependency Analysis Protocol
 
-Apply this protocol before delegating two or more subtasks to subagents.
-
-### Step 1 — Enumerate subtasks
-List every subtask that will be delegated in this work item.
-
-### Step 2 — Classify each pair
-For each pair (A, B), mark **Sequential (A → B)** if **any** of the following hold:
-
-| Dependency type | Condition |
-|---|---|
-| Data | B requires a file, value, schema, or artifact produced by A |
-| Write conflict | A and B write to the same file or resource |
-| State | B requires A's side effects to be in place (e.g., migration before query, schema before data) |
-| Review gate | B is a Maker-Checker review or verification of A's output |
-
-If none of the above apply → the pair is **Independent**.
-
-### Step 3 — Build execution tiers
-Group mutually independent tasks into the same tier:
-
-```
-Tier 1 (parallel): [task-a, task-b, task-c]
-Tier 2 (parallel, after Tier 1): [task-d, task-e]
-Tier 3 (sequential, after Tier 2): [task-f — Maker-Checker review]
-```
-
-### Step 4 — Execute per tier
-- **Same tier → single Agent call**: issue all subtask prompts in one message
-- **Between tiers → wait**: do not start Tier N+1 until all Tier N results are received
-- **Uncertainty rule**: when unsure whether two tasks are independent, treat as sequential
+See [`.github/summaries/task-dependency-protocol.md`](.github/summaries/task-dependency-protocol.md) for the full protocol. Apply it before delegating two or more subtasks.
 
 ## Knowledge Base
 
@@ -124,16 +95,6 @@ DevOps Lead is **co-primary reviewer** for PRs that touch CI/CD-adjacent layers.
 
 This agent applies a **Maker-Checker review loop** to all delegated tasks. Full specification: `.github/summaries/maker-checker-protocol.md`.
 
-**Loop phases**: Checker Verification Plan (isolation) → Maker Execution → Checker Review. See §Loop Mechanics in the protocol for the full procedure.
-
-**Cycle cap**: 3 cycles for simple changes; 5 cycles for shared contract changes. See §Cycle Cap in the protocol for the definition of shared contract changes.
-
-**Gap analysis**: Every review cycle must cover both Tier A (compliance) and Tier B (gap analysis) as defined in §Gap Analysis Tiers in the protocol.
-
-**Union rule**: If the Maker implemented valid corner cases not in the Verification Plan, preserve them. Do not remove valid work because it was not anticipated.
-
-**Structured report**: Produce the Structured Checker Report format (§Structured Checker Report) only on REJECT cycles.
-
 **Domain-specific gap questions** (apply during Tier B review, in addition to the standard gap analysis):
 - Does every new or modified CI job handle job failure gracefully (correct `if:` conditions, no silent swallow of exit codes)?
 - Are all secrets referenced via `${{ secrets.NAME }}` — never hardcoded or logged?
@@ -155,15 +116,7 @@ Before approving any workflow change:
 
 ## Reporting Back to PM
 
-When a task delegated by PM is complete, return **only** the following to PM:
-
-1. **Status**: `COMPLETE`, `BLOCKED`, or `ESCALATE`
-2. **Changes made**: list of files created or modified, each with a one-line description
-3. **Open items**: any risks, blockers, or follow-up items requiring PM or human attention
-
-Do **not** return intermediate content, draft specs, sub-agent output, or internal chain details to PM. PM needs the result, not the process.
-
-If the task is `BLOCKED` or requires `ESCALATE`, stop all sub-delegation immediately and report to PM. PM will present to the human and wait for instruction before any further work.
+See [`.github/summaries/reporting-back-to-pm.md`](.github/summaries/reporting-back-to-pm.md).
 
 ## Knowledge-Gap Escalation
 
