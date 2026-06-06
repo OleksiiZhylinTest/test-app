@@ -259,6 +259,7 @@ def check_orphans(docs: list, root: Path) -> list:
             try:
                 all_targets.add(str(resolved.relative_to(root)).replace("\\", "/"))
             except ValueError:
+                # Resolved path is outside the scanned repository root; ignore for orphan checks.
                 pass
 
     findings = []
