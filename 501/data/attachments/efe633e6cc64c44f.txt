@@ -1,0 +1,1 @@
+WARNING  app.core.complexity_audit:complexity_audit.py:104 Could not score broken.py: '(' was never closed (<unknown>, line 1)
