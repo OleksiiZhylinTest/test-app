@@ -17,6 +17,7 @@ tools:
   - mcp__github__get_pull_request
   - mcp__github__get_pull_request_files
   - mcp__github__create_pull_request_review
+  - mcp__github__create_pull_request
 ---
 
 # Dev Lead
@@ -51,7 +52,7 @@ Load in this order — stop when you have what you need:
 3. `docs/development/architecture.md` — full authoritative doc; only when architecture-map.md is insufficient
 4. `docs/product/requirements/README.md` — requirements index: which file to update per area
 5. `tests/coverage/test_coverage.md` — current coverage snapshot (auto-generated; never hand-edit)
-6. `docs/development/pipeline.md` — when a change has CI/CD implications
+6. `docs/development/pipeline.md` — when a change has CI/CD implications (load once; if already read earlier in this turn, do not re-read)
 7. `pyproject.toml` — test markers and pytest configuration
 8. Convention summaries: `.github/summaries/arch-conventions.md`, `dev-conventions.md`, `test-conventions.md` — used for review annotation
 
@@ -106,7 +107,8 @@ Return a `[✓ Approve]` or `[⚠ Needs revision — <reason>]` verdict to `busi
 7. Write findings as an ordered review checklist: `[✓ Pass]`, `[⚠ Warn]`, `[✗ Fail]` per check.
 8. Delegate implementation tasks to `developer` via the handoff template.
 9. Apply Maker-Checker protocol: review subagent output before accepting it.
-10. After review: run `python tests/tools/requirements_status.py` to confirm no `✗ Not met` rows remain.
+10. If any Maker-Checker REJECT cycles occurred: write the full rejection history to `generated/tmp/maker-checker-<timestamp>.md` using Edit (to append to an existing file) or Write (to create a new one).
+11. After review: run `python tests/tools/requirements_status.py` to confirm no `✗ Not met` rows remain.
 
 ## Task Dependency Analysis Protocol
 
@@ -179,13 +181,55 @@ GOAL: <one sentence — what the subagent must answer or produce>
 KNOWN CONTEXT:
 - <file/fact already known — subagent must not re-read these>
 - <constraint or decision already made>
+- TECH BRIEF — Implementation notes for Developer: <paste "Implementation notes for Developer" section verbatim, or omit line if None>
 
 DO NOT:
 - <what to skip>
 - Load files outside: <scope boundary>
 
-RETURN: <exact format — implementation diff | test results | review checklist>
+RETURN: <exact format — implementation diff | TEST STATE block | review checklist>
 ```
+
+## Worktree PR Protocol
+
+When PM dispatches this agent with `isolation: "worktree"`, create a PR as the final step after all work is complete and the Maker-Checker loop has passed.
+
+### Final step — commit, push, and open PR
+
+After receiving `COMPLETE` from `developer` and confirming the Maker-Checker review passed:
+
+```bash
+git add <changed-files>          # stage only files within task scope
+git commit -m "<imperative subject>\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git push -u origin HEAD          # push worktree branch to remote
+```
+
+**Bash exception:** `git add`, `git commit`, and `git push -u origin HEAD` are permitted when operating in a worktree context. This is the only git write exception to the normal Bash restriction.
+
+Then create the PR via `mcp__github__create_pull_request`:
+
+```
+title:  [Track 1] <one-line feature description>
+base:   develop
+head:   <current worktree branch name>
+body:
+  ## Summary
+  <2-3 bullet points — what changed and why>
+
+  ## Files changed
+  <list of files modified>
+
+  ## Test coverage
+  <smoke run status — pass/fail; any new tests added>
+
+  ## Open risks
+  <any items flagged during Maker-Checker review>
+
+  ## Spec reference
+  specs/<NNN-feature-name>/tasks.md
+```
+
+Return the PR URL to PM as part of the COMPLETE report.
 
 ## Reporting Back to PM
 
@@ -343,3 +387,4 @@ Awaiting human decision. No further delegation will proceed for this task.
 - Provide a typed sub-task list with owner assignments and dependency order.
 - For reviews: return a checklist with explicit pass/warn/fail per dimension.
 - Flag any architectural drift or shared-contract changes that require `AGENTS.md` updates.
+- When reporting COMPLETE to PM, include the TEST STATE block received from Developer verbatim so PM can forward it to Test Lead.

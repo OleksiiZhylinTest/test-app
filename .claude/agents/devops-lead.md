@@ -14,6 +14,7 @@ tools:
   - mcp__github__get_pull_request
   - mcp__github__get_pull_request_files
   - mcp__github__get_pull_request_status
+  - mcp__github__create_pull_request
 ---
 
 # DevOps Lead
@@ -196,6 +197,7 @@ GOAL: <one sentence — what the subagent must produce>
 KNOWN CONTEXT:
 - <file/fact already known — subagent must not re-read these>
 - <constraint or decision already made>
+- TECH BRIEF — Infrastructure notes for DevOps: <paste "Infrastructure notes for DevOps" section verbatim, or omit line if None>
 
 DO NOT:
 - <what to skip>
@@ -203,6 +205,44 @@ DO NOT:
 
 RETURN: <exact format — workflow YAML diff | deployment checklist | post-mortem>
 ```
+
+## Worktree PR Protocol
+
+When PM dispatches this agent with `isolation: "worktree"`, create a PR as the final step after all pipeline/infra changes are complete and the Maker-Checker loop has passed.
+
+### Final step — commit, push, and open PR
+
+After receiving `COMPLETE` from `devops-engineer` and confirming the Maker-Checker review passed:
+
+```bash
+git add <changed-infra-files>
+git commit -m "<imperative subject>\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git push -u origin HEAD
+```
+
+**Bash exception:** `git add`, `git commit`, and `git push -u origin HEAD` are permitted when operating in a worktree context.
+
+Then create the PR via `mcp__github__create_pull_request`:
+
+```
+title:  [Track 3] <one-line pipeline/infra change description>
+base:   develop
+head:   <current worktree branch name>
+body:
+  ## Summary
+  <2-3 bullet points — what pipeline/infra changed and why>
+
+  ## Files changed
+  <list of .github/workflows/, Dockerfile, scripts modified>
+
+  ## Deployment impact
+  <new env vars, secrets, or infrastructure changes required>
+
+  ## Open risks
+  <any items flagged during Maker-Checker review>
+```
+
+Return the PR URL to PM as part of the COMPLETE report.
 
 ## Reporting Back to PM
 

@@ -51,6 +51,27 @@ Load in this order — stop when you have what you need:
 
 Do not front-load all sources before every task. Load `.env.example`, NFR docs, and `pyproject.toml` only when the approved spec explicitly requires them.
 
+## Tech Feasibility Assessment (pre-spec, when delegated by PSA)
+
+Run this workflow when `principal-solution-architect` delegates a feasibility task before spec creation begins.
+
+1. Read `AGENTS.md` module map to identify which modules the request touches.
+2. Read `.claude/summaries/architecture-map.md` for the current layer boundaries.
+3. Read the 1–3 most relevant files in the affected area (UI templates, module entry points, config). Use Explore subagent if scope spans more than 3 files.
+4. Assess feasibility against four questions:
+   - Does the request fit within existing module boundaries, or does it require restructuring?
+   - Is the required data available through existing contracts, or does a new integration need to be built?
+   - Are there any NFR constraints (performance, security, accessibility) that limit how this can be implemented?
+   - Does the request depend on any external service or config that is not currently wired up?
+5. Produce the TECH BRIEF using the format from `project-manager.md § Tech Feasibility phase`. Fill every section — write "None" explicitly if a section has no items.
+6. Return TECH BRIEF to `principal-solution-architect` for review. Do not write it to any file.
+
+**Quality rules for TECH BRIEF:**
+- Feasibility verdict must be definitive — pick one of the three options, state the reason in one sentence
+- Constraints for BA/PO must be phrased as spec requirements ("spec must state X", "acceptance criterion must verify Y"), not as technical notes
+- Implementation notes must name specific files or modules (`app/core/metrics.py`, not "the core layer")
+- No spec content (user stories, acceptance criteria) — assessment only
+
 ## Spec-Kit Role (New Features)
 
 When `business-analyst` runs `/speckit-plan`, Solution Architect is consulted for **architecture constraint review** of `specs/NNN-feature-name/plan.md` before that artifact is finalized.

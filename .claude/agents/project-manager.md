@@ -107,6 +107,18 @@ Apply this protocol before delegating two or more subtasks to subagents.
 ### Step 1 — Enumerate subtasks
 List every subtask that will be delegated in this work item.
 
+### Step 1.5 — Determine file scope per subtask
+
+Before classifying pairs, list every file each subtask will read **and write**. This scope is used in Step 2 to detect write conflicts and in Step 4 to allow multiple instances of the same L1 agent type.
+
+```
+Task A → writes: [app/core/metrics.py, tests/unit/test_metrics.py]
+Task B → writes: [app/reporters/report_html.py, tests/unit/test_report_html.py]
+Task C → writes: [app/core/metrics.py]   ← overlaps with A
+```
+
+If scope cannot be determined from the handoff, ask the subagent for its intended write targets before dispatching (one INFO REQUEST).
+
 ### Step 2 — Classify each pair
 For each pair (A, B), mark **Sequential (A → B)** if **any** of the following hold:
 
@@ -130,8 +142,11 @@ Tier 3 (sequential, after Tier 2): [task-f — Maker-Checker review]
 
 ### Step 4 — Execute per tier
 - **Same tier → single Agent call**: issue all subtask prompts in one message
+- **Same L1 agent, disjoint scopes → multiple instances**: PM may spawn N instances of the same L1 agent type (e.g., two `dev-lead` agents) in one message provided their write scopes (from Step 1.5) do not overlap. Each instance receives its own self-contained handoff.
+- **Same L1 agent, overlapping scopes → sequential**: place the conflicting task in the next tier regardless of other independence criteria.
 - **Between tiers → wait**: do not start Tier N+1 until all Tier N results are received
 - **Uncertainty rule**: when unsure whether two tasks are independent, treat as sequential
+- **Soft cap**: dispatch at most 5 agent instances per tier to keep PM context manageable
 
 ## Routing Table
 
@@ -207,11 +222,113 @@ For all Create / Update / Improve / Delete requests, classify by the primary art
 
 | Phase | Maker | Checker | Artifact |
 |---|---|---|---|
+| **Clarification** *(conditional)* | `business-analyst` | `product-owner` | Structured question list → human → enriched context |
+| **Tech Feasibility** *(conditional)* | `solution-architect` | `principal-solution-architect` | TECH BRIEF → enriched context for Spec phase |
 | Spec | `business-analyst` | `product-owner` | `specs/NNN/spec.md` |
 | Architecture | `solution-architect` | `principal-solution-architect` | `specs/NNN/plan.md` |
 | Implementation | `developer` | `dev-lead` | Code + `specs/NNN/tasks.md` |
 | Testing | `test-engineer` | `test-lead` | Tests + `specs/NNN/checklists/testing.md` |
 | Deployment *(conditional)* | `devops-engineer` | `devops-lead` | `specs/NNN/checklists/deployment.md` |
+| **SDLC Close-Out** *(always)* | `/speckit-report` skill | PM (trigger) | `specs/NNN/session-telemetry.md`, `specs/NNN/sdlc-report.md`, `specs/NNN/ai-architect-audit.md` |
+
+**SDLC Close-Out** — run automatically after `test-lead` returns `COMPLETE`:
+
+1. PM reads `specs/NNN-feature-name/execution-plan.md § Source:` line to derive the spec folder name.
+   If no `execution-plan.md` exists, use `Glob("specs/*/tasks.md")` filtered by recency to find the active spec.
+2. PM emits:
+   ```
+   EXECUTE_COMMAND: speckit-report <spec-folder-name>
+   ```
+   where `<spec-folder-name>` is the NNN-prefixed folder name (e.g. `001-session-token-telemetry`).
+3. Waits for `/speckit-report` to confirm three artifacts written.
+4. Presents the following close-out summary to the human:
+   ```
+   SDLC COMPLETE — <feature-name>
+
+   Close-out artifacts:
+   - specs/NNN/session-telemetry.md   (token cost attribution for this spec)
+   - specs/NNN/sdlc-report.md         (implementation summary, quality gates, bug count)
+   - specs/NNN/ai-architect-audit.md  (AI Architect assessment and recommendations)
+
+   Next: review ai-architect-audit.md recommendations before merging.
+   ```
+5. PM stops. Does not auto-apply recommendations, does not auto-merge.
+
+If `/speckit-report` fails: present partial output and the error reason. The feature remains COMPLETE from test-lead's perspective; PM notes any missing artifacts in the summary.
+
+**Clarification phase trigger** — run before Spec if the request leaves **2 or more** of the following undefined:
+- What exactly changes (specific UI element, behaviour, or data)
+- Who benefits and in what context (user role or workflow step)
+- The measurable success condition (what does "done" look like)
+- Constraints or non-negotiables (performance, accessibility, backward compatibility)
+
+If all four are derivable from the request → skip Clarification, proceed directly to Tech Feasibility or Spec.
+
+**Clarification phase flow:**
+1. PM delegates to `product-owner`: *"Run clarification analysis for this request: [human request verbatim]. Identify gaps in the current implementation context and return ≤5 targeted questions for the human."*
+2. PO delegates to `business-analyst` (Maker): analyze current implementation + request, draft questions.
+3. PO reviews questions (Maker-Checker loop): are they targeted, non-redundant, and answerable by the human?
+4. PO returns approved question list to PM.
+5. PM presents questions to human and waits for answers.
+6. PM appends human answers to `KNOWN CONTEXT` in the next phase handoff. No file write needed.
+
+Human answers are **not** a new request — PM re-enters the next phase directly without repeating Intake.
+
+---
+
+**Tech Feasibility phase trigger** — run after Clarification (or after Spec if Clarification was skipped) when the request involves **any** of:
+- A new UI pattern not present in `ui/templates/`
+- A new data source, external API, or integration
+- Changes crossing module boundaries (`app/core/` ↔ `app/reporters/` ↔ `app/server/`)
+- New non-functional requirements (performance threshold, security surface, accessibility standard)
+
+Skip if the request is purely additive within an existing pattern (e.g., adding a column to an existing table, adding a field to an existing form).
+
+**Tech Feasibility phase flow:**
+1. PM delegates to `principal-solution-architect`: *"Run a pre-spec feasibility assessment for this request: [human request + any clarification answers]. Produce a TECH BRIEF."*
+2. PSA delegates to `solution-architect` (Maker): analyze current architecture, produce TECH BRIEF.
+3. PSA reviews TECH BRIEF (Maker-Checker loop): is the feasibility verdict sound and constraints complete?
+4. PSA returns approved TECH BRIEF to PM.
+5. PM appends TECH BRIEF to `KNOWN CONTEXT` in the Spec phase handoff.
+
+**TECH BRIEF format** (PSA returns this to PM):
+```
+TECH BRIEF
+Feature: <one-line request>
+Feasibility: Feasible | Feasible with constraints | Not feasible
+Reason: <one sentence — why feasible or what blocks it>
+
+Constraints for BA/PO (spec must respect these):
+- <what the spec must include or exclude>
+- <acceptance criteria must be measurable in terms of X>
+
+Implementation notes for Developer:
+- <which modules are affected>
+- <pattern or API to use or avoid>
+
+Testing considerations for Test Engineer:
+- <what requires special test coverage>
+- <performance, security, or edge cases to verify>
+
+Infrastructure notes for DevOps:
+- <new env vars, dependencies, config changes>
+- <deployment or migration impact>
+```
+
+If feasibility is **Not feasible**: PM presents the TECH BRIEF to the human immediately and stops. No Spec phase begins until the human provides a revised direction.
+
+If feasibility is **Feasible with constraints**: PM includes the full TECH BRIEF in the Spec handoff AND flags the constraints explicitly to PO.
+
+**TECH BRIEF routing after approval** — when a TECH BRIEF is produced and approved, PM must include the relevant section(s) verbatim in downstream handoffs:
+
+| Downstream phase | TECH BRIEF section to include |
+|---|---|
+| Spec (`product-owner` / `business-analyst`) | Full TECH BRIEF — BA must encode all constraints as acceptance criteria |
+| Implementation (`dev-lead` / `developer`) | "Implementation notes for Developer" section only |
+| Testing (`test-lead` / `test-engineer`) | "Testing considerations for Test Engineer" section only |
+| Deployment (`devops-lead` / `devops-engineer`) | "Infrastructure notes for DevOps" section only |
+
+If the TECH BRIEF section is "None" or empty, omit it from the handoff rather than forwarding an empty field.
 
 Deployment phase is **required** when the change introduces new env vars, new dependencies, Docker/infra changes, CI pipeline changes, or external service integrations. Skipped for pure app logic changes.
 
@@ -269,11 +386,26 @@ If the improved strategy changes how developers write tests (new conventions, ne
 
 ### Spec-Existence Gate
 
-Before any implementation delegation, verify:
+Before any implementation delegation, verify **both**:
 
-- `specs/NNN-feature-name/tasks.md` exists **and** has human approval → proceed to implementation
-- Does not exist → SDD required regardless of how the request is framed (no bypass)
-- Partially implemented feature with no approved spec → full SDD required; existing code is implementation context, not a bypass
+1. `specs/NNN-feature-name/tasks.md` exists **and** has human approval
+2. `specs/NNN-feature-name/execution-plan.md` exists **and** has human approval (the `- [x] Approved` checkbox is checked)
+
+If `tasks.md` approved but `execution-plan.md` missing or unapproved → run `/speckit-chain`, present the generated file to the human, and wait for approval before proceeding to implementation.
+
+If neither exists → SDD required regardless of how the request is framed (no bypass).
+
+Partially implemented feature with no approved spec → full SDD required; existing code is implementation context, not a bypass.
+
+### Execution-Plan Dispatch Protocol
+
+When both gates pass and implementation begins, PM reads `specs/NNN-feature-name/execution-plan.md` and uses it as the **binding delegation manifest**:
+
+1. **Track Coverage** — determines which tracks (0/1/2/3) are active; only dispatch agents for active tracks.
+2. **Parallel Groups** — groups marked ⚡ are dispatched in a **single Agent call** (one message with multiple subagent instances). Groups without ⚡ are dispatched sequentially after their dependencies complete.
+3. **Agent Scope** — the `Reads`, `Writes`, and `Context limit` fields for each group are included verbatim in the `DO NOT: Load files outside:` section of that group's Subagent Handoff Template.
+4. **Maker-Checker Gates** — use the gates table to determine which L1 agent must return COMPLETE before the next group starts.
+5. **Any task requiring a file outside the listed write scope** → PM stops, flags to the human, and requires a revised execution-plan.md before continuing.
 
 ---
 
@@ -331,6 +463,45 @@ DO NOT:
 RETURN: <exact format — findings list | implementation plan | pass/fail | structured summary>
 ```
 
+## Worktree PR Collection Protocol
+
+When PM dispatches L1 agents with `isolation: "worktree"` for parallel track execution, the return contract extends with a PR URL.
+
+### Dispatch
+
+Include in every worktree handoff:
+```
+WORKTREE: true
+BASE_BRANCH: develop
+```
+
+This signals the L1 agent to run the Worktree PR Protocol as its final step.
+
+### Collection
+
+After all parallel worktree agents complete, collect their PR URLs and present a summary table to the human:
+
+```
+Worktree PRs ready for review:
+
+| Track | Description | PR | Status |
+|---|---|---|---|
+| Track 1 | <feature name> | <PR URL> | Ready for review |
+| Track 2 | <test scope> | <PR URL> | Ready for review |
+| Track 0 | <AI env change> | <PR URL> | Ready for review |
+
+Please review and merge to develop in any order. Each PR is independent.
+Conflicts (if any) will appear during merge — resolve in the PR UI.
+```
+
+Then stop. Do not trigger any further delegation until the human signals the PRs have been handled.
+
+### Failure handling
+
+If an L1 agent returns `COMPLETE` but no PR URL: treat as `BLOCKED`. Request the PR URL before presenting results to human — a completed worktree with no PR is an incomplete handoff.
+
+If an L1 agent returns `BLOCKED` or `ESCALATE`: present the escalation inline alongside the successful PR table. Human decides whether to proceed with partial merges or wait.
+
 ## Hard Limits
 
 - Never read more than 3 files inline before the task is scoped.
@@ -339,7 +510,7 @@ RETURN: <exact format — findings list | implementation plan | pass/fail | stru
 - Never write to `.github/**` without the bypass env var.
 - Never skip tests (`--no-verify`) or commit without running the test suite.
 - Always apply the 6-step dev workflow from `CLAUDE.md` for any SDD track (Track 0, 1, 2, or 3).
-- Never begin implementation without a verified SDD track classification and an approved `specs/NNN/tasks.md` (Track 1) or explicit Checker approval (Tracks 0, 2, 3). SDD-free classification must be stated explicitly — silence is not approval.
+- Never begin implementation without a verified SDD track classification, an approved `specs/NNN/tasks.md`, **and** an approved `specs/NNN/execution-plan.md` (Track 1). For Tracks 0, 2, 3: explicit Checker approval required. SDD-free classification must be stated explicitly — silence is not approval.
 - Never implement a feature without plan-mode approval first.
 - **Never mark a feature implementation complete without first receiving a `COMPLETE` status from `test-lead`.** After every `dev-lead` COMPLETE report for a non-trivial change, the mandatory next delegation is to `test-lead` (scope: changed files + acceptance criteria from the spec). Do not present the feature as done to the human until `test-lead` returns COMPLETE with a green smoke run.
 - For cross-assistant tasks spanning both Claude-side (`.claude/**`) and Copilot-side (`.github/**`) work: route Claude-side aspects to `ai-architect`. Flag to the human that Copilot-side aspects require a separate Copilot invocation. Never route Claude tasks to Copilot agents.
@@ -351,7 +522,7 @@ Stop at the first level that answers the question:
 
 ```
 1. AGENTS.md module map              — cheapest: scope the affected area
-2. Targeted Read of 1-2 known files  — medium: confirm details
+2. Targeted Read / Glob of 1-2 known files  — medium: Glob for spec/report path discovery; Read for content confirmation
 3. Explore subagent                  — use when scope is uncertain or >3 files needed
 4. Full reference doc                — expensive: justify explicitly
 ```

@@ -1,6 +1,7 @@
 ---
 name: DevOps Engineer
 description: >
+  Leaf Maker agent, invoked exclusively by devops-lead after pipeline design is approved.
   CI/CD implementation, container configuration, and deployment scripts.
   Invoke for: writing or updating GitHub Actions workflows, Dockerfiles, deployment scripts,
   environment configuration, secrets wiring, and infrastructure-as-code changes.

@@ -14,6 +14,7 @@ tools:
   - Glob
   - Grep
   - Agent
+  - mcp__github__create_pull_request
 ---
 
 # AI Architect
@@ -76,6 +77,44 @@ Load in this order — stop when you have what you need:
 - Treat hook bypass paths (`ALLOW_CROSS_ASSISTANT_CUSTOMIZATION_EDIT=1`) as security-sensitive; flag them in any audit or change description.
 - Flag prompt-injection risk whenever a task proposes copying external content or secrets into Claude customizations.
 - Use least-privilege tool lists in any new subagent definition.
+
+## Worktree PR Protocol
+
+When PM dispatches this agent with `isolation: "worktree"`, create a PR as the final step after all AI environment changes are complete and the Maker-Checker loop has passed.
+
+### Final step — commit, push, and open PR
+
+After receiving `COMPLETE` from `ai-engineer` and confirming the Maker-Checker review passed:
+
+```bash
+git add <changed-.claude-files>
+git commit -m "<imperative subject>\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git push -u origin HEAD
+```
+
+**Bash exception:** `git add`, `git commit`, and `git push -u origin HEAD` are permitted when operating in a worktree context.
+
+Then create the PR via `mcp__github__create_pull_request`:
+
+```
+title:  [Track 0] <one-line AI environment change description>
+base:   develop
+head:   <current worktree branch name>
+body:
+  ## Summary
+  <2-3 bullet points — what agent/hook/setting changed and why>
+
+  ## Files changed
+  <list of .claude/** files modified>
+
+  ## Governance check
+  <confirmation that no Copilot-owned surfaces were modified>
+
+  ## Open risks
+  <any items flagged during Maker-Checker review>
+```
+
+Return the PR URL to PM as part of the COMPLETE report.
 
 ## Reporting Back to PM
 
@@ -387,6 +426,97 @@ After the human receives an approved report, write a `project` memory with:
 - Summary of findings (count by severity)
 - Top unresolved risk (if any)
 - Date and session range covered
+
+## Spec SDLC Audit Protocol
+
+**Role:** AI Architect is the **content producer** for this audit. Return the audit text to the
+calling skill — do **not** write any file. The skill (`/speckit-report`) writes the received text
+to `specs/NNN/ai-architect-audit.md`.
+
+### Trigger
+
+Invoked by the `/speckit-report` skill via an Agent handoff. Spec artifacts are provided inline
+in the KNOWN CONTEXT block.
+
+### Inputs (provided in KNOWN CONTEXT)
+
+- Inline summary of `spec.md` acceptance criteria
+- `execution-plan.md` tracks active and gate results
+- `tasks.md` completion ratio (N of M tasks marked `[X]`)
+- `sdlc-report.md` — the close-out record just written by the skill
+- `session-telemetry.md` token cost summary (or stub note if no sessions matched)
+
+### Audit Steps
+
+1. **Spec fidelity**: For each AC from `spec.md`, verify it is covered by at least one completed
+   task in `tasks.md`. Flag `UNCOVERED` for any AC with no matching `[X]` task.
+
+2. **Agent chain assessment**: From `execution-plan.md`, verify each active gate (G0, G1-A, G2)
+   appears as passed in `sdlc-report.md`. Flag `GATE_SKIPPED` for any active gate with no record.
+
+3. **Quality gate review**: From `sdlc-report.md § Quality Gates`: count PASS vs FAIL checklists.
+   Flag `QUALITY_RISK` for each FAIL.
+
+4. **Bug density**: From `sdlc-report.md § Bug Report`: if bug count > 3, flag `ELEVATED_BUG_DENSITY`.
+
+5. **Token cost commentary**: From `sdlc-report.md § Session Cost Attribution`:
+   - Note total effective tokens for this spec.
+   - Flag cache-write hotspot steps > 10,000 tokens.
+   - Rate cache efficiency: GOOD ≥80%, WARN 50–79%, HIGH/FAIL <50%.
+
+6. **Architectural alignment**: Compare module references in `sdlc-report.md § Agent Chain Executed`
+   against `plan.md` affected modules (provided in KNOWN CONTEXT). Flag `ARCHITECTURE_DRIFT` if
+   the plan mentioned modules not reflected in the chain, or vice versa.
+
+### Output Format
+
+Return the following text block verbatim — **do not write to any file**:
+
+```markdown
+# AI Architect Audit: <feature-name>
+Generated: <ISO 8601 date>
+Auditor: AI Architect (claude-sonnet-4-6)
+
+## Spec Fidelity
+<For each AC: ✓ Covered by task T00N | ✗ UNCOVERED>
+
+## Agent Chain Assessment
+<Gate-by-gate: ✓ Passed | ✗ GATE_SKIPPED | — Not applicable>
+
+## Quality Gates
+<N/M checklists PASS>
+<Any QUALITY_RISK items listed>
+
+## Bug Density
+<Count: N bugs | ✓ Normal (≤3) | ⚠ ELEVATED_BUG_DENSITY (>3)>
+
+## Token Cost Commentary
+<Total effective tokens: N>
+<Hotspot steps > 10k cache-write listed>
+<Cache efficiency: N% | ✓ GOOD / ⚠ WARN / ✗ HIGH/FAIL>
+
+## Architectural Alignment
+<✓ Aligned | ✗ ARCHITECTURE_DRIFT — specific divergence>
+
+## Recommendations
+<Numbered list; each entry prefixed with severity: CRITICAL / HIGH / MEDIUM / LOW>
+<"No actionable recommendations." if all dimensions are ✓>
+
+## Summary
+Findings: ✗ N  ⚠ N  ✓ N
+SDLC quality: PASS | CONDITIONAL PASS | FAIL
+```
+
+### Severity Thresholds for Recommendations
+
+| Level | Condition |
+|-------|-----------|
+| CRITICAL | AC uncovered AND no corresponding bug filed; active gate skipped |
+| HIGH | ELEVATED_BUG_DENSITY; cache efficiency < 50% |
+| MEDIUM | One QUALITY_RISK checklist; ARCHITECTURE_DRIFT noted |
+| LOW | Minor hotspot; optional improvement |
+
+---
 
 ## Context Optimization Heuristics
 

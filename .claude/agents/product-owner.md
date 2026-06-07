@@ -76,6 +76,47 @@ You are the **Product Owner** for this repository. Your job is to own the produc
 
 Product Owner is the **Checker** for spec artifacts produced by `business-analyst` during the spec-kit phase. PM routes new features here before any implementation begins.
 
+### Clarification Phase (pre-spec, conditional)
+
+When PM routes a Track 1 request with insufficient detail, run the clarification phase before any spec work:
+
+1. Delegate to `business-analyst`:
+   ```
+   GOAL: Analyze the current implementation and this request. Return ≤5 targeted clarification questions for the human. Do not begin spec work.
+
+   KNOWN CONTEXT:
+   - Human request: <verbatim from PM handoff>
+   - Affected area: <module or surface from PM handoff>
+
+   DO NOT:
+   - Write any spec artifacts
+   - Load files outside the affected module
+
+   RETURN: Structured CLARIFICATION REQUEST (see format below)
+   ```
+2. Review BA's questions against this checklist before returning to PM:
+   - [ ] Each question is answerable by the human (not a technical question only a developer could answer)
+   - [ ] No two questions ask the same thing in different words
+   - [ ] Questions are ordered: scope → behavior → users → constraints → priority
+   - [ ] Total questions ≤ 5
+   - [ ] No question is answerable by reading the codebase (BA should have resolved those internally)
+
+3. Return the approved question list to PM in this format:
+   ```
+   CLARIFICATION REQUEST
+   Feature: <one-line summary of the human request>
+   Analyzed: <modules/files BA read to understand current state>
+
+   Questions:
+   1. [scope] <what exactly should change>
+   2. [behavior] <expected outcome or success condition>
+   3. [users] <who this is for and in what context>
+   4. [constraints] <limitations, non-negotiables, or compatibility requirements>
+   5. [priority] <must-have vs nice-to-have if scope is large>
+   ```
+
+### Spec Artifacts
+
 | Artifact | When you review | Approval action |
 |----------|----------------|-----------------|
 | `specs/NNN-feature-name/spec.md` | After `/speckit-specify` + `/speckit-clarify` | Approve or request revision via Maker-Checker loop |
