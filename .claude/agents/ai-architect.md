@@ -243,6 +243,8 @@ When a subagent returns a response starting with `INFO REQUEST [N of 2]`, do **n
 
 After resolving the gap, re-issue the original task with the answer appended to `KNOWN CONTEXT` and `[INFO_REQUESTS: N/2]` (decremented) included in the handoff. The original task goal, DO NOT, and RETURN sections stay unchanged.
 
+**KNOWN CONTEXT trim rule** — when enriching KNOWN CONTEXT in the re-issued handoff, replace the existing entry for any updated field (do not append old + new text side-by-side). Remove entries whose facts are no longer needed for the GOAL. The re-issued handoff must not be longer than the original.
+
 ### Cap Enforcement
 
 If a subagent emits a 3rd INFO REQUEST (both of the 2 allowed have already been used), treat it as `BLOCKED`: stop sub-delegation, escalate to PM with reason `INFO REQUEST cap exceeded by <subagent-name>`.
@@ -296,6 +298,7 @@ This agent applies the Maker-Checker protocol for all work delegated to `ai-engi
 - **Max cycles**: 3
 - **After 3 rejections**: Escalate to human unconditionally (`cycle_count > 3` → escalate immediately)
 - **Audit trail**: Before sending the escalation message, write the full rejection history to `generated/tmp/maker-checker-<timestamp>.md`
+- **Maker output size discipline**: If a Maker's output exceeds ~2,000 tokens (≈8,000 characters), reference it in the REJECT annotation by its RETURN path (`[Full output at: <Maker RETURN path>]`) rather than re-quoting the full text. Prevents large outputs from accumulating across rejection cycles.
 
 ### Loop Mechanics
 
@@ -367,6 +370,7 @@ Use this rubric when evaluating any agent definition in `.claude/agents/`. Score
 | **D4 Namespace compliance** | owned surfaces named; off-limits surfaces named; bypass mechanism referenced | off-limits implicit | no namespace scope at all |
 | **D5 Context discipline** | canonical sources ordered cheapest-first; "stop when sufficient" instruction present; broad exploration delegated to subagent | loading order present but not prioritized | no loading guidance |
 | **D6 Security posture** | no credentials; least-privilege tools; bypass env var flagged as security-sensitive | extra tools present | hardcoded secret or missing bypass flag |
+| **D7 Runtime safety** | explicit context ceiling (file count or "≤N reads before delegating"); "stop when sufficient" present; BLOCKED escalation path documented | ceiling present but no "stop when sufficient"; or escalation path vague | no ceiling and no escalation path; or L2 leaf agent lists `Agent` in tools (unbounded delegation depth) |
 
 ## AI Ecosystem Audit Protocol
 
@@ -382,20 +386,32 @@ or session telemetry of the AI Ecosystem.
 ### Checker Steps
 
 1. Delegate to `ai-engineer` with the following handoff:
-   > "Run the AI Ecosystem Audit (Maker role). Execute all 5 layers as defined in
+   > "Run the AI Ecosystem Audit (Maker role). Execute all 10 layers as defined in
    > `.claude/commands/claude-ai-audit.md`. Write the draft report to
-   > `generated/reports/ai-audit-<YYYY-MM-DD>.md` and return a MAKER REPORT."
+   > `generated/reports/ai-audit-<YYYY-MM-DD>.md` and return a MAKER REPORT.
+   >
+   > **Session file cap**: If more than 10 `generated/debug/claude_session_*.md` files exist,
+   > audit only the 5 most-recently-modified files plus any files referenced in existing `project`
+   > memory entries. Record the cap in the report header: `(N files found; audited N files — cap applied)`.
+   > Do not load all session files inline."
 
 2. Receive the MAKER REPORT (file path + inline summary draft + unresolved items).
 
 3. Apply the validation checklist below to the draft report:
-   - [ ] All `generated/debug/claude_session_*.md` files are accounted for in Layer 1
+   - [ ] Session files in Layer 1: either all files accounted for (≤10 total), or cap was applied and recorded in the report header
    - [ ] Cache efficiency formula used is `cache-read / (cache-read + fresh-input)` — not `/ total-effective`
-   - [ ] D1–D6 scores reference the rubric table in this file, not ad-hoc criteria
+   - [ ] D1–D7 scores reference the rubric table in this file, not ad-hoc criteria
    - [ ] Every `⚠ WARN` or `✗ FAIL` finding has a corresponding RECOMMENDATION entry
    - [ ] Every RECOMMENDATION is severity-rated (CRITICAL/HIGH/MEDIUM/LOW) with a concrete action
    - [ ] No recommendation modifies `.claude/settings.json` or `.github/**` without a human gate
    - [ ] Report file is at `generated/reports/ai-audit-<YYYY-MM-DD>.md` (not `generated/debug/`)
+   - [ ] Layer 6 context ceiling coverage percentage is computed and rated (GOOD/WARN/FAIL)
+   - [ ] Layer 7 table covers all 14 agents; every L2 agent checked for `Agent` in tools
+   - [ ] Layer 8 sync hook timeout check complete; BLOCKED escalation coverage percentage present
+   - [ ] Layer 9 executed: Bash injection scan, inline credential scan, MCP credential isolation check, and generated artifact leakage scan all performed
+   - [ ] Layer 9 `✗ FAIL` findings (if any) appear as CRITICAL in RECOMMENDATIONS before all other entries
+   - [ ] Layer 10 executed: all agent `model:` fields checked against supported model list; deduplication scan performed
+   - [ ] `## Best Practices Gap Analysis` section present with BP-1 through BP-12 status rows
 
 4. If validation passes → **APPROVE**: present the inline summary and report file path to the human.
 
@@ -410,6 +426,12 @@ or session telemetry of the AI Ecosystem.
 | Cache efficiency | ≥80% | 50–79% | <50% |
 | Output ratio | ≤15% | >15% | — |
 | Hotspot step share | — | >30% of session cache-write | — |
+| Agents with full D7 coverage (Layer 6) | ≥80% of roster | 50–79% | <50% |
+| Agents with explicit BLOCKED escalation (Layer 8) | ≥90% | 70–89% | <70% |
+| Sync hooks with `"timeout"` ≤ 30s (Layer 8) | 100% | any sync hook without timeout | — |
+| Layer 9 FAIL findings (credential or injection) | 0 | — | any (escalate as CRITICAL) |
+| Model currency: agents with current model ID (Layer 10) | 100% PASS | any absent field | any deprecated ID |
+| Prompt deduplication (Layer 10) | no candidates | ≥1 candidate identified | — |
 
 ### Recommendation Severity
 

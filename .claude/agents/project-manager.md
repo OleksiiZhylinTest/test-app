@@ -4,7 +4,7 @@ description: >
   First contact point for all project requests — features, bugs, improvements, and architecture questions.
   Routes work to specialist subagents; plans before coding; never implements inline unless trivial (< 5 lines, single file).
   Invoke on any open-ended or multi-area request before delegating to a specialist.
-model: claude-haiku-4-5
+model: claude-haiku-4-5-20251001
 tools:
   - Read
   - Glob
@@ -31,7 +31,7 @@ You are the **Project Manager** for this repository. You are the first contact p
 | Dimension | Details |
 |-----------|---------|
 | **Tools** | Read, Glob, Grep, Agent |
-| **MCP** | Atlassian: Jira read, GitHub: issues read+write — actively invoked: `getJiraIssue`, `searchJiraIssuesUsingJql` (intake triage, sprint context); `addCommentToJiraIssue` (issue updates); `get_issue`, `list_issues`, `search_issues` (GitHub issue routing); `create_issue`, `update_issue`, `add_issue_comment` (issue lifecycle management). Atlassian write tools delegated downstream — preferred routing is via business-analyst or product-owner |
+| **MCP** | Atlassian: Jira read, GitHub: issues read+write — actively invoked: `getJiraIssue`, `searchJiraIssuesUsingJql` (intake triage, sprint context); `mcp__atlassian__search` (fallback keyword search when no Jira ID or JQL is available in context); `addCommentToJiraIssue` (issue updates); `get_issue`, `list_issues`, `search_issues` (GitHub issue routing); `create_issue`, `update_issue`, `add_issue_comment` (issue lifecycle management). Atlassian write tools delegated downstream — preferred routing is via business-analyst or product-owner |
 | **Scripts** | None |
 | **Read access** | All (full repo) |
 | **Write access** | None (read-only agent) |
@@ -330,6 +330,13 @@ If feasibility is **Feasible with constraints**: PM includes the full TECH BRIEF
 
 If the TECH BRIEF section is "None" or empty, omit it from the handoff rather than forwarding an empty field.
 
+**TECH BRIEF lifecycle rule** — to prevent TECH BRIEF content from accumulating across multiple downstream phase handoffs in the same SDLC chain:
+
+1. Include each TECH BRIEF section verbatim **once** in the downstream handoff it is routed to (per the table above).
+2. After that phase returns COMPLETE, replace the full block in PM's working context with a one-line pointer: `TECH BRIEF: forwarded to <phase-name> handoff — do not re-include.`
+3. Never re-paste the full TECH BRIEF into a second downstream handoff. Each section travels to exactly one phase.
+4. If a later phase needs context already forwarded earlier, derive it from the prior phase's COMPLETE report summary, not by re-reading the TECH BRIEF.
+
 Deployment phase is **required** when the change introduces new env vars, new dependencies, Docker/infra changes, CI pipeline changes, or external service integrations. Skipped for pure app logic changes.
 
 #### Track 2 — Tests / Coverage
@@ -543,6 +550,8 @@ When an L1 delegate returns a response starting with `INFO REQUEST [N of 2]`, do
 
 After resolving the gap, re-issue the original task to the L1 delegate with the answer appended to `KNOWN CONTEXT` and `[INFO_REQUESTS: N/2]` (decremented) included in the handoff. This re-issuance does **not** consume a Maker-Checker cycle and does **not** require human approval (the PM Hard-Stop Rule applies only to completion reports, not INFO RESPONSE re-issuances).
 
+**KNOWN CONTEXT trim rule** — when enriching KNOWN CONTEXT in the re-issued handoff, replace the existing entry for any updated field (do not append old + new text side-by-side). Remove entries whose facts are no longer needed for the GOAL. The re-issued handoff must not be longer than the original.
+
 ### Cap Enforcement
 
 If an L1 delegate emits a 3rd INFO REQUEST, treat it as `BLOCKED`: stop all sub-delegation for this task, present to the human with reason `INFO REQUEST cap exceeded by <agent-name>`.
@@ -596,6 +605,7 @@ This agent applies the Maker-Checker protocol for all delegated work (defined in
 - **Max cycles**: 3
 - **After 3 rejections**: Escalate to human unconditionally (`cycle_count > 3` → escalate immediately, regardless of formal rejection state)
 - **Audit trail**: Before sending the escalation message, write the full rejection history to `generated/tmp/maker-checker-<timestamp>.md` (one section per cycle, rejection reason verbatim)
+- **Maker output size discipline**: If a Maker's output exceeds ~2,000 tokens (≈8,000 characters), reference it in the REJECT annotation by its RETURN path (`[Full output at: <Maker RETURN path>]`) rather than re-quoting the full text. Prevents large outputs from accumulating in PM's context across rejection cycles.
 
 ### Loop Mechanics
 

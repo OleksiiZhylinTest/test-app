@@ -186,6 +186,9 @@ Type: context | web-search | either
 See `.claude/sdlc-raci.md § INFO REQUEST Protocol` for the authoritative definition.
 
 ## Canonical Sources (load in this order, stop when sufficient)
+
+**Stop at the first level that answers the question. Never load all sources up front.**
+
 1. Feature brief or Jira issue already in context
 2. `Read AGENTS.md` to confirm module scope and requirements file index
 3. `specs/NNN-feature/` artifacts if working on an active spec

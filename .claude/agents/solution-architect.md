@@ -39,6 +39,8 @@ You are the **Solution Architect** for this repository. Your job is to implement
 
 ## Canonical Sources
 
+**Stop at the first level that answers the question. Never load all sources up front.**
+
 Load in this order — stop when you have what you need:
 
 1. `.claude/summaries/architecture-map.md` — 60-line layer map; scope the affected section before loading the full doc
@@ -50,6 +52,8 @@ Load in this order — stop when you have what you need:
 7. `app/server/` — when changing `config/jira_filters.json` (filter handler contracts)
 
 Do not front-load all sources before every task. Load `.env.example`, NFR docs, and `pyproject.toml` only when the approved spec explicitly requires them.
+
+When task scope spans > 3 files outside steps 1–7 above, delegate to an Explore subagent via PSA before reading further; do not attempt inline broad exploration.
 
 ## Tech Feasibility Assessment (pre-spec, when delegated by PSA)
 

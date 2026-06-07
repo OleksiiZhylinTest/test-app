@@ -52,7 +52,7 @@ You are the **AI Engineer** for this repository — the **Claude Code variant**.
 ## AI Ecosystem Audit — Maker Role
 
 **Role:** AI Engineer is the **Maker** in the AI Ecosystem Audit Maker-Checker loop.
-Triggered by AI Architect's delegation. Executes the full 5-layer audit, writes the draft
+Triggered by AI Architect's delegation. Executes the full 10-layer audit, writes the draft
 report, and returns a MAKER REPORT to AI Architect for Checker review.
 
 ### Execution Steps
@@ -65,11 +65,46 @@ report, and returns a MAKER REPORT to AI Architect for Checker review.
    - **Output ratio** = `output / total-effective × 100%`
    - **Steps/turn** = total steps across all turns / number of turns with steps
    - **Hotspot concentration** = largest single hotspot cache-write / session total cache-write
-4. `Glob .claude/agents/*.md` — read each agent file and score D1–D6 per the rubric in
+4. `Glob .claude/agents/*.md` — read each agent file and score D1–D7 per the rubric in
    `ai-architect.md § Agent Evaluation Rubric`. For each WARN/FAIL, record the specific observation.
-5. Draft the full report using the format defined in `.claude/commands/claude-ai-audit.md`.
-6. Write the draft report to `generated/reports/ai-audit-<YYYY-MM-DD>.md`.
-7. Return a MAKER REPORT to AI Architect (see format below).
+
+5. **Layer 6 — Runtime Context Management**: For each agent file, check:
+   - Presence of a `## Context Optimization` section (or equivalent).
+   - Concrete file-read ceiling defined (e.g., "≤ 3 files before delegating").
+   - "stop when sufficient" or equivalent directive present.
+   - Explicit Explore subagent delegation trigger defined.
+   Score each agent PASS/WARN/FAIL; compute aggregate coverage percentage.
+
+6. **Layer 7 — Loop & Recursion Safety**:
+   - For each L1 agent: grep for `max.*cycle` or `cycle_count`; flag missing cap as WARN.
+   - For each L2 agent: grep frontmatter `tools:` for `Agent`; flag presence as FAIL (unbounded depth).
+   - Grep `.claude/commands/*.md` and `.claude/skills/**/*.md` for `ScheduleWakeup`, `CronCreate`, `/loop`; for each match, verify adjacent termination condition; flag missing as WARN.
+   - For each L1 agent: grep for `INFO REQUEST` or `2 per task`; flag missing as WARN.
+   Record results as table: `Agent/File | Cycle Cap | Leaf Depth Safe | Loop Termination | INFO Cap | Notes`.
+
+7. **Layer 8 — Hanging Request Protection**:
+   - Read `.claude/settings.json`; for each sync hook entry (no `"async": true`), verify `"timeout"` ≤ 30s; flag missing or >30s as WARN.
+   - For each agent file: grep for Monitor tool usage without `timeout_ms` guidance (WARN), long-running Bash without `run_in_background` or `timeout` guidance (WARN), and presence of a BLOCKED/escalation clause. Flag absence of escalation clause as WARN.
+   Compute: percentage of agents with explicit BLOCKED escalation; record sync hook timeout compliance.
+
+8. **Layer 9 — Prompt Injection & Credential Safety**:
+   - Grep all `.claude/agents/*.md` and `.claude/commands/*.md` for: Bash command strings containing unquoted dynamic values; bearer token patterns (`Bearer [A-Za-z0-9+/]{20,}`); key assignment patterns (`api_key\s*=\s*\S+`, `password\s*=\s*\S+`). Flag any match → `✗ FAIL`.
+   - For each agent file: check whether the Workflow or Handoff section forwards raw `$ARGUMENTS` or unquoted user-supplied text into a subagent prompt. Flag absence of explicit quoting acknowledgment → `⚠ WARN`.
+   - Read `.claude/settings.local.json` (if present): for each `mcpServers` entry, verify credentials use `$ENV_VAR` substitution; hardcoded value → `✗ FAIL`. File absent → record "N/A".
+   - Grep the 5 most-recently-modified files in `generated/debug/` and `generated/reports/` for the same credential patterns. Any match → `✗ FAIL`.
+   - Build table: `File | Bash Injection | Input Forwarding | Inline Creds | MCP Isolation | Artifact Leak | Notes`.
+
+9. **Layer 10 — Model Currency & Prompt Deduplication**:
+   - For each agent file in `.claude/agents/*.md`: read frontmatter `model:` field. Supported IDs (from `CLAUDE.md`): `claude-sonnet-4-6`, `claude-opus-4-7`, `claude-haiku-4-5-20251001`. Match → `✓ PASS`; absent → `⚠ WARN`; other value → `✗ FAIL`.
+   - Identify guidance blocks present verbatim or near-verbatim in ≥ 3 agent files (INFO REQUEST format, output expectations boilerplate, logging/coding standards). Block > 150 tokens in ≥ 3 files → `⚠ WARN` (deduplication candidate).
+   - Build table: `Agent | Model Field | Currency Status | Notes` plus deduplication candidates list.
+   - Compute aggregate: 100% PASS → GOOD; any absent field → WARN; any deprecated ID → FAIL.
+
+10. **Best Practices Gap Analysis**: Evaluate BP-1 through BP-12 using findings from Layers 6–9. Emit a status row (✓ MET / ⚠ PARTIAL / ✗ GAP) for each practice.
+
+11. Draft the full report using the format defined in `.claude/commands/claude-ai-audit.md`.
+12. Write the draft report to `generated/reports/ai-audit-<YYYY-MM-DD>.md`.
+13. Return a MAKER REPORT to AI Architect (see format below).
 
 ### Write Target
 
@@ -84,6 +119,12 @@ This is within AI Engineer's write access for generated artifacts. Do not write 
 | Cache efficiency | ≥80% | 50–79% | <50% |
 | Output ratio | ≤15% | >15% | — |
 | Hotspot step share | — | >30% of session cache-write | — |
+| Agents with full D7 coverage (Layer 6) | ≥80% of roster | 50–79% | <50% |
+| Agents with explicit BLOCKED escalation (Layer 8) | ≥90% | 70–89% | <70% |
+| Sync hooks with `"timeout"` ≤ 30s (Layer 8) | 100% | any sync hook without timeout | — |
+| Layer 9 FAIL findings (credential or injection) | 0 | — | any (escalate as CRITICAL) |
+| Model currency: agents with current model ID (Layer 10) | 100% PASS | any absent field | any deprecated ID |
+| Prompt deduplication (Layer 10) | no candidates | ≥1 candidate identified | — |
 
 ### MAKER REPORT Format (return to AI Architect)
 

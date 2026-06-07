@@ -139,6 +139,8 @@ Never create disposable files in `app/`, `config/`, `tests/`, `ui/`, or the repo
 - WCAG AA is a hard requirement for all UI work — not optional.
 - Never implement a new UI layout or interaction pattern without an approved Business Analyst spec.
 - For any new HTTP handler, input validation path, or credential-handling code: flag for Security QA review via Dev Lead before reporting work complete.
+- For Bash commands expected to produce large output (e.g., full test suite output, dependency scans): redirect to `generated/tmp/` and `Read` the summary rather than capturing output inline.
+- For any Bash command expected to run > 60s, use `timeout N cmd` wrapper (e.g. `timeout 120 python tests/runners/run_all_checks.py --sanity`) or document the expected duration in your Dev Lead return.
 
 ## Output Expectations
 
