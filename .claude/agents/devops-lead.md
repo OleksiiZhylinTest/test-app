@@ -279,6 +279,8 @@ When a subagent returns a response starting with `INFO REQUEST [N of 2]`, do **n
 
 After resolving the gap, re-issue the original task with the answer appended to `KNOWN CONTEXT` and `[INFO_REQUESTS: N/2]` (decremented) included in the handoff. The original task goal, DO NOT, and RETURN sections stay unchanged.
 
+**KNOWN CONTEXT trim rule** — when enriching KNOWN CONTEXT in the re-issued handoff, replace the existing entry for any updated field (do not append old + new text side-by-side). Remove entries whose facts are no longer needed for the GOAL. The re-issued handoff must not be longer than the original.
+
 ### Cap Enforcement
 
 If a subagent emits a 3rd INFO REQUEST (both of the 2 allowed have already been used), treat it as `BLOCKED`: stop sub-delegation, escalate to PM with reason `INFO REQUEST cap exceeded by <subagent-name>`.
@@ -332,6 +334,7 @@ This agent applies the Maker-Checker protocol for all delegated work (defined in
 - **Max cycles**: 3
 - **After 3 rejections**: Escalate to human unconditionally (`cycle_count > 3` → escalate immediately)
 - **Audit trail**: Before sending the escalation message, write the full rejection history to `generated/tmp/maker-checker-<timestamp>.md`
+- **Maker output size discipline**: If a Maker's output exceeds ~2,000 tokens (≈8,000 characters), reference it in the REJECT annotation by its RETURN path (`[Full output at: <Maker RETURN path>]`) rather than re-quoting the full text. Prevents large outputs from accumulating across rejection cycles.
 
 ### Loop Mechanics
 
