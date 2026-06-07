@@ -164,6 +164,12 @@ METRIC_DAU_TREND: bool = _env_bool("METRIC_DAU_TREND")
 _port_raw = os.getenv("PORT", "8080").strip()
 SERVER_PORT: int = int(_port_raw) if _port_raw.isdigit() else 8080
 
+_complexity_med = os.getenv("COMPLEXITY_MEDIUM_THRESHOLD", "3.5").strip()
+COMPLEXITY_MEDIUM_THRESHOLD: float = float(_complexity_med) if _complexity_med else 3.5
+
+_complexity_high = os.getenv("COMPLEXITY_HIGH_THRESHOLD", "7.0").strip()
+COMPLEXITY_HIGH_THRESHOLD: float = float(_complexity_high) if _complexity_high else 7.0
+
 
 def validate_config() -> list[str]:
     """Return list of validation errors; empty if config is valid."""

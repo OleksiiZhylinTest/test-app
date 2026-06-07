@@ -219,6 +219,8 @@ class HandlerBase(BaseHTTPRequestHandler):
             self._handle_dau_roster_get()
         elif path == "/api/data-preview":
             self._handle_data_preview()
+        elif path == "/api/complexity/audit":
+            self._handle_complexity_audit()
         elif path.startswith("/generated/reports/"):
             target = self._resolve_report_path(path)
             if target is None:

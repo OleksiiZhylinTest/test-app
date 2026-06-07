@@ -10,5 +10,6 @@ allure-pytest>=2.16.0
 ruff>=0.15.14
 mypy>=2.1.0
 bandit>=1.9.4
+# radon promoted to requirements.txt (runtime dep)
 radon>=6.0.1
 pipdeptree>=2.35.3
