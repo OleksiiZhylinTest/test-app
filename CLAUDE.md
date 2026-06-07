@@ -107,12 +107,14 @@ Invoked as slash commands in Claude Code. Skills live in `.claude/skills/speckit
 | `/speckit-plan` | Produce `specs/NNN-feature/plan.md` (technical approach) |
 | `/speckit-tasks` | Produce `specs/NNN-feature/tasks.md` (ordered task breakdown) |
 | `/speckit-analyze` | Cross-check spec/plan/tasks for coverage gaps |
-| `/speckit-implement` | Drive implementation from approved `tasks.md` |
+| `/speckit-chain` | Generate `specs/NNN-feature/execution-plan.md` — full agent delegation chain with parallel groups, agent read/write scope, and Maker-Checker gates; **requires human approval before `/speckit-implement`** |
+| `/speckit-implement` | Drive implementation from approved `tasks.md` + `execution-plan.md` |
 | `/speckit-checklist` | Generate/update quality checklists |
 | `/speckit-taskstoissues` | Convert `tasks.md` items to GitHub Issues |
 | `/speckit-constitution` | Update `.specify/memory/constitution.md` |
+| `/speckit-report [NNN-feature]` | Generate `specs/NNN/session-telemetry.md`, `specs/NNN/sdlc-report.md`, and `specs/NNN/ai-architect-audit.md` after SDLC completion |
 
-Run the full workflow in order: specify → clarify → plan → tasks → analyze → (human approval) → implement.
+Run the full workflow in order: specify → clarify → plan → tasks → analyze → **(human approval of tasks.md)** → chain → **(human approval of execution-plan.md)** → implement → **(test-lead COMPLETE)** → **report** (auto-triggered by PM).
 
 ### Slash Command Placement Rule
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -91,7 +92,104 @@ def _op_label(tool: str, inp: dict[str, Any]) -> str:
         return f"TaskUpdate(#{inp.get('taskId', '')})"
     if tool in ("TaskGet", "TaskList"):
         return tool
+    if tool == "_parsed":
+        return inp.get("_label", "_(parsed)_")
     return tool
+
+
+# ── spec-filter helpers ───────────────────────────────────────────────────────
+
+def _spec_path_fragments(spec_dir: Path) -> set[str]:
+    """Build set of path fragments used to match session steps to this spec."""
+    fragments: set[str] = {spec_dir.name}
+    repo_root = spec_dir.parent.parent  # specs/NNN/ → specs/ → repo root
+    for item in spec_dir.rglob("*"):
+        if item.is_file():
+            fragments.add(item.name)
+            try:
+                fragments.add(str(item.relative_to(repo_root)).replace("\\", "/"))
+            except ValueError:
+                pass
+    tasks_file = spec_dir / "tasks.md"
+    if tasks_file.exists():
+        text = tasks_file.read_text(encoding="utf-8", errors="replace")
+        for m in re.finditer(r'(?:^|\s)((?:app|tests|ui|config|docs|specs)/[^\s\]()]+)', text, re.MULTILINE):
+            frag = m.group(1).strip(".,;:")
+            fragments.add(frag)
+            fragments.add(Path(frag).name)
+    return {f for f in fragments if f}
+
+
+def _step_touches_spec(operations: list[dict[str, Any]], fragments: set[str]) -> bool:
+    """Return True if any operation's label or input values contain a spec fragment."""
+    for op in operations:
+        label = _op_label(op["tool"], op["input"])
+        combined = label + " " + " ".join(
+            str(v) for v in op["input"].values() if isinstance(v, (str, int))
+        )
+        if any(frag in combined for frag in fragments):
+            return True
+    return False
+
+
+def _filter_turns_for_spec(turns: list[dict[str, Any]], fragments: set[str]) -> list[dict[str, Any]]:
+    """Keep turns where at least one step touches a spec file."""
+    return [t for t in turns if any(_step_touches_spec(s["operations"], fragments) for s in t["steps"])]
+
+
+def _derive_projects_dir(cwd: Path) -> Path | None:
+    """Derive ~/.claude/projects/<hash>/ from cwd — no config required.
+
+    Claude names the project directory by replacing :, \\, /, _ in the abs path with -.
+    e.g. C:\\Users\\Foo_Bar\\my-project → C--Users-Foo-Bar-my-project
+    """
+    hash_name = str(cwd).replace(":", "-").replace("\\", "-").replace("/", "-").replace("_", "-")
+    projects_dir = Path.home() / ".claude" / "projects" / hash_name
+    return projects_dir if projects_dir.exists() else None
+
+
+def _discover_jsonl_files(projects_dir: Path) -> list[Path]:
+    """Return JSONL session files sorted by modification time (oldest first)."""
+    return sorted(projects_dir.glob("*.jsonl"), key=lambda p: p.stat().st_mtime)
+
+
+def _filter_turns_from_md_files(
+    md_files: list[Path], fragments: set[str]
+) -> list[dict[str, Any]]:
+    """Fallback: parse step tables from generated/debug/*.md, return synthetic turn dicts."""
+    all_turns: list[dict[str, Any]] = []
+    for md_file in md_files:
+        text = md_file.read_text(encoding="utf-8", errors="replace")
+        sections = re.split(r"\n### Turn \d+", text)
+        for section in sections[1:]:
+            ts_m = re.search(r"·\s*(\d{2}:\d{2}:\d{2})\s*UTC", "### Turn 0 · " + section[:100])
+            ts_short = ts_m.group(1) if ts_m else ""
+            prompt_m = re.search(r'\*\*Prompt:\*\*\s*"([^"]*)"', section)
+            prompt = prompt_m.group(1) if prompt_m else ""
+            rows = re.findall(
+                r"\|\s*\d+\s*\|\s*(\d{2}:\d{2}:\d{2})\s*\|"
+                r"\s*(.+?)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|",
+                section,
+            )
+            matching: list[dict[str, Any]] = []
+            for row_ts, op_label_raw, inp, cw, cr, out in rows:
+                op_label_stripped = op_label_raw.strip()
+                if any(frag in op_label_stripped for frag in fragments):
+                    matching.append({
+                        "timestamp": row_ts,
+                        "usage": {
+                            "input_tokens": int(inp.replace(",", "")),
+                            "cache_creation_input_tokens": int(cw.replace(",", "")),
+                            "cache_read_input_tokens": int(cr.replace(",", "")),
+                            "output_tokens": int(out.replace(",", "")),
+                        },
+                        "model": "unknown",
+                        "stop_reason": "end_turn",
+                        "operations": [{"tool": "_parsed", "input": {"_label": op_label_stripped}}],
+                    })
+            if matching:
+                all_turns.append({"timestamp": ts_short, "prompt": prompt, "steps": matching})
+    return all_turns
 
 
 # ── parsing ───────────────────────────────────────────────────────────────────
@@ -224,6 +322,8 @@ def _render_markdown(
     session_id: str,
     turns: list[dict[str, Any]],
     meta: dict[str, str],
+    *,
+    title: str = "Claude Session Token Report",
 ) -> str:
     # Session-level totals
     session_totals: dict[str, int] = defaultdict(int)
@@ -257,7 +357,7 @@ def _render_markdown(
 
     # ── header ────────────────────────────────────────────────────────────────
     L += [
-        "# Claude Session Token Report",
+        f"# {title}",
         "",
         f"**Session:** `{session_id}`  ",
         f"**Project:** {project}" + (f"  **Branch:** `{branch}`" if branch else "") + "  ",
@@ -366,7 +466,67 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Claude Code session token report")
     parser.add_argument("transcript", nargs="?", help="Path to session JSONL transcript")
     parser.add_argument("--output-dir", default=None)
+    parser.add_argument(
+        "--spec",
+        default=None,
+        metavar="SPEC_DIR",
+        help=(
+            "Spec filter mode: path to a spec folder (e.g. specs/001-feature). "
+            "Scans sessions for steps touching spec files; writes session-telemetry.md."
+        ),
+    )
+    parser.add_argument(
+        "--projects-dir",
+        default=None,
+        metavar="DIR",
+        help=(
+            "Path to ~/.claude/projects/<hash>/ containing JSONL transcripts. "
+            "Used with --spec for full token attribution. "
+            "Falls back to generated/debug/*.md parsing if omitted."
+        ),
+    )
     args = parser.parse_args()
+
+    # ── spec filter mode ──────────────────────────────────────────────────────
+    if args.spec:
+        cwd = Path.cwd()
+        spec_dir = Path(args.spec)
+        if not spec_dir.is_absolute():
+            spec_dir = cwd / spec_dir
+        if not spec_dir.exists():
+            print(f"Spec folder not found: {spec_dir}", file=sys.stderr)
+            sys.exit(1)
+        fragments = _spec_path_fragments(spec_dir)
+        all_filtered_turns: list[dict[str, Any]] = []
+        projects_dir = Path(args.projects_dir) if args.projects_dir else _derive_projects_dir(cwd)
+        if projects_dir:
+            for jf in _discover_jsonl_files(projects_dir):
+                turns = _parse_turns(_load_transcript(jf))
+                all_filtered_turns.extend(_filter_turns_for_spec(turns, fragments))
+        else:
+            debug_dir = cwd / "generated" / "debug"
+            md_files = sorted(debug_dir.glob("claude_session_*.md")) if debug_dir.exists() else []
+            if md_files:
+                all_filtered_turns = _filter_turns_from_md_files(md_files, fragments)
+        out_file = spec_dir / "session-telemetry.md"
+        if not all_filtered_turns:
+            out_file.write_text(
+                "# Spec Session Telemetry\n\n"
+                "_No session steps matched this spec's file paths._\n\n"
+                f"Spec: `{spec_dir.name}`  \n"
+                f"Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}  \n"
+                "Hint: provide `--projects-dir <path>` if `~/.claude/projects/<hash>/` was not auto-detected.\n",
+                encoding="utf-8",
+            )
+            print(f"Stub telemetry (no matches): {out_file}", file=sys.stderr)
+            return
+        meta: dict[str, str] = {"project": cwd.name, "branch": ""}
+        md = _render_markdown(
+            spec_dir.name, all_filtered_turns, meta, title="Spec Session Telemetry Report"
+        )
+        out_file.write_text(md, encoding="utf-8")
+        print(f"Spec telemetry: {out_file}", file=sys.stderr)
+        return
 
     hook_json: dict[str, Any] = {}
 

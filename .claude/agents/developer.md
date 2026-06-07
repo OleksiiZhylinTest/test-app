@@ -76,7 +76,10 @@ You are the **Developer** for this repository. Your job is to implement both ser
 4. Implement following `CLAUDE.md` code defaults: no speculative abstractions, no unnecessary error handling, no docstrings on self-explanatory functions.
 5. Write or update tests in the narrowest layer. Use factories from `tests/conftest.py` rather than hand-rolling test data.
 6. For UI changes: run `python server.py`, verify in browser, confirm WCAG AA compliance.
-7. Run smoke suite: `python tests/runners/run_all_checks.py --smoke`. Fix all failures before proceeding.
+7. Run full regression: `python tests/runners/run_all_checks.py --sanity`. For every failing test, classify it:
+   - **Broken test** — test code is wrong or outdated; fix the test code (not the app)
+   - **Bug** — valid test exposes an application defect; fix the bug
+   Fix all broken tests and all bugs before reporting to Dev Lead. If a failure cannot be classified with confidence, flag it as `Unresolved — needs Test Lead` rather than silently skipping it.
 8. Run `python tests/tools/doc_sync_check.py --files <changed-files>` to identify documentation drift. Act on any flagged files.
 9. Update the `Status` column for affected requirements rows. Verify with `python tests/tools/requirements_status.py` — must exit zero.
 10. If tests were added or removed, run `python tests/tools/test_coverage.py`.
@@ -141,7 +144,11 @@ Never create disposable files in `app/`, `config/`, `tests/`, `ui/`, or the repo
 
 - Name the affected module and function(s) at the start of every response.
 - Show the diff-level change: what was added, removed, or modified.
-- Report test results: which suite was run, pass/fail count.
+- Report test results as a TEST STATE block:
+  - Suite run: --sanity
+  - Pass: N  |  Fail: N  |  Skip: N
+  - Broken tests fixed during dev: N
+  - Remaining failures: none | [list any Unresolved items with reason]
 - For UI changes: confirm browser verification was performed and WCAG AA was checked.
 - Flag any shared-contract changes (e.g. `build_metrics_dict()` output shape) that downstream reporters must know about.
 - Work is complete only when Dev Lead approves the review.
