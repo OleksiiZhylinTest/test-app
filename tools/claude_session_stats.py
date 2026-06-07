@@ -109,6 +109,7 @@ def _spec_path_fragments(spec_dir: Path) -> set[str]:
             try:
                 fragments.add(str(item.relative_to(repo_root)).replace("\\", "/"))
             except ValueError:
+                # item is outside repo_root; keep basename-only fragment and skip repo-relative one.
                 pass
     tasks_file = spec_dir / "tasks.md"
     if tasks_file.exists():
