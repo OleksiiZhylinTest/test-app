@@ -44,5 +44,5 @@ ignore_missing_imports = true
 cache_dir = "generated/.mypy_cache"
 
 [[tool.mypy.overrides]]
-module = ["app.server._base", "app.server.cert_handlers", "app.server.config_handlers", "app.server.connection_handlers", "app.server.filter_handlers", "app.server.generate_handlers", "app.server.schema_handlers", "app.server.dau_handlers"]
+module = ["app.server._base", "app.server.cert_handlers", "app.server.config_handlers", "app.server.connection_handlers", "app.server.complexity_handlers", "app.server.filter_handlers", "app.server.generate_handlers", "app.server.schema_handlers", "app.server.dau_handlers"]
 disable_error_code = ["attr-defined"]

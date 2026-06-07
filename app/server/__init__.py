@@ -49,6 +49,7 @@ from ._base import (  # noqa: E402
     Server,
 )
 from .cert_handlers import CertHandlerMixin  # noqa: E402
+from .complexity_handlers import ComplexityHandlerMixin  # noqa: E402
 from .config_handlers import ConfigHandlerMixin  # noqa: E402
 from .connection_handlers import ConnectionHandlerMixin  # noqa: E402
 from .dau_handlers import DauHandlerMixin  # noqa: E402
@@ -60,6 +61,7 @@ from .schema_handlers import SchemaHandlerMixin  # noqa: E402
 logger = logging.getLogger(__name__)
 
 
+# Base class order: most-specific mixins first, HandlerBase last (MRO).
 class Handler(
     ConnectionHandlerMixin,
     ConfigHandlerMixin,
@@ -69,6 +71,7 @@ class Handler(
     DauHandlerMixin,
     DataHandlerMixin,
     GenerateHandlerMixin,
+    ComplexityHandlerMixin,
     HandlerBase,
 ):
     pass
