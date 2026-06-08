@@ -28,12 +28,12 @@ For each changed module, look up its requirement ID prefix using the table in `.
 git diff master...HEAD -- tests/
 ```
 - Confirm new behavior has a test in the narrowest applicable layer (unit > component > integration > e2e).
-- Flag if a changed function in `app/core/` has no corresponding test change.
+- Flag if a changed function in application source module has no corresponding test change.
 - Flag if a new `/api/*` route handler has no component test.
 
 ### Step 4 — Code standards check
 Review changed Python files against CLAUDE.md coding standards:
-- Single Responsibility: `metrics.py` computes only, reporters render only, `config.py` reads env only.
+- Single Responsibility: application source modules each have one job (metrics computes only, reporters render only, config reads env only).
 - No logic in `.j2` templates.
 - No bare `print()` — use `logger.*`.
 - No docstrings on self-explanatory functions.
@@ -48,8 +48,8 @@ Flag any new use of `shell=True`, `eval`, `exec`, or `os.system`. Confirm no `.e
 
 ### Step 6 — Docs check (for non-`--quick` runs)
 If the diff touches:
-- `app/core/metrics.py` → check `docs/product/metrics/` for outdated metric descriptions
-- `app/server/` → check route table in `.claude/summaries/architecture-map.md §Dev Server API Routes`
+- The metrics module in application source → check `docs/product/metrics/` for outdated metric descriptions
+- Server handlers in application source → check route table in `.claude/summaries/architecture-map.md §Dev Server API Routes`
 - `README.md` or `main.py` → no further check needed (these are the docs)
 
 ### Step 7 — Summary

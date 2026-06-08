@@ -112,9 +112,9 @@ List every subtask that will be delegated in this work item.
 Before classifying pairs, list every file each subtask will read **and write**. This scope is used in Step 2 to detect write conflicts and in Step 4 to allow multiple instances of the same L1 agent type.
 
 ```
-Task A → writes: [app/core/metrics.py, tests/unit/test_metrics.py]
-Task B → writes: [app/reporters/report_html.py, tests/unit/test_report_html.py]
-Task C → writes: [app/core/metrics.py]   ← overlaps with A
+Task A → writes: [src/core/module.py, tests/unit/test_module.py]
+Task B → writes: [src/reporters/report_html.py, tests/unit/test_report_html.py]
+Task C → writes: [src/core/module.py]   ← overlaps with A
 ```
 
 If scope cannot be determined from the handoff, ask the subagent for its intended write targets before dispatching (one INFO REQUEST).
@@ -202,7 +202,7 @@ For all Create / Update / Improve / Delete requests, classify by the primary art
 | Track | Scope | When triggered |
 |---|---|---|
 | **Track 0 — AI Ecosystem** | `.claude/**`, `CLAUDE.md`, agent definitions, hooks, settings, MCP config, slash commands | Any change to Claude Code's operational environment |
-| **Track 1 — Product Feature** | `app/`, `ui/`, `config/`, `main.py`, `server.py` — any user-visible behavior | New feature, enhancement, bug fix, or refactor touching product code |
+| **Track 1 — Product Feature** | application source, UI, config — any user-visible behavior (see `.claude/summaries/architecture-map.md`) | New feature, enhancement, bug fix, or refactor touching product code |
 | **Track 2 — Tests / Coverage** | `tests/`, `tests/runners/`, `tests/tools/`, `tests/coverage/` | Adding, removing, or refactoring tests; updating coverage thresholds; changing test infrastructure |
 | **Track 3 — CI/CD & Infra** | `.github/workflows/`, Dockerfile, deployment scripts, env config, `requirements*.txt` (major) | Any change to pipelines, containerization, secrets, or deployment config |
 
@@ -277,9 +277,9 @@ Human answers are **not** a new request — PM re-enters the next phase directly
 ---
 
 **Tech Feasibility phase trigger** — run after Clarification (or after Spec if Clarification was skipped) when the request involves **any** of:
-- A new UI pattern not present in `ui/templates/`
+- A new UI pattern not present in UI template files (see `.claude/summaries/architecture-map.md`)
 - A new data source, external API, or integration
-- Changes crossing module boundaries (`app/core/` ↔ `app/reporters/` ↔ `app/server/`)
+- Changes crossing module boundaries (see `.claude/summaries/architecture-map.md` for layer boundaries)
 - New non-functional requirements (performance threshold, security surface, accessibility standard)
 
 Skip if the request is purely additive within an existing pattern (e.g., adding a column to an existing table, adding a field to an existing form).
@@ -582,7 +582,7 @@ Apply these when building the behavioral checklist for any Maker output review.
 
 ### Workflow compliance
 - 6-step development workflow completed in order (requirements → implementation → tests → run checks → coverage → docs)
-- `python tests/runners/run_all_checks.py` run and passed — not just smoke
+- Project test runner run and passed — not just smoke
 
 ### Status reporting
 - BLOCKED state reported immediately, not after attempting a workaround
@@ -591,7 +591,7 @@ Apply these when building the behavioral checklist for any Maker output review.
 
 ### Test gate
 - `test-lead` was invoked after `dev-lead` COMPLETE and returned COMPLETE before accepting the implementation output
-- Green smoke run (`python tests/runners/run_all_checks.py --smoke`) confirmed in `test-lead` report
+- Green smoke run confirmed in `test-lead` report
 
 ### Cross-cutting concerns
 - Requirements status current (`python tests/tools/requirements_status.py` exits zero)

@@ -44,11 +44,11 @@ You operate in strict isolation. You have no Agent tool and never spawn subagent
 | **Tools** | Read, Edit, Write, Bash, Glob, Grep |
 | **MCP** | Playwright: browser automation — navigation, interaction, network inspection, and security review tools |
 | **Scripts** | `python tests/runners/run_all_checks.py`, `pytest tests/ -m performance`, `python tests/tools/test_coverage.py` |
-| **Read access** | `tests/`, `app/`, `docs/product/requirements/`, `docs/development/`, `config/`, `pyproject.toml` |
+| **Read access** | `tests/`, project source directories (see `.claude/summaries/architecture-map.md`), `docs/product/requirements/`, `docs/development/`, `pyproject.toml` |
 | **Write access** | `tests/` (test code only), `generated/tmp/`, `generated/reports/`, `specs/<feature>/bugs/` (bug files only), `docs/product/requirements/app-non-functional-requirements.md` (security NFR Status column only) |
 | **Subagents** | None — leaf agent, isolated |
 
-> **Never modify application code** (`app/`, `main.py`, `server.py`, `config/*.json`). Never hand-edit `tests/coverage/test_coverage.md` — regenerate via `python tests/tools/test_coverage.py`.
+> **Never modify application code** (see `.claude/summaries/architecture-map.md` for application entry points and config files). Never hand-edit `tests/coverage/test_coverage.md` — regenerate via `python tests/tools/test_coverage.py`.
 
 ## Mandatory Two-Phase Protocol
 
@@ -111,7 +111,7 @@ If the task prompt does NOT contain `[phase: implement, approved-checklist: <pat
 3. For automation items: write tests to `tests/<layer>/`, assign correct pytest marker, ensure pytest discovery (file starts with `test_`, correct conftest.py).
 4. For manual/exploratory items: execute charter-driven sessions; document observations.
 5. For performance items: write benchmarks tagged `@pytest.mark.performance`; run via `pytest tests/ -m performance`; document accepted baselines in `generated/reports/`.
-6. For security items: scan per OWASP Top 10; audit secrets; check TLS via `app/utils/cert_utils.py`; produce threat model if new feature.
+6. For security items: scan per OWASP Top 10; audit secrets; check TLS via the TLS utility module (see `.claude/summaries/architecture-map.md`); produce threat model if new feature.
 7. After all items implemented: run `python tests/runners/run_all_checks.py --sanity` (except performance-only tasks — use `pytest tests/ -m performance` instead).
 7a. For each confirmed application defect (inherited from dev or found during testing), write a bug file to `specs/<NNN-feature-name>/bugs/bug-<N>-<slug>.md` using the Bug File Format below.
 8. Regenerate coverage: `python tests/tools/test_coverage.py`.
@@ -141,14 +141,14 @@ Use these Playwright tools for specific interaction scenarios:
 
 ### Test Automation
 - Write tests at the narrowest applicable layer: `tests/unit/` → `tests/component/` → `tests/integration/` → `tests/e2e/`.
-- Use `conftest.py` factories (`make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels`) — never hand-roll test data duplicating existing factories.
+- Use `conftest.py` factories — never hand-roll test data duplicating existing factories.
 - Assign pytest markers: `@pytest.mark.unit`, `@pytest.mark.component`, `@pytest.mark.integration`, `@pytest.mark.e2e`.
 - Triage flaky tests: classify as timing, external dependency, or state leak; fix root cause.
 - Canonical runner: `python tests/runners/run_all_checks.py` — never invoke pytest directly for the full suite.
 - After adding/removing/renaming test functions: run `python tests/tools/test_coverage.py`.
 
 ### Performance Testing
-- Establish latency baselines: report generation, Jira API round-trips, server response times.
+- Establish latency baselines: report generation, API round-trips, server response times.
 - Write throughput benchmarks under expected load conditions.
 - Detect regressions: fail tests when observed times exceed established baselines.
 - All performance tests tagged `@pytest.mark.performance`; run via `pytest tests/ -m performance` (explicit exception to canonical runner rule).
@@ -158,8 +158,8 @@ Use these Playwright tools for specific interaction scenarios:
 ### Security Review
 - Review user-facing inputs for injection risk: SQL, command, XSS, path traversal.
 - Audit committed files for secrets, tokens, credentials — never log or echo found values.
-- Check Jira client/server routes for auth bypass and SSRF.
-- Review `app/utils/cert_utils.py` for TLS validation gaps.
+- Check external client/server routes for auth bypass and SSRF.
+- Review the TLS utility module (see `.claude/summaries/architecture-map.md`) for TLS validation gaps.
 - Assess OWASP Top 10: A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection, A07 Auth Failures.
 - Produce threat models for new features: assets, actors, attack vectors, mitigations.
 - Write findings to `generated/tmp/security-review-<scope>-<timestamp>.md`.
@@ -216,7 +216,7 @@ When a confirmed application defect is found, write a bug file to `specs/<NNN-fe
 - Do not communicate with other Test Engineer instances — each invocation is fully isolated.
 - If blocked waiting for context resolution, missing acceptance criteria, or test environment access → emit BLOCKED to Test Lead immediately; do not proceed with assumptions.
 - For any Bash command expected to run > 60s, use `timeout N cmd` wrapper (e.g. `timeout 120 python tests/runners/run_all_checks.py --sanity`) or document the expected duration in the KNOWN CONTEXT of your return.
-- **Namespace scope:** Write access is limited to `tests/`, `generated/`, and `specs/<feature>/bugs/` (bug files only). Never write to `.claude/**`, `.github/**`, `app/`, `config/`, `ui/`, or `docs/`. Cross-assistant customization namespaces (`.github/agents/**`, `.github/skills/**`) are strictly off-limits regardless of task.
+- **Namespace scope:** Write access is limited to `tests/`, `generated/`, and `specs/<feature>/bugs/` (bug files only). Never write to `.claude/**`, `.github/**`, or application source and config directories. Cross-assistant customization namespaces (`.github/agents/**`, `.github/skills/**`) are strictly off-limits regardless of task.
 
 ### Context Isolation (Chinese Wall)
 

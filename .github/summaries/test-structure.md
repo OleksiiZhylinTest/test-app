@@ -1,45 +1,107 @@
-# Copilot Summary: Test Structure
+# Copilot Summary: Test Structure — test-app
 
 Use this summary before loading multiple test files. Its job is to route changes to the narrowest useful test layer.
 
 ## Source of Truth
 
 - `AGENTS.md`
-- `pyproject.toml`
 - `tests/conftest.py`
-- `tests/unit/conftest.py`
-- `tests/component/conftest.py`
-- `tests/e2e/conftest.py`
+
+## Test Framework
+
+`pytest`
 
 ## Test Pyramid
 
-- `tests/unit/` -> pure functions, no I/O
-- `tests/component/` -> filesystem and HTTP slices, no broad orchestration
-- `tests/integration/` -> real multi-module interactions
-- `tests/e2e/` -> Playwright browser flows
 
-## Shared Factories And Fixtures
+| Layer | File | Count |
+|-------|------|-------|
+| `component` | `tests/component/test_complexity_api.py` | 4 |
+| `component` | `tests/component/test_complexity_cli.py` | 4 |
+| `component` | `tests/component/test_contracts.py` | 11 |
+| `component` | `tests/component/test_cross_section_chart_labels.py` | 13 |
+| `component` | `tests/component/test_dau_report.py` | 15 |
+| `component` | `tests/component/test_release_zip.py` | 11 |
+| `component` | `tests/component/test_report_html.py` | 31 |
+| `component` | `tests/component/test_report_md.py` | 37 |
+| `component` | `tests/component/test_report_performance.py` | 1 |
+| `component` | `tests/component/test_server.py` | 45 |
+| `component` | `tests/component/test_server_config.py` | 45 |
+| `component` | `tests/component/test_server_filters.py` | 11 |
+| `e2e` | `tests/e2e/test_dau_survey_ui.py` | 25 |
+| `e2e` | `tests/e2e/test_e2e_connection.py` | 41 |
+| `e2e` | `tests/e2e/test_e2e_filters.py` | 15 |
+| `e2e` | `tests/e2e/test_e2e_report_content.py` | 1 |
+| `e2e` | `tests/e2e/test_e2e_schema_ui.py` | 6 |
+| `e2e` | `tests/e2e/test_e2e_ui.py` | 32 |
+| `e2e` | `tests/e2e/test_e2e_version.py` | 4 |
+| `e2e` | `tests/e2e/test_positive_e2e_flow.py` | 1 |
+| `integration` | `tests/integration/test_cli_server.py` | 3 |
+| `integration` | `tests/integration/test_copilot_telemetry_stats.py` | 2 |
+| `integration` | `tests/integration/test_fetch_ssl_cert.py` | 10 |
+| `integration` | `tests/integration/test_integration.py` | 8 |
+| `unit` | `tests/unit/test_cert_handlers.py` | 4 |
+| `unit` | `tests/unit/test_cert_validation.py` | 5 |
+| `unit` | `tests/unit/test_cli.py` | 5 |
+| `unit` | `tests/unit/test_complexity_audit.py` | 15 |
+| `unit` | `tests/unit/test_config.py` | 44 |
+| `unit` | `tests/unit/test_copilot_customization_assets.py` | 6 |
+| `unit` | `tests/unit/test_dau_metrics.py` | 33 |
+| `unit` | `tests/unit/test_dau_normalizer.py` | 21 |
+| `unit` | `tests/unit/test_exceptions.py` | 6 |
+| `unit` | `tests/unit/test_filter_handlers.py` | 19 |
+| `unit` | `tests/unit/test_imports.py` | 8 |
+| `unit` | `tests/unit/test_jira_client.py` | 46 |
+| `unit` | `tests/unit/test_logging_setup.py` | 15 |
+| `unit` | `tests/unit/test_main_helpers.py` | 5 |
+| `unit` | `tests/unit/test_metrics.py` | 89 |
+| `unit` | `tests/unit/test_schema.py` | 37 |
+| `unit` | `tests/unit/test_server_handlers.py` | 26 |
+| `unit` | `tests/unit/test_user_data.py` | 3 |
+| `unit` | `tests/unit/test_version.py` | 4 |
 
-- `tests/conftest.py` provides shared factories such as `make_sprint`, `make_issue`, `make_issue_with_changelog`, and `make_issue_with_labels`.
-- `tests/unit/conftest.py` provides `mock_jira`.
-- `tests/component/conftest.py` provides `minimal_metrics_dict` and `empty_metrics_dict`.
-- `tests/e2e/conftest.py` provides the live server setup for browser tests.
+### Layer Summary
+
+- `component` — 228 tests
+- `e2e` — 125 tests
+- `integration` — 23 tests
+- `unit` — 391 tests
+
+## Shared Factories and Fixtures
+
+- `tests/conftest.py` — shared factories available from any layer
+- `tests/unit/conftest.py` — unit-layer-only fixtures
+- `tests/component/conftest.py` — component-layer fixtures
+- `tests/e2e/conftest.py` — live server setup for browser tests
+
+Rules:
+- Never duplicate fixture logic that already exists in `tests/conftest.py`.
+- Do not import a layer-specific fixture into a different layer.
 
 ## Runner Shortcuts
 
-- Full checks -> `python tests/runners/run_all_checks.py`
-- Smoke -> `python tests/runners/run_all_checks.py --smoke`
-- Sanity -> `python tests/runners/run_all_checks.py --sanity`
+```bash
+pytest tests/ -v                                       # full suite
+pytest tests/unit/ -v                                  # unit only
+pytest tests/component/ -v                             # component only
+python tests/runners/run_all_checks.py                 # all CI checks
+python tests/runners/run_all_checks.py --smoke         # smoke tier only
+python tests/runners/run_all_checks.py --sanity        # smoke + sanity
+```
 
 ## Selection Guidance
 
-- Change in `app/core/*.py` pure logic -> start with unit tests.
-- Change in reporter rendering or server handler slice -> start with component tests.
-- Change spanning fetch, compute, render, or CLI/server orchestration -> add integration coverage.
-- Change in browser UI behavior -> add or update e2e coverage.
+- Change in a pure compute function, no I/O → start with unit tests.
+- Change in a handler, reporter, or filesystem slice → start with component tests.
+- Change spanning fetch, compute, render, or CLI/server orchestration → add integration coverage.
+- Change in browser UI behavior → add or update e2e coverage.
 
 ## Escalate Beyond This Summary When
 
 - you need exact fixture shapes or factory signatures
-- you need current coverage/test inventory details
 - you are changing test runners, markers, or CI stage definitions
+- a test pyramid imbalance is detected (unit coverage displaced by integration tests)
+
+---
+
+Generated by nexus-agentic-sdlc 1.0.0

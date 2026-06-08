@@ -43,9 +43,9 @@ If implementing a **new feature**:
 
 1. Follow the design principles in CLAUDE.md (Single Responsibility, Open/Closed, DRY, KISS, YAGNI)
 2. Use existing patterns and utilities — check `.claude/summaries/architecture-map.md` for module responsibilities; only load `docs/development/architecture.md` if deeper architectural detail is needed
-3. For new metrics: see `app/core/metrics.py` and `/extend`
-4. For new config vars: see `app/core/config.py` and `/extend`
-5. For new server endpoints: see `app/server/_base.py` and `/extend`
+3. For new metrics: see the metrics module in application source (see `.claude/summaries/architecture-map.md`) and `/extend`
+4. For new config vars: see the config module in application source and `/extend`
+5. For new server endpoints: see the server base module in application source and `/extend`
 6. Keep changes minimal and focused on the requirement
 
 ### Step 3: Write or Update Tests
@@ -101,4 +101,3 @@ Update docs **only if behavior changed** (not for internal refactors):
 1. Run `/test` one final time — all must pass
 2. Run `/commit` with type `feat:` (new feature) or `fix:` (if this was a bug fix)
 3. Optionally: run `/sync` to verify alignment across all 5 layers (requirements, code, tests, architecture.md, feature docs)
-

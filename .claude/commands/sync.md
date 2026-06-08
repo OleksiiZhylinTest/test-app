@@ -28,7 +28,7 @@ Explore docs/product/requirements/ — requirements cross-check:
 1. Read README.md for the file map.
 2. For each requirement file: scan all ✓ Met rows and identify the test(s) that verify them
    (check tests/unit/ and tests/component/ for matching test names or requirement IDs).
-3. For each ✗ Not met row: check whether corresponding code already exists in app/.
+3. For each ✗ Not met row: check whether corresponding code already exists in the application source.
 Return a gap table: requirement ID | file | status | test coverage | gap description.
 ```
 
@@ -55,11 +55,10 @@ Delegate to an Explore subagent — do not read architecture.md inline:
 
 ```
 Explore docs/development/architecture.md vs current code:
-1. Read docs/development/architecture.md sections 3 (Project Layout) and 4 (Architecture & Module Map).
+1. Read docs/development/architecture.md sections covering Project Layout and Architecture & Module Map.
 2. For each directory in the Project Layout tree: verify it still exists (Glob or ls).
 3. Compare each module description against the actual file at that path.
-4. Check that Sprint dict and Issue dict shapes match app/core/jira_client.py.
-5. Check that metrics_dict fields match build_metrics_dict() in app/core/metrics.py.
+4. Check that data dict shapes match the application source.
 Return a gap list: section | expected | actual | gap description.
 ```
 
@@ -89,10 +88,10 @@ Wait for result, then report gaps.
 Delegate to an Explore subagent — do not read all metric docs inline:
 
 ```
-Explore docs/product/metrics/ vs app/core/metrics.py:
+Explore docs/product/metrics/ vs application source metrics module:
 1. List all .md files in docs/product/metrics/.
 2. For each metric doc: extract the metric name, computation description, and output shape.
-3. Read app/core/metrics.py — list every field added to metrics_dict in build_metrics_dict().
+3. Read the metrics module — list every field added to metrics_dict in build_metrics_dict().
 4. Cross-reference: which metrics_dict fields have a doc? Which are undocumented?
 Return a gap table: metric name | doc file | documented? | shape matches? | gap description.
 ```
@@ -111,21 +110,21 @@ ALIGNMENT AUDIT SUMMARY
 
 Layer 1 (Requirements):
   ✓ All Met rows have test coverage
-  ⚠ GAP: JDF-SP-001 marked Met but test_compute_velocity fails
-  
+  ⚠ GAP: <requirement-id> marked Met but test fails
+
 Layer 2 (Code ↔ Tests):
   ✓ All unit + component tests pass
-  
+
 Layer 3 (Architecture Docs):
-  ⚠ GAP: New module app/reporters/report_json.py not documented
-  
+  ⚠ GAP: New module not documented
+
 Layer 4 (Feature Docs):
-  ⚠ GAP: DAU survey UI feature added but docs/product/features/features.md not updated
-  
+  ⚠ GAP: Feature added but docs/product/features/features.md not updated
+
 Layer 5 (Metric Docs):
   ✓ All metrics documented in docs/product/metrics/
 
-TOTAL GAPS FOUND: 3
+TOTAL GAPS FOUND: <N>
 ACTION REQUIRED: See gaps above. User to decide which to address and in what priority.
 ```
 
@@ -139,4 +138,3 @@ Do NOT auto-fix gaps. Instead:
 2. Ask which gaps should be fixed (e.g., "Should we update architecture.md to document the new metric?")
 3. For each gap user approves: use `/implement`, `/fix`, or direct code changes to address
 4. After fixes: re-run `/sync <layer>` to verify the gap is closed
-

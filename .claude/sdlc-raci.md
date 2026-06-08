@@ -189,7 +189,7 @@ An INFO REQUEST is not a Maker output and is never subject to a Maker-Checker re
 | Technical design / task breakdown | Dev Lead | Principal Solution Architect | Developer | Test Lead |
 | Application implementation (backend + frontend) | Developer | Dev Lead | Principal Solution Architect | Test Lead |
 | Test strategy & coverage gates | Test Lead | Dev Lead | Test Engineer | Project Manager |
-| Testing execution (manual, automation, performance, security) | Test Engineer | Test Lead | Backend Developer, DevOps Engineer | Dev Lead |
+| Testing execution (manual, automation, performance, security) | Test Engineer | Test Lead | Developer, DevOps Engineer | Dev Lead |
 | Test-gate sign-off (feature complete) | Test Lead | **Project Manager** | Dev Lead | All |
 | Architecture & quality framework docs | Solution Architect | Principal Solution Architect | Dev Lead, Test Lead | Product Owner |
 | AI environment implementation | AI Engineer | AI Architect | Project Manager | Dev Lead |

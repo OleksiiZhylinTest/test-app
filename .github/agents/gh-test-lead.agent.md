@@ -97,7 +97,7 @@ This agent applies a **Maker-Checker review loop** to all delegated tasks. Full 
 |---|---|
 | Pure function, no I/O | `tests/unit/` |
 | Filesystem or HTTP, no inter-module orchestration | `tests/component/` |
-| Real multi-module interaction, may need Jira creds | `tests/integration/` |
+| Real multi-module interaction, may need external service credentials | `tests/integration/` |
 | Browser-level, requires Chromium | `tests/e2e/` |
 
 ## Knowledge Base

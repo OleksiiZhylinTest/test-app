@@ -96,4 +96,3 @@ Bug-fix loop — identify failing tests, fix code, verify, and update requiremen
 - Requirement: "Support legacy Jira 7 issue format" → Status set to `⬜ N/T` (no longer supporting)
 - Old test: tests parsing of Jira 7 custom field IDs
 - Decision: **REMOVE** — the requirement was dropped, test is now orphaned
-

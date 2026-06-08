@@ -114,7 +114,7 @@ Layer 3 — Commands
 
 Layer 4 — Settings and MCP
   ✓ settings.json  valid JSON, no secrets
-  ⚠ settings.local.json  mcp-jira-wrapper.sh path: confirm script exists
+  ⚠ settings.local.json  mcp-wrapper.sh path: confirm script exists
 
 Layer 5 — Governance
   ✓ CLAUDE.md ownership section matches governance doc

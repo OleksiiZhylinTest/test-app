@@ -42,4 +42,3 @@ Claude Code will:
 - Stage only specified files (avoid `git add .`)
 - Validate format before committing
 - Add co-author trailer automatically
-

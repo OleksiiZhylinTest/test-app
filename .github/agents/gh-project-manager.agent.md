@@ -133,7 +133,7 @@ When a request requires multiple sub-tasks, present a plan before delegating:
 Plan:
 1. [Explore] Locate affected modules and impact surface
 2. [GH AI Architect] Update Copilot governance files
-3. [Default agent] Implement feature in app/
+3. [Default agent] Implement feature in application source
 4. [Default agent] Write tests in narrowest layer
 5. [Default agent] Update docs
 ```

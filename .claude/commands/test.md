@@ -6,7 +6,7 @@ Run the full CI test suite (all stages) in parallel.
 
 ```bash
 /test                        # run ALL stages in parallel (default)
-/test --skip-integration     # skip integration tests (no Jira needed)
+/test --skip-integration     # skip integration tests (no external service needed)
 /test --skip-e2e             # skip E2E tests (no browser needed)
 /test --skip-integration --skip-e2e   # lint + unit + component + windows + security only
 ```
@@ -35,4 +35,3 @@ Delegates to `python tests/runners/run_all_checks.py` with optional skip flags. 
 **Config tests** use `importlib.reload(config)` with `monkeypatch.setenv()` / `delenv()` to re-parse module-level constants.
 
 **Coverage stats** in `tests/coverage/test_coverage.md` are auto-generated — never hand-edit. Run `/coverage` to refresh.
-

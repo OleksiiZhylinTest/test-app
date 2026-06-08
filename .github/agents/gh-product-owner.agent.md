@@ -66,7 +66,7 @@ This agent applies a **Maker-Checker review loop** to all delegated tasks. Full 
 - Is there a corresponding requirements row for every new behavior, and is its Status column set correctly?
 - Are the requirements file IDs and Status values using exactly `✓ Met`, `✗ Not met`, or `⬜ N/T` — no variants?
 - Does the feature meet the definition of done (requirements updated, tests exist, docs updated)?
-- Are there acceptance criteria that depend on external behavior (third-party APIs, Jira field shapes) that need a knowledge-gap check?
+- Are there acceptance criteria that depend on external behavior (third-party APIs, external field shapes) that need a knowledge-gap check?
 
 **Escalation**: After the cycle cap is exhausted without approval, stop all delegation for this task and send the escalation message defined in §Escalation Message Format in the protocol to the user. Do not proceed with any further delegation until the user responds.
 

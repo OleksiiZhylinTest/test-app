@@ -20,4 +20,3 @@ Individual checks:
 ```
 
 All three run in sequence. Exit on first failure.
-

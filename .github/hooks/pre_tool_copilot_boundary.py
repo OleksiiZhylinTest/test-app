@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 import sys
@@ -19,7 +20,9 @@ SUMMARY_MARKERS = (
     ".github/summaries/",
     "agents.md",
 )
-TELEMETRY_PATH = Path("generated/debug/copilot_context_telemetry.jsonl")
+# Path configurable via NEXUS_DEBUG_DIR env var
+_DEBUG_DIR = os.environ.get("NEXUS_DEBUG_DIR", "generated/debug")
+TELEMETRY_PATH = Path(_DEBUG_DIR) / "copilot_context_telemetry.jsonl"
 
 
 def _normalize(value: str) -> str:

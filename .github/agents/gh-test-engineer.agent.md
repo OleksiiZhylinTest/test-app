@@ -62,7 +62,7 @@ Activate the section(s) matching the `task_type` in your delegation. Ignore othe
 **Scope**: Automated test authoring, CI integration, flaky test triage.
 **Approach**:
 - Write pytest tests in the narrowest layer that proves the changed behavior: `unit/` for pure functions, `component/` for filesystem/HTTP, `integration/` for multi-module, `e2e/` for browser flows.
-- Use `tests/conftest.py` factories (`make_sprint`, `make_issue`, `make_issue_with_changelog`, `make_issue_with_labels`) for shared test data.
+- Use `tests/conftest.py` factories for shared test data.
 - Add `@pytest.mark.smoke` for critical happy-path tests; `@pytest.mark.sanity` for broader regression.
 - Triage flaky tests: identify root cause; fix or quarantine with `@pytest.mark.xfail`.
 **Write scope**: `tests/unit/`, `tests/component/`, `tests/integration/`, `tests/e2e/`, `tests/coverage/`.
@@ -80,7 +80,7 @@ Activate the section(s) matching the `task_type` in your delegation. Ignore othe
 **Scope**: OWASP Top 10 scanning, TLS certificate validation, secrets audit, dependency CVE review.
 **Approach**:
 - Check for OWASP Top 10 vulnerabilities (injection, XSS, broken auth, etc.) in the changed scope.
-- Validate TLS certificate handling in `app/utils/cert_utils.py` and related code.
+- Validate TLS certificate handling in relevant utility modules (see `.github/summaries/architecture-module-map.md`).
 - Audit for hardcoded secrets, credentials, or sensitive values in source and config files.
 - Review `requirements.txt` and `requirements-dev.txt` for known CVEs.
 - Update security NFR Status column in `docs/product/requirements/` when findings are resolved.
