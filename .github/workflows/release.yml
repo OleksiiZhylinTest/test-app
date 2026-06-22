@@ -47,7 +47,7 @@ jobs:
       version: ${{ steps.read.outputs.version }}
       should_release: ${{ steps.read.outputs.should_release }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # need full tag history
 
@@ -71,7 +71,7 @@ jobs:
     needs: check
     if: needs.check.outputs.should_release == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -101,7 +101,7 @@ jobs:
     needs: [check, validate]
     if: needs.check.outputs.should_release == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build release ZIP
         run: |
@@ -147,7 +147,7 @@ jobs:
     needs: [check, build]
     if: needs.check.outputs.should_release == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download ZIP artifact
         uses: actions/download-artifact@v4
@@ -175,7 +175,7 @@ jobs:
     needs: [check, release]
     if: needs.check.outputs.should_release == 'true'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: develop
           fetch-depth: 0
