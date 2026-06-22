@@ -107,7 +107,7 @@ jobs:
     name: Lint (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -133,7 +133,7 @@ jobs:
        vars.ENABLE_SMOKE == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -197,7 +197,7 @@ jobs:
        vars.ENABLE_SANITY == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -257,7 +257,7 @@ jobs:
        vars.ENABLE_UNIT == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -302,7 +302,7 @@ jobs:
        vars.ENABLE_COMPONENT == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -353,7 +353,7 @@ jobs:
       JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -404,7 +404,7 @@ jobs:
       JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
       JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -471,7 +471,7 @@ jobs:
        vars.ENABLE_WINDOWS_TESTS == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -511,7 +511,7 @@ jobs:
        vars.ENABLE_SECURITY_SCAN == 'true' &&
        (vars.RESTRICT_TO_MASTER != 'true' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'))
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -546,7 +546,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download all Allure results artifacts
         uses: actions/download-artifact@v8
