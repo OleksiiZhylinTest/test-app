@@ -37,30 +37,30 @@ COVERAGE_REQS_DIR = TESTS_DIR / "coverage" / "requirements"
 
 # Mapping: ALL_REQUIREMENTS key → detail file path
 _DETAIL_FILES: dict[str, Path] = {
-    "technical_requirements": COVERAGE_REQS_DIR / "technical_requirements_coverage.md",
-    "installation_requirements": COVERAGE_REQS_DIR / "installation_requirements_coverage.md",
-    "app_non_functional_requirements": COVERAGE_REQS_DIR / "app_non_functional_requirements_coverage.md",
-    "dau_survey_requirements": COVERAGE_REQS_DIR / "dau_survey_requirements_coverage.md",
-    "jira_connection_requirements": COVERAGE_REQS_DIR / "jira_connection_requirements_coverage.md",
-    "jira_data_fetching_requirements": COVERAGE_REQS_DIR / "jira_data_fetching_requirements_coverage.md",
-    "jira_schema_requirements": COVERAGE_REQS_DIR / "jira_schema_requirements_coverage.md",
-    "jira_filter_management_requirements": COVERAGE_REQS_DIR / "jira_filter_management_requirements_coverage.md",
-    "logging_requirements": COVERAGE_REQS_DIR / "logging_requirements_coverage.md",
-    "report_generation_requirements": COVERAGE_REQS_DIR / "report_generation_requirements_coverage.md",
+    "technical_requirements": COVERAGE_REQS_DIR / "technical-requirements-coverage.md",
+    "installation_requirements": COVERAGE_REQS_DIR / "installation-requirements-coverage.md",
+    "app_non_functional_requirements": COVERAGE_REQS_DIR / "app-non-functional-requirements-coverage.md",
+    "dau_survey_requirements": COVERAGE_REQS_DIR / "dau-survey-requirements-coverage.md",
+    "jira_connection_requirements": COVERAGE_REQS_DIR / "jira-connection-requirements-coverage.md",
+    "jira_data_fetching_requirements": COVERAGE_REQS_DIR / "jira-data-fetching-requirements-coverage.md",
+    "jira_schema_requirements": COVERAGE_REQS_DIR / "jira-schema-requirements-coverage.md",
+    "jira_filter_management_requirements": COVERAGE_REQS_DIR / "jira-filter-management-requirements-coverage.md",
+    "logging_requirements": COVERAGE_REQS_DIR / "logging-requirements-coverage.md",
+    "report_generation_requirements": COVERAGE_REQS_DIR / "report-generation-requirements-coverage.md",
 }
 
 # Mapping: ALL_REQUIREMENTS key → source document (relative to repo root)
 _SOURCE_DOCS: dict[str, str] = {
-    "technical_requirements": "docs/product/requirements/technical_requirements.md",
-    "installation_requirements": "docs/product/requirements/installation_requirements.md",
-    "app_non_functional_requirements": "docs/product/requirements/app_non_functional_requirements.md",
-    "dau_survey_requirements": "docs/product/requirements/dau_survey_requirements.md",
-    "jira_connection_requirements": "docs/product/requirements/jira_connection_requirements.md",
-    "jira_data_fetching_requirements": "docs/product/requirements/jira_data_fetching_requirements.md",
-    "jira_schema_requirements": "docs/product/requirements/jira_schema_requirements.md",
-    "jira_filter_management_requirements": "docs/product/requirements/jira_filter_management_requirements.md",
-    "logging_requirements": "docs/product/requirements/logging_requirements.md",
-    "report_generation_requirements": "docs/product/requirements/report_generation_requirements.md",
+    "technical_requirements": "docs/product/requirements/technical-requirements.md",
+    "installation_requirements": "docs/product/requirements/installation-requirements.md",
+    "app_non_functional_requirements": "docs/product/requirements/app-non-functional-requirements.md",
+    "dau_survey_requirements": "docs/product/requirements/dau-survey-requirements.md",
+    "jira_connection_requirements": "docs/product/requirements/jira-connection-requirements.md",
+    "jira_data_fetching_requirements": "docs/product/requirements/jira-data-fetching-requirements.md",
+    "jira_schema_requirements": "docs/product/requirements/jira-schema-requirements.md",
+    "jira_filter_management_requirements": "docs/product/requirements/jira-filter-management-requirements.md",
+    "logging_requirements": "docs/product/requirements/logging-requirements.md",
+    "report_generation_requirements": "docs/product/requirements/report-generation-requirements.md",
 }
 
 # Layer name → folder (relative to TESTS_DIR), description, path label
@@ -397,7 +397,7 @@ def build_requirements_summary(req_stats: dict) -> str:
     for src in req_stats["sources"]:
         s = src["summary"]
         key = src["key"]
-        detail_link = f"[→ detail](requirements/{key}_coverage.md)"
+        detail_link = f"[→ detail](requirements/{key.replace('_', '-')}-coverage.md)"
         lines.append(
             f"| {src['name']} | {s['total']} | {s['covered']} | "
             f"{s['partial']} | {s['gap']} | {s['nt']} | {s['func_pct']}% | {detail_link} |"

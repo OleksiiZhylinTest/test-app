@@ -113,7 +113,7 @@ else:
 
 ### Step 5 — Add a New Metric (if needed)
 
-If the new data feeds a new metric, follow the extension pattern in `CLAUDE.md`:
+If the new data feeds a new metric, follow the extension pattern in [`architecture.md`](../architecture.md):
 
 1. Add `compute_<name>(sprints, sprint_issues) -> list[dict]` to `app/metrics.py`
 2. Call it in `build_metrics_dict()` and include the result in the returned dict

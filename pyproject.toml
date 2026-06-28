@@ -10,6 +10,7 @@ markers = [
     "windows_only: tests covering Windows-specific OS behaviour (automatically skipped on Linux/macOS via skipif decorator)",
     "smoke: critical happy-path tests across all layers (~1-2 min total). Select with -m smoke",
     "sanity: broader regression set across all layers (~5-10 min total). Select smoke+sanity with -m 'smoke or sanity'",
+    "performance: performance and load tests",
 ]
 
 [tool.playwright]
@@ -17,7 +18,7 @@ browser = "chromium"
 timeout = 5000
 
 [build-system]
-requires = ["setuptools>=65.0", "wheel"]
+requires = ["setuptools>=82.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -43,5 +44,5 @@ ignore_missing_imports = true
 cache_dir = "generated/.mypy_cache"
 
 [[tool.mypy.overrides]]
-module = ["app.server._base", "app.server.cert_handlers", "app.server.config_handlers", "app.server.connection_handlers", "app.server.filter_handlers", "app.server.generate_handlers", "app.server.schema_handlers", "app.server.dau_handlers"]
+module = ["app.server._base", "app.server.cert_handlers", "app.server.config_handlers", "app.server.connection_handlers", "app.server.complexity_handlers", "app.server.filter_handlers", "app.server.generate_handlers", "app.server.schema_handlers", "app.server.dau_handlers"]
 disable_error_code = ["attr-defined"]

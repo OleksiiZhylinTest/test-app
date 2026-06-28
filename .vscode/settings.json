@@ -1,3 +1,15 @@
-{
-    "claudeCode.useTerminal": true
+{ 
+    "search.exclude": {
+        "generated/**": true,
+        "**/__pycache__/**": true,
+        "**/.pytest_cache/**": true,
+        ".venv/**": true,
+        "data/**": true,
+        "**/*.pyc": true
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true
+    }
 }

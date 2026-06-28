@@ -91,11 +91,13 @@ test-app/                          ← project root
 │   │   ├── data_handlers.py       ← /api/reports, /generated/reports/…
 │   │   ├── filter_handlers.py     ← /api/filters (GET + POST + DELETE)
 │   │   ├── dau_handlers.py        ← /api/dau/* (records, roster, import, config)
+│   │   ├── complexity_handlers.py ← /api/complexity/audit (GET)
 │   │   ├── generate_handlers.py   ← /api/generate (SSE stream)
 │   │   └── schema_handlers.py     ← /api/schemas (GET + POST + DELETE)
 │   │
 │   ├── core/                      ← business logic & infrastructure
 │   │   ├── __init__.py
+│   │   ├── complexity_audit.py    ← structural complexity scoring engine + recommendation derivation
 │   │   ├── config.py              ← env/dotenv loading, validation, constants
 │   │   ├── dau_importer.py        ← DAU Excel (.xlsx) import; column detection driven by config/dau_import_config.json
 │   │   ├── dau_normalizer.py      ← DAU survey dedup + normalization (called by cli.py)
@@ -105,6 +107,8 @@ test-app/                          ← project root
 │   │
 │   ├── reporters/                 ← output formatters
 │   │   ├── __init__.py
+│   │   ├── report_complexity_html.py ← Jinja2 HTML complexity audit report renderer
+│   │   ├── report_complexity_md.py   ← Markdown complexity audit report builder
 │   │   ├── report_html.py         ← Jinja2 HTML report renderer
 │   │   └── report_md.py           ← Markdown report builder
 │   │
@@ -129,6 +133,7 @@ test-app/                          ← project root
 │   ├── index.html                 ← single-file browser UI (served by app.server)
 │   ├── dau_survey.html            ← self-contained DAU survey form (served statically)
 │   ├── templates/
+│   │   ├── complexity_audit.html.j2 ← Jinja2 complexity audit HTML template
 │   │   └── report.html.j2         ← Jinja2 HTML template
 │   ├── css/                       ← modular CSS (tokens, layout, components, logs, reports)
 │   └── js/                        ← modular JS (api, config, connection, generate, filters, etc.)
@@ -457,6 +462,7 @@ All routes are served by `app/server.py` (stdlib `HTTPServer`). CORS headers (`A
 | `GET` | `/api/dau/roster` | Return the team roster for `?filter=<slug>` |
 | `POST` | `/api/dau/roster` | Add or update a roster entry |
 | `DELETE` | `/api/dau/roster` | Remove a roster entry (`?filter=<slug>&username=`) |
+| `GET` | `/api/complexity/audit` | Run on-demand structural complexity audit; returns JSON with per-module scores, classifications, and improvement recommendations |
 | `OPTIONS` | `*` | CORS preflight (returns 204) |
 
 ### SSE event types (`GET /api/generate`)
@@ -665,11 +671,10 @@ python server.py 9000                 # custom port
 
 ## See Also
 
-- [`README.md`](../README.md) — user-facing quickstart
-- [`CLAUDE.md`](../CLAUDE.md) — AI assistant guidance and coding conventions
+- [`README.md`](../../README.md) — user-facing quickstart
 - [`docs/development/jira/`](jira/) — Jira REST API reference notes
 - [`docs/development/confluence/`](confluence/) — Confluence API reference notes
 - [`docs/product/metrics/`](../product/metrics/) — metric definitions, field reference, and configuration guide
-- [`tests/coverage/test_coverage.md`](../tests/coverage/test_coverage.md) — auto-generated test count + requirements summary
-- [`tests/coverage/requirements/`](../tests/coverage/requirements/) — per-requirements-source coverage detail files
-- [`.env.example`](../.env.example) — all configuration variables with comments
+- [`tests/coverage/test_coverage.md`](../../tests/coverage/test_coverage.md) — auto-generated test count + requirements summary
+- [`tests/coverage/requirements/`](../../tests/coverage/requirements/) — per-requirements-source coverage detail files
+- [`.env.example`](../../.env.example) — all configuration variables with comments

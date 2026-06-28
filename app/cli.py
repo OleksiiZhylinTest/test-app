@@ -10,6 +10,7 @@ import re
 import shutil
 import time
 from concurrent.futures import ThreadPoolExecutor, wait
+from datetime import datetime, timezone
 from pathlib import Path
 
 from app.core import config, jira_client, metrics
@@ -30,6 +31,9 @@ def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--clean", action="store_true", help="Delete the generated/reports/ directory and exit")
     p.add_argument("--clean-logs", action="store_true", help="Delete the generated/logs/ directory and exit")
+    p.add_argument(
+        "--complexity-audit", action="store_true", help="Run structural complexity audit (no Jira credentials required)"
+    )
     return p.parse_args()
 
 
@@ -47,6 +51,19 @@ def _report_name_slug(report_name: str) -> str:
 
 def main() -> int:
     args = _parse_args()
+    if args.complexity_audit:
+        from app.core.complexity_audit import build_complexity_report
+        from app.reporters.report_complexity_html import generate_complexity_html
+        from app.reporters.report_complexity_md import generate_complexity_md
+
+        report = build_complexity_report(PROJECT_ROOT)
+        ts = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H-%M-%S")
+        out_dir = REPORTS_DIR / ts
+        out_dir.mkdir(parents=True, exist_ok=True)
+        generate_complexity_md(report, out_dir / "complexity_report.md")
+        generate_complexity_html(report, out_dir / "complexity_report.html")
+        logger.log(SUCCESS_LEVEL, "Complexity audit written to %s", out_dir)
+        return 0
     if args.clean:
         if REPORTS_DIR.exists():
             shutil.rmtree(REPORTS_DIR)
