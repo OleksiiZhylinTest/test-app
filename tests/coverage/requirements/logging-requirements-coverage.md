@@ -1,6 +1,6 @@
 # Logging Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/logging_requirements.md](../../../docs/product/requirements/logging_requirements.md)  
+> Source document: [docs/product/requirements/logging-requirements.md](../../../docs/product/requirements/logging-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 18 | **✅ Covered:** 16 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 2 | **Functional:** 100%

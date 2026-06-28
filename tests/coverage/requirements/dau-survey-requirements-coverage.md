@@ -1,6 +1,6 @@
 # Dau Survey Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/dau_survey_requirements.md](../../../docs/product/requirements/dau_survey_requirements.md)  
+> Source document: [docs/product/requirements/dau-survey-requirements.md](../../../docs/product/requirements/dau-survey-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 31 | **✅ Covered:** 26 | **🔶 Partial:** 0 | **❌ Gap:** 3 | **⬜ N/T:** 2 | **Functional:** 90%

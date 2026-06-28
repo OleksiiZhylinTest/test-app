@@ -1,6 +1,6 @@
 # Report Generation Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/report_generation_requirements.md](../../../docs/product/requirements/report_generation_requirements.md)  
+> Source document: [docs/product/requirements/report-generation-requirements.md](../../../docs/product/requirements/report-generation-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 33 | **✅ Covered:** 30 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 3 | **Functional:** 100%

@@ -1,6 +1,6 @@
 # Jira Filter Management Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/jira_filter_management_requirements.md](../../../docs/product/requirements/jira_filter_management_requirements.md)  
+> Source document: [docs/product/requirements/jira-filter-management-requirements.md](../../../docs/product/requirements/jira-filter-management-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 23 | **✅ Covered:** 21 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 2 | **Functional:** 100%

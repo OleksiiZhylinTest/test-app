@@ -1,9 +1,4 @@
-{
-    "claudeCode.useTerminal": true,
-    "github.copilot.chat.otel.enabled": true,
-    "github.copilot.chat.otel.exporterType": "file",
-    "github.copilot.chat.otel.outfile": "${workspaceFolder}/generated/debug/copilot_chat_otel.jsonl",
-    "github.copilot.chat.otel.captureContent": false,
+{ 
     "search.exclude": {
         "generated/**": true,
         "**/__pycache__/**": true,
@@ -16,9 +11,5 @@
         "**/__pycache__": true,
         "**/*.pyc": true,
         "**/.pytest_cache": true
-    },
-    "github.copilot.enable": {
-        "*": true,
-        "dotenv": false
     }
 }

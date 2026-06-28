@@ -1,6 +1,6 @@
 # Installation Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/installation_requirements.md](../../../docs/product/requirements/installation_requirements.md)  
+> Source document: [docs/product/requirements/installation-requirements.md](../../../docs/product/requirements/installation-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 40 | **✅ Covered:** 24 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 16 | **Functional:** 100%

@@ -1,6 +1,6 @@
 # Jira Schema Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/jira_schema_requirements.md](../../../docs/product/requirements/jira_schema_requirements.md)  
+> Source document: [docs/product/requirements/jira-schema-requirements.md](../../../docs/product/requirements/jira-schema-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 29 | **✅ Covered:** 23 | **🔶 Partial:** 0 | **❌ Gap:** 2 | **⬜ N/T:** 4 | **Functional:** 92%

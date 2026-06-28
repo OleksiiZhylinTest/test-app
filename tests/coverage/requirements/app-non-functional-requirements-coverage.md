@@ -1,6 +1,6 @@
 # App Non Functional Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/app_non_functional_requirements.md](../../../docs/product/requirements/app_non_functional_requirements.md)  
+> Source document: [docs/product/requirements/app-non-functional-requirements.md](../../../docs/product/requirements/app-non-functional-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 32 | **✅ Covered:** 21 | **🔶 Partial:** 0 | **❌ Gap:** 1 | **⬜ N/T:** 10 | **Functional:** 95%

@@ -166,7 +166,7 @@ result_active = jira.get_all_sprints_from_board(
 )
 ```
 
-> **Note:** The sprint dict returned by this project does **not** include a `state` field — `compute_velocity` does not filter by state. See `CLAUDE.md` for the canonical sprint dict shape.
+> **Note:** The sprint dict returned by this project does **not** include a `state` field — `compute_velocity` does not filter by state. See [`architecture.md`](../architecture.md) for the canonical sprint dict shape.
 
 ---
 

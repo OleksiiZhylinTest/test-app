@@ -1,6 +1,6 @@
 # Technical Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/technical_requirements.md](../../../docs/product/requirements/technical_requirements.md)  
+> Source document: [docs/product/requirements/technical-requirements.md](../../../docs/product/requirements/technical-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 47 | **✅ Covered:** 25 | **🔶 Partial:** 0 | **❌ Gap:** 0 | **⬜ N/T:** 22 | **Functional:** 100%

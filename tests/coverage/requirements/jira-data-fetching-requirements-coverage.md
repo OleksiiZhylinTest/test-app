@@ -1,6 +1,6 @@
 # Jira Data Fetching Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/jira_data_fetching_requirements.md](../../../docs/product/requirements/jira_data_fetching_requirements.md)  
+> Source document: [docs/product/requirements/jira-data-fetching-requirements.md](../../../docs/product/requirements/jira-data-fetching-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 19 | **✅ Covered:** 14 | **🔶 Partial:** 1 | **❌ Gap:** 1 | **⬜ N/T:** 3 | **Functional:** 94%

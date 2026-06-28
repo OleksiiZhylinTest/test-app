@@ -672,7 +672,6 @@ python server.py 9000                 # custom port
 ## See Also
 
 - [`README.md`](../../README.md) — user-facing quickstart
-- [`CLAUDE.md`](../../CLAUDE.md) — AI assistant guidance and coding conventions
 - [`docs/development/jira/`](jira/) — Jira REST API reference notes
 - [`docs/development/confluence/`](confluence/) — Confluence API reference notes
 - [`docs/product/metrics/`](../product/metrics/) — metric definitions, field reference, and configuration guide

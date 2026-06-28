@@ -1,6 +1,6 @@
 # Jira Connection Requirements — Coverage Detail
 
-> Source document: [docs/product/requirements/jira_connection_requirements.md](../../../docs/product/requirements/jira_connection_requirements.md)  
+> Source document: [docs/product/requirements/jira-connection-requirements.md](../../../docs/product/requirements/jira-connection-requirements.md)  
 > Back to summary: [tests/coverage/test_coverage.md](../test_coverage.md)
 
 **Total:** 33 | **✅ Covered:** 23 | **🔶 Partial:** 0 | **❌ Gap:** 6 | **⬜ N/T:** 4 | **Functional:** 79%

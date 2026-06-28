@@ -6,31 +6,31 @@
 
 | Source | Total | ✅ Covered | 🔶 Partial | ❌ Gap | ⬜ N/T | Functional % | Detail |
 |--------|-------|-----------|------------|-------|--------|--------------|--------|
-| Technical Requirements | 47 | 25 | 0 | 0 | 22 | 100% | [→ detail](requirements/technical_requirements_coverage.md) |
-| Installation Requirements | 40 | 24 | 0 | 0 | 16 | 100% | [→ detail](requirements/installation_requirements_coverage.md) |
-| App Non Functional Requirements | 32 | 21 | 0 | 1 | 10 | 95% | [→ detail](requirements/app_non_functional_requirements_coverage.md) |
-| Dau Survey Requirements | 31 | 26 | 0 | 3 | 2 | 90% | [→ detail](requirements/dau_survey_requirements_coverage.md) |
-| Jira Connection Requirements | 33 | 23 | 0 | 6 | 4 | 79% | [→ detail](requirements/jira_connection_requirements_coverage.md) |
-| Jira Data Fetching Requirements | 19 | 14 | 1 | 1 | 3 | 94% | [→ detail](requirements/jira_data_fetching_requirements_coverage.md) |
-| Jira Schema Requirements | 29 | 23 | 0 | 2 | 4 | 92% | [→ detail](requirements/jira_schema_requirements_coverage.md) |
-| Jira Filter Management Requirements | 23 | 21 | 0 | 0 | 2 | 100% | [→ detail](requirements/jira_filter_management_requirements_coverage.md) |
-| Logging Requirements | 18 | 16 | 0 | 0 | 2 | 100% | [→ detail](requirements/logging_requirements_coverage.md) |
-| Report Generation Requirements | 33 | 30 | 0 | 0 | 3 | 100% | [→ detail](requirements/report_generation_requirements_coverage.md) |
+| Technical Requirements | 47 | 25 | 0 | 0 | 22 | 100% | [→ detail](requirements/technical-requirements-coverage.md) |
+| Installation Requirements | 40 | 24 | 0 | 0 | 16 | 100% | [→ detail](requirements/installation-requirements-coverage.md) |
+| App Non Functional Requirements | 32 | 21 | 0 | 1 | 10 | 95% | [→ detail](requirements/app-non-functional-requirements-coverage.md) |
+| Dau Survey Requirements | 31 | 26 | 0 | 3 | 2 | 90% | [→ detail](requirements/dau-survey-requirements-coverage.md) |
+| Jira Connection Requirements | 33 | 23 | 0 | 6 | 4 | 79% | [→ detail](requirements/jira-connection-requirements-coverage.md) |
+| Jira Data Fetching Requirements | 19 | 14 | 1 | 1 | 3 | 94% | [→ detail](requirements/jira-data-fetching-requirements-coverage.md) |
+| Jira Schema Requirements | 29 | 23 | 0 | 2 | 4 | 92% | [→ detail](requirements/jira-schema-requirements-coverage.md) |
+| Jira Filter Management Requirements | 23 | 21 | 0 | 0 | 2 | 100% | [→ detail](requirements/jira-filter-management-requirements-coverage.md) |
+| Logging Requirements | 18 | 16 | 0 | 0 | 2 | 100% | [→ detail](requirements/logging-requirements-coverage.md) |
+| Report Generation Requirements | 33 | 30 | 0 | 0 | 3 | 100% | [→ detail](requirements/report-generation-requirements-coverage.md) |
 | **All** | **305** | **223** | **1** | **13** | **68** | **95%** |  |
 
 ## Test Pyramid
 
 ```text
-              /  E2E  \              125 tests  (16%)  (Playwright browser UI)  → tests/e2e/
+              /  E2E  \              125 tests  (15%)  (Playwright browser UI)  → tests/e2e/
              /----------\
             / Integration \           21 tests   (3%)  (cross-module flows, subprocess)       → tests/integration/
            /----------------\
-          /    Component      \      230 tests  (29%)  (filesystem, HTTP, data shapes)        → tests/component/
+          /    Component      \      238 tests  (29%)  (filesystem, HTTP, data shapes)        → tests/component/
          /--------------------\
-        /        Unit            \   423 tests  (53%)  (pure functions, no I/O)               → tests/unit/
+        /        Unit            \   438 tests  (53%)  (pure functions, no I/O)               → tests/unit/
        /------------------------\
                                      ────────────────
-                                     799 tests total
+                                     822 tests total
 ```
 
 ## Coverage Matrix

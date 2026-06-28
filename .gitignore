@@ -3,7 +3,6 @@
 data/dau/*
 !data/dau/*/.gitkeep
 !data/dau/*/*/.gitkeep
-.vscode/mcp.json
 *settings.local.json
 
 # Virtual environments
@@ -29,7 +28,6 @@ coverage.xml
 # Playwright test output
 playwright-report/
 test-results/
-.playwright-mcp/
 
 # Build / packaging
 *.egg-info/
@@ -63,11 +61,6 @@ logs/
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# spec-kit session state (project constitution and spec artifacts are committed)
-.specify/memory/session*.md
-.specify/memory/.session*
-.specify/.cache/
 
 # Misc
 *.bak

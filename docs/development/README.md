@@ -14,7 +14,6 @@ Technical reference and guides for contributors and AI agents working on this co
 | Directory | What it covers |
 |-----------|----------------|
 | [adr/](adr/README.md) | Architecture Decision Records |
-| [ai/](ai/README.md) | Agent orchestration, AI assistant governance, local agentic workflow |
 | [confluence/](confluence/README.md) | Confluence REST API reference, CRUD operations, extension guide |
 | [jira/](jira/README.md) | Jira REST API reference, agile API, extension guide |
 | [quality/](quality/README.md) | Test strategy, coverage gates, performance baselines |
