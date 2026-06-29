@@ -146,7 +146,7 @@ jobs:
 
       - name: Cache Playwright browser binary
         id: playwright-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ hashFiles('requirements-dev.txt') }}
@@ -210,7 +210,7 @@ jobs:
 
       - name: Cache Playwright browser binary
         id: playwright-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ hashFiles('requirements-dev.txt') }}
@@ -420,7 +420,7 @@ jobs:
       # are not cached and are required even on a cache hit.
       - name: Cache Playwright browser binary
         id: playwright-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ hashFiles('requirements-dev.txt') }}
